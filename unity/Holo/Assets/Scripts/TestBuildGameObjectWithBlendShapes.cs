@@ -15,7 +15,7 @@ public class TestBuildGameObjectWithBlendShapes
          */
         int[] indexes = {
             0, 1, 2,
-            1, 2, 3,
+            0, 2, 3,
         };
 
         /* The blend shapes inform Unity how to interpolate between base vertex positions,
