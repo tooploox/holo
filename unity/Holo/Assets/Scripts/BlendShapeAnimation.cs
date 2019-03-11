@@ -1,16 +1,26 @@
-﻿//Using C#
+﻿/* Add this to a GameObject with SkinnedMeshRenderer having some blend shapes,
+ * with each shape representing consecutive desired look of the mesh.
+ * This script will perform a smooth looping animation between all blend shapes.
+ */
 
 using UnityEngine;
 using System.Collections;
 
 public class BlendShapeAnimation : MonoBehaviour
 {
-    int blendShapeCount;
-    SkinnedMeshRenderer skinnedMeshRenderer;
-    Mesh skinnedMesh;
+    /* Private fields constant after Start() */
+    private int blendShapeCount;
+    private SkinnedMeshRenderer skinnedMeshRenderer;
+    private Mesh skinnedMesh;
+    private bool mirrorIncreasing;
+    private float mirrorMaxCurrentIndex;
+    // At any time, only these two blend shapes may have non-zero weights.
+    private int lastPreviousShape, lastNextShape;
 
-    float currentIndex = 0f;
+    /* Current state, may change in each Update() */
+    private float currentIndex = 0f;
 
+    /* Public fields, configurable from Unity Editor */
     public bool mirrorAnimation = false;
     public float speed = 1f;
 
@@ -22,8 +32,16 @@ public class BlendShapeAnimation : MonoBehaviour
 
     void Start()
     {
-        blendShapeCount = skinnedMesh.blendShapeCount;
+        blendShapeCount = skinnedMesh.blendShapeCount;        
         Debug.Log("BlendShapes count: " + blendShapeCount);
+
+        // Make sure all blend shapes start with weight 0, in case user was playing around with them in Unity Editor.
+        for (int i = 0; i < blendShapeCount; i++)
+        {
+            skinnedMeshRenderer.SetBlendShapeWeight(i, 0f);
+        }
+
+        mirrorMaxCurrentIndex = blendShapeCount - 1f;
     }
 
     private void Update()
@@ -32,18 +50,15 @@ public class BlendShapeAnimation : MonoBehaviour
         else UpdateCyclic();
     }
 
-    private bool mirrorIncreasing;
-
     void UpdateMirror()
-    {
-        float maxCurrentIndex = blendShapeCount - 1f;
+    {        
         if (mirrorIncreasing)
         {
             currentIndex += Time.deltaTime * speed;
-            if (currentIndex > maxCurrentIndex)
+            if (currentIndex > mirrorMaxCurrentIndex)
             {
                 mirrorIncreasing = false;
-                currentIndex = maxCurrentIndex - (currentIndex - maxCurrentIndex);
+                currentIndex = mirrorMaxCurrentIndex - (currentIndex - mirrorMaxCurrentIndex);
             }
         }
         else
@@ -71,6 +86,9 @@ public class BlendShapeAnimation : MonoBehaviour
     /* Update current mesh shape, looking at currentIndex. */
     void UpdateBlendShapes()
     {
+        skinnedMeshRenderer.SetBlendShapeWeight(lastPreviousShape, 0f);
+        skinnedMeshRenderer.SetBlendShapeWeight(lastNextShape, 0f);
+
         int previousShape = (int)currentIndex;
         float frac = currentIndex - previousShape;
         int nextShape = previousShape + 1;
@@ -79,23 +97,10 @@ public class BlendShapeAnimation : MonoBehaviour
             nextShape = 0;
         }
 
-        for (int i = 0; i < blendShapeCount; i++)
-        {
-            float weight;
-            if (i == previousShape)
-            {
-                weight = 100f * (1f - frac);
-            }
-            else
-            if (i == nextShape)
-            {
-                weight = 100f * frac;
-            }
-            else
-            {
-                weight = 0f;
-            }
-            skinnedMeshRenderer.SetBlendShapeWeight(i, weight);
-        }
+        skinnedMeshRenderer.SetBlendShapeWeight(previousShape, 100f * (1f - frac));
+        skinnedMeshRenderer.SetBlendShapeWeight(nextShape, 100f * frac);
+
+        lastPreviousShape = previousShape;
+        lastNextShape = nextShape;
     }
 }
