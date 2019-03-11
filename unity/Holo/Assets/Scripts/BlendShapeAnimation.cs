@@ -1,20 +1,28 @@
-﻿//Using C#
+﻿/* Add this to a GameObject with SkinnedMeshRenderer having some blend shapes,
+ * with each shape representing consecutive desired look of the mesh.
+ * This script will perform a smooth looping animation between all blend shapes.
+ */
 
 using UnityEngine;
 using System.Collections;
 
 public class BlendShapeAnimation : MonoBehaviour
 {
-    int blendShapeCount;
-    SkinnedMeshRenderer skinnedMeshRenderer;
-    Mesh skinnedMesh;
-    
-    int currentIndex = 0;
-    int indexStep = 1;
-    public int updateInterval;
-    int updateCounter = 0;
+    /* Private fields constant after Start() */
+    private int blendShapeCount;
+    private SkinnedMeshRenderer skinnedMeshRenderer;
+    private Mesh skinnedMesh;
+    private bool mirrorIncreasing;
+    private float mirrorMaxCurrentIndex;
+    // At any time, only these two blend shapes may have non-zero weights.
+    private int lastPreviousShape, lastNextShape;
 
+    /* Current state, may change in each Update() */
+    private float currentIndex = 0f;
+
+    /* Public fields, configurable from Unity Editor */
     public bool mirrorAnimation = false;
+    public float speed = 1f;
 
     void Awake()
     {
@@ -24,53 +32,75 @@ public class BlendShapeAnimation : MonoBehaviour
 
     void Start()
     {
-        blendShapeCount = skinnedMesh.blendShapeCount;
+        blendShapeCount = skinnedMesh.blendShapeCount;        
         Debug.Log("BlendShapes count: " + blendShapeCount);
+
+        // Make sure all blend shapes start with weight 0, in case user was playing around with them in Unity Editor.
+        for (int i = 0; i < blendShapeCount; i++)
+        {
+            skinnedMeshRenderer.SetBlendShapeWeight(i, 0f);
+        }
+
+        mirrorMaxCurrentIndex = blendShapeCount - 1f;
     }
 
     private void Update()
     {
-        if (updateCounter++ < updateInterval) return;
-        updateCounter = 0;
-
         if (mirrorAnimation) UpdateMirror();
-        else UpadteCyclicWithLastZero();
+        else UpdateCyclic();
     }
 
     void UpdateMirror()
-    {
-        if (currentIndex == blendShapeCount -1)
-            indexStep = -1;
+    {        
+        if (mirrorIncreasing)
+        {
+            currentIndex += Time.deltaTime * speed;
+            if (currentIndex > mirrorMaxCurrentIndex)
+            {
+                mirrorIncreasing = false;
+                currentIndex = mirrorMaxCurrentIndex - (currentIndex - mirrorMaxCurrentIndex);
+            }
+        }
+        else
+        {
+            currentIndex -= Time.deltaTime * speed;
+            if (currentIndex < 0f)
+            {
+                mirrorIncreasing = true;
+                currentIndex = -currentIndex;
+            }
 
-        if (currentIndex == 0)
-            indexStep = 1;
+        }
 
-        int zeroIndex = currentIndex;
-        currentIndex += indexStep;
-
-        skinnedMeshRenderer.SetBlendShapeWeight(currentIndex, 100f);
-        skinnedMeshRenderer.SetBlendShapeWeight(zeroIndex, 0.0f);
+        UpdateBlendShapes();
     }
 
     void UpdateCyclic()
     {
-        int zeroIndex = currentIndex;
-        currentIndex = (currentIndex + 1) % blendShapeCount;
+        currentIndex += Time.deltaTime * speed;
+        currentIndex = Mathf.Repeat(currentIndex, blendShapeCount);
 
-        skinnedMeshRenderer.SetBlendShapeWeight(currentIndex, 100f);
-        skinnedMeshRenderer.SetBlendShapeWeight(zeroIndex, 0.0f);
+        UpdateBlendShapes();
     }
 
-    void UpadteCyclicWithLastZero()
+    /* Update current mesh shape, looking at currentIndex. */
+    void UpdateBlendShapes()
     {
-        int cycleCount = blendShapeCount + 1;
-        int zeroIndex = currentIndex;
+        skinnedMeshRenderer.SetBlendShapeWeight(lastPreviousShape, 0f);
+        skinnedMeshRenderer.SetBlendShapeWeight(lastNextShape, 0f);
 
-        currentIndex = (currentIndex + 1) % cycleCount;
-        if(currentIndex < blendShapeCount)
-            skinnedMeshRenderer.SetBlendShapeWeight(currentIndex, 100f);
-        if(zeroIndex < blendShapeCount)
-            skinnedMeshRenderer.SetBlendShapeWeight(zeroIndex, 0.0f);
-       
+        int previousShape = (int)currentIndex;
+        float frac = currentIndex - previousShape;
+        int nextShape = previousShape + 1;
+        if (nextShape > blendShapeCount - 1)
+        {
+            nextShape = 0;
+        }
+
+        skinnedMeshRenderer.SetBlendShapeWeight(previousShape, 100f * (1f - frac));
+        skinnedMeshRenderer.SetBlendShapeWeight(nextShape, 100f * frac);
+
+        lastPreviousShape = previousShape;
+        lastNextShape = nextShape;
     }
 }
