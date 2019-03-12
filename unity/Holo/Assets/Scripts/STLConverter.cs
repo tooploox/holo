@@ -9,13 +9,12 @@ using System.IO;
 public class STLSeriesConverter
 {
     GameObject series_GameObject;
-
-
+    
     [MenuItem("Holo/Convert STL series to a .prefab")]
     public static void ConvertSTL()
     {
         STLSeriesConverter stlSeriesConverter = new STLSeriesConverter();
-        STLImporter stlImporter = new STLImporter();
+        STLSeriesImporter stlImporter = new STLSeriesImporter();
 
         stlSeriesConverter.series_GameObject = stlImporter.Get_GameObject();
         stlSeriesConverter.series_GameObject.AddComponent<BlendShapeAnimation>();
@@ -32,9 +31,10 @@ public class STLSeriesConverter
 
 }
 
-public class STLImporter
+public class STLSeriesImporter
 {
     GameObject imported_STLs = new GameObject();
+    
     List<string> file_paths = new List<string>();
 
     public GameObject Get_GameObject()
@@ -43,7 +43,7 @@ public class STLImporter
     }
 
     // Object constructor, initiates STL series import.
-    public STLImporter()
+    public STLSeriesImporter()
     {
         this.Get_file_paths();
         this.Load_files();
@@ -62,16 +62,33 @@ public class STLImporter
     private void Load_files()
     {
         SkinnedMeshRenderer skinnedMesh = imported_STLs.AddComponent<SkinnedMeshRenderer>();
+        Mesh mesh = new Mesh();
+
+        STLFileImporter stlFileImporter = new STLFileImporter();
+
         bool first_mesh = true;
         foreach (string filepath in this.file_paths)
         {
-            this.Load_STL_file(filepath, first_mesh);
+            stlFileImporter.Load_STL_file(filepath, first_mesh);
+            mesh.AddBlendShapeFrame(Path.GetFileName(filepath), 100f, stlFileImporter.AllVertices, null, null);
             first_mesh = false;
         }
+        mesh.vertices = stlFileImporter.BaseVertices;
+        mesh.triangles = stlFileImporter.Indexes;
+        skinnedMesh.sharedMesh = mesh;
     }
-    
-    //Loads a single STL file and turns it into a list of vertices (x,y,z) and if first_mesh: a list of indexes
-    private void Load_STL_file(string file_path, bool first_mesh)
+}
+
+
+//Loads a single STL file and turns it into a list of vertices (x,y,z) and if first_mesh: a list of indexes
+public class STLFileImporter
+{
+    public Vector3[] AllVertices { get; } = new Vector3[] { };
+    public Vector3[] BaseVertices { get; } = new Vector3[] { };
+    public int[] Indexes { get; } = new int[] { };
+    // TODO: Change arrays into list but getting them gives you an array
+
+    public void Load_STL_file(string file_path, bool first_mesh)
     {
         using (FileStream filestream = new FileStream(file_path, FileMode.Open, FileAccess.Read))
         {
@@ -80,27 +97,65 @@ public class STLImporter
                 // read header
                 byte[] header = binary_reader.ReadBytes(80);
                 uint facetCount = binary_reader.ReadUInt32();
+
+
                 for (uint i = 0; i < facetCount; i++)
                 {
-                    if (first_mesh == true)
-                    {
-                        Vector3[] vertices_triad = binary_reader.;
-                    }
-                    else
-                    {
-
-                    }
-                }   
+                    Adapt_Facet(binary_reader, first_mesh);
+                }
             }
         }
     }
 
-    private static Vector3[] Get_vertices(this BinaryReader binary_reader)
+    private void Adapt_Facet(BinaryReader binary_reader, bool first_mesh)
     {
-        Vector3[] vertices_triad = new Vector3[3];
+        binary_reader.GetVector3(); // A normal we don't use
+
+        for (int i = 0; i < 3; i++)
+        {
+            Vector3 vertix = binary_reader.GetVector3();
+            if (first_mesh == true)
+            {
+                //TODO: Map vertices to indices
+            }
+
+        }
+        binary_reader.ReadUInt16(); // non-sense attribute byte
+    }
+
+    private void SetIndexForVertix(Vector3 vertix)
+    {
+        // TODO: Set an index for a vertix, checking if it isn't already in the allVertices list, if so, give the used index
+    }
+}
 
 
+public static class STLImportUtils
+{
+    public static Vector3[] Get_vertices(this BinaryReader binary_reader)
+    {
 
-        return vertices_triad;
-    } 
+        Facet facet = new Facet();
+        facet.normal = binary_reader.GetVector3();
+
+        // maintain counter-clockwise orientation of vertices:
+        facet.a = binary_reader.GetVector3();
+        facet.c = binary_reader.GetVector3();
+        facet.b = binary_reader.GetVector3();
+        binary_reader.ReadUInt16(); // padding
+
+        return facet;
+    }
+    public static Vector3 GetVector3(this BinaryReader binaryReader)
+    {
+        Vector3 vector3 = new Vector3();
+        for (int i = 0; i < 3; i++)
+            vector3[i] = binaryReader.ReadSingle();
+        return vector3.UnityCoordTrafo();
+    }
+
+    private static Vector3 UnityCoordTrafo(this Vector3 vector3)
+    {
+        return new Vector3(-vector3.y, vector3.z, vector3.x);
+    }
 }
