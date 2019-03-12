@@ -37,6 +37,10 @@ public class STLImporter
     GameObject imported_STLs = new GameObject();
     List<string> file_paths = new List<string>();
 
+    public GameObject Get_GameObject()
+    {
+        return this.imported_STLs;
+    }
 
     // Object constructor, initiates STL series import.
     public STLImporter()
@@ -76,17 +80,27 @@ public class STLImporter
                 // read header
                 byte[] header = binary_reader.ReadBytes(80);
                 uint facetCount = binary_reader.ReadUInt32();
-                facets = new Facet[facetCount];
-
                 for (uint i = 0; i < facetCount; i++)
-                    facets[i] = binary_reader.GetFacet();
+                {
+                    if (first_mesh == true)
+                    {
+                        Vector3[] vertices_triad = binary_reader.;
+                    }
+                    else
+                    {
+
+                    }
+                }   
             }
         }
-
     }
 
-    public GameObject Get_GameObject()
+    private static Vector3[] Get_vertices(this BinaryReader binary_reader)
     {
-        return this.imported_STLs;
-    }
+        Vector3[] vertices_triad = new Vector3[3];
+
+
+
+        return vertices_triad;
+    } 
 }
