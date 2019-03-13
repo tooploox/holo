@@ -5,7 +5,7 @@ using System.Text;
 using System.Collections.Generic;
 using System.IO;
 
-
+/// A class for importing and converting StL series into an animation
 public class STLSeriesConverter
 {
     GameObject series_GameObject;
@@ -26,12 +26,13 @@ public class STLSeriesConverter
     private void ExportToPrefab()
     {
         //string save_path = EditorUtility.SaveFilePanel("Choose a folder where for a .prefab file", "", "", ".prefab");
-        string save_path = @"C: \Users\mit - kuchnowski\repos\holo\unity\Holo\Assets\Resources\test.prefab";
+        string save_path = @"C: \Users\mit - kuchnowski\repos\holo\unity\Holo\Assets\Resources\test2.prefab";
         PrefabUtility.SaveAsPrefabAsset(series_GameObject, save_path);
     }
 
 }
 
+//A class for importing a ASTL series from a dir
 public class STLSeriesImporter
 {
     GameObject imported_STLs = new GameObject("Hypertrophy");
@@ -103,8 +104,6 @@ public class STLFileImporter
     public int[] Indices { get => indices.ToArray(); }
 
     private uint facetCount = 1;
-
-    // TODO: Change arrays into list but getting them gives you an array
 
     public void Load_STL_file(string file_path, bool first_mesh)
     {
