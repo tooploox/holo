@@ -138,7 +138,17 @@ public class STLFileImporter
 
     private void SetIndexForVertix(Vector3 vertix)
     {
-        // TODO: Set an index for a vertix, checking if it isn't already in the allVertices list, if so, give the used index
+        int index = 0;
+        foreach (Vector3 listed_vertix in allVertices)
+        {
+            if (listed_vertix.Equals(vertix))
+            {
+                indices.Add(index);
+                return;
+            }
+            index++;   
+        }
+        indices.Add(index);
     }
 }
 
@@ -149,12 +159,11 @@ public static class STLImportUtils
     {
         Vector3 vector3 = new Vector3();
         for (int i = 0; i < 3; i++)
+        {
             vector3[i] = binaryReader.ReadSingle();
-        return vector3.UnityCoordTrafo();
-    }
-
-    private static Vector3 UnityCoordTrafo(this Vector3 vector3)
-    {
-        return new Vector3(-vector3.y, vector3.z, vector3.x);
+            if (i == 2)
+                vector3[i] = -vector3[i];
+        }
+        return vector3;
     }
 }
