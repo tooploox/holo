@@ -74,18 +74,24 @@ public class STLSeriesImporter
             first_mesh = false;
         }
         mesh.vertices = stlFileImporter.BaseVertices;
-        mesh.triangles = stlFileImporter.Indexes;
+        mesh.triangles = stlFileImporter.Indices;
         skinnedMesh.sharedMesh = mesh;
     }
 }
 
 
-//Loads a single STL file and turns it into a list of vertices (x,y,z) and if first_mesh: a list of indexes
+//Loads a single STL file and turns it into a list of vertices (x,y,z) & if first_mesh: a list of indexes
 public class STLFileImporter
 {
-    public Vector3[] AllVertices { get; } = new Vector3[] { };
-    public Vector3[] BaseVertices { get; } = new Vector3[] { };
-    public int[] Indexes { get; } = new int[] { };
+    public Vector3[] BaseVertices { get; private set; }
+
+    private List<Vector3> allVertices;
+    public Vector3[] AllVertices { get => allVertices.ToArray(); }
+
+    private List<int> indices;
+    public int[] Indices { get => indices.ToArray(); }
+
+
     // TODO: Change arrays into list but getting them gives you an array
 
     public void Load_STL_file(string file_path, bool first_mesh)
@@ -98,6 +104,13 @@ public class STLFileImporter
                 byte[] header = binary_reader.ReadBytes(80);
                 uint facetCount = binary_reader.ReadUInt32();
 
+                if (first_mesh)
+                {
+                    BaseVertices = new Vector3[facetCount*3];
+                }
+                
+                //TODO check topology
+                 
 
                 for (uint i = 0; i < facetCount; i++)
                 {
@@ -114,11 +127,11 @@ public class STLFileImporter
         for (int i = 0; i < 3; i++)
         {
             Vector3 vertix = binary_reader.GetVector3();
-            if (first_mesh == true)
+            if (first_mesh)
             {
-                //TODO: Map vertices to indices
+                SetIndexForVertix(vertix);
             }
-
+            allVertices.Add(vertix);
         }
         binary_reader.ReadUInt16(); // non-sense attribute byte
     }
@@ -129,23 +142,9 @@ public class STLFileImporter
     }
 }
 
-
+//Static class containing methods for extracting and adapting vertices from a STL file. 
 public static class STLImportUtils
 {
-    public static Vector3[] Get_vertices(this BinaryReader binary_reader)
-    {
-
-        Facet facet = new Facet();
-        facet.normal = binary_reader.GetVector3();
-
-        // maintain counter-clockwise orientation of vertices:
-        facet.a = binary_reader.GetVector3();
-        facet.c = binary_reader.GetVector3();
-        facet.b = binary_reader.GetVector3();
-        binary_reader.ReadUInt16(); // padding
-
-        return facet;
-    }
     public static Vector3 GetVector3(this BinaryReader binaryReader)
     {
         Vector3 vector3 = new Vector3();
