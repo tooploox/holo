@@ -1,6 +1,8 @@
 ﻿using Unity;
 using UnityEngine;
 using UnityEditor;
+using System;
+using System.Linq;
 using System.Text;
 using System.Collections.Generic;
 using System.IO;
@@ -8,7 +10,7 @@ using System.IO;
 /// A class for importing and converting StL series into an animation
 public class STLSeriesConverter
 {
-    GameObject series_GameObject;
+    GameObject seriesGameObject;
     
     [MenuItem("Holo/Convert STL series to a .prefab")]
     public static void ConvertSTL()
@@ -16,8 +18,8 @@ public class STLSeriesConverter
         STLSeriesConverter stlSeriesConverter = new STLSeriesConverter();
         STLSeriesImporter stlImporter = new STLSeriesImporter();
 
-        stlSeriesConverter.series_GameObject = stlImporter.Get_GameObject();
-        stlSeriesConverter.series_GameObject.AddComponent<BlendShapeAnimation>();
+        stlSeriesConverter.seriesGameObject = stlImporter.GetGameObject();
+        stlSeriesConverter.seriesGameObject.AddComponent<BlendShapeAnimation>();
 
         stlSeriesConverter.ExportToPrefab();
     }
@@ -25,9 +27,8 @@ public class STLSeriesConverter
     // Exports finished GameObject to a .prefab
     private void ExportToPrefab()
     {
-        //string save_path = EditorUtility.SaveFilePanel("Choose a folder where for a .prefab file", "", "", ".prefab");
-        string save_path = @"C: \Users\mit - kuchnowski\repos\holo\unity\Holo\Assets\Resources\test2.prefab";
-        PrefabUtility.SaveAsPrefabAsset(series_GameObject, save_path);
+        string save_path = EditorUtility.SaveFilePanel("Export to a  .prefab file", Application.dataPath, "", ".prefab");
+        PrefabUtility.SaveAsPrefabAsset(seriesGameObject, save_path);
     }
 
 }
@@ -35,55 +36,61 @@ public class STLSeriesConverter
 //A class for importing a ASTL series from a dir
 public class STLSeriesImporter
 {
-    GameObject imported_STLs = new GameObject("Hypertrophy");
+    GameObject importedSTLSeries = new GameObject("Hypertrophy");
 
-    private string[] file_paths;
+    private string[] filePaths;
 
-    public GameObject Get_GameObject()
+    public GameObject GetGameObject()
     {
-        return this.imported_STLs;
+        return importedSTLSeries;
     }
 
     // Object constructor, initiates STL series import.
     public STLSeriesImporter()
     {
-        this.Get_file_paths();
-        this.Load_files();
+        GetFilePaths();
+        LoadFiles();
     }
 
 
     // gets path to the subsequent STL meshes stored in a root folder.
-    private void Get_file_paths()
+    private void GetFilePaths()
     {
-        //string root_folder = EditorUtility.OpenFolderPanel("Select STL series root folder", "", "");
-        string root_folder = @"C:\Users\mit-kuchnowski\repos\holo\data\hypertrophy-heart\meshes\";
-        file_paths = Directory.GetFiles(root_folder);
+        string rootFolder = EditorUtility.OpenFolderPanel("Select STL series root folder", Application.dataPath, "");
+        filePaths = Directory.GetFiles(rootFolder + @"\");
     }
 
 
     //loads meshes from separate files into one GameObject
-    private void Load_files()
+    private void LoadFiles()
     {
-        SkinnedMeshRenderer skinnedMesh = imported_STLs.AddComponent<SkinnedMeshRenderer>();
+        SkinnedMeshRenderer skinnedMesh = importedSTLSeries.AddComponent<SkinnedMeshRenderer>();
         Mesh mesh = new Mesh();
 
         STLFileImporter stlFileImporter = new STLFileImporter();
 
-        bool first_mesh = true;
+        bool firstMesh = true;
+
         Debug.Log("Doing mesh #1!");
-        stlFileImporter.Load_STL_file(file_paths[0], first_mesh);
+        stlFileImporter.LoadSTLFile(filePaths[0], firstMesh);
         mesh.vertices = stlFileImporter.BaseVertices;
         mesh.triangles = stlFileImporter.Indices;
-        mesh.AddBlendShapeFrame(Path.GetFileName(file_paths[0]), 100f, stlFileImporter.AllVertices, null, null);
-        first_mesh = false;
+        mesh.AddBlendShapeFrame(Path.GetFileName(filePaths[0]), 100f, stlFileImporter.AllVertices, null, null);
+        skinnedMesh.sharedMaterial = Resources.Load<Material>("Test Object Material");
+        firstMesh = false;
 
         int count = 2;
-        for (int i = 1; i < file_paths.Length; i++)
+        for (int i = 1; i < filePaths.Length; i++)
         {
             Debug.Log("Doing mesh #" + count.ToString() + "!");
-            stlFileImporter.Load_STL_file(file_paths[1], first_mesh);
-            mesh.AddBlendShapeFrame(Path.GetFileName(file_paths[i]), 100f, stlFileImporter.AllVertices, null, null);
-            first_mesh = false;
+
+            stlFileImporter.LoadSTLFile(filePaths[i], firstMesh);
+
+            // Check topology
+            if (!mesh.triangles.SequenceEqual(stlFileImporter.Indices))
+                throw new Exception("Topology isn't the same");
+
+            mesh.AddBlendShapeFrame(Path.GetFileName(filePaths[i]), 100f, stlFileImporter.AllVertices, null, null);
             count++;
         }
 
@@ -92,7 +99,7 @@ public class STLSeriesImporter
 }
 
 
-//Loads a single STL file and turns it into a list of vertices (x,y,z) & if first_mesh: a list of indexes
+//Loads a single STL file and turns it into a list of vertices (x,y,z) & if firstMesh: a list of indexes
 public class STLFileImporter
 {
     public Vector3[] BaseVertices { get; private set; }
@@ -105,59 +112,57 @@ public class STLFileImporter
 
     private uint facetCount = 1;
 
-    public void Load_STL_file(string file_path, bool first_mesh)
+    public void LoadSTLFile(string file_path, bool firstMesh)
     {
         allVertices = new List<Vector3>();
+        indices = new List<int>();
         using (FileStream filestream = new FileStream(file_path, FileMode.Open, FileAccess.Read))
         {
-            using (BinaryReader binary_reader = new BinaryReader(filestream, new ASCIIEncoding()))
+            using (BinaryReader binaryReader = new BinaryReader(filestream, new ASCIIEncoding()))
             {
                 // read header
-                byte[] header = binary_reader.ReadBytes(80);
-                facetCount = binary_reader.ReadUInt32();
-
-                if (first_mesh)
-                {
-                    BaseVertices = new Vector3[facetCount*3];
-                }
-
-                //TODO check topology
+                byte[] header = binaryReader.ReadBytes(80);
+                facetCount = binaryReader.ReadUInt32();
 
                 for (uint i = 0; i < facetCount; i++)
-                    Adapt_Facet(binary_reader, first_mesh);
+                    AdaptFacet(binaryReader, firstMesh);
             }
         }
-        BaseVertices = new Vector3[allVertices.Count];
+        if (firstMesh)
+            BaseVertices = new Vector3[allVertices.Count];
     }
 
-    private void Adapt_Facet(BinaryReader binary_reader, bool first_mesh)
+    private void AdaptFacet(BinaryReader binaryReader, bool firstMesh)
     {
-        binary_reader.GetVector3(); // A normal we don't use
+        binaryReader.GetVector3(); // A normal we don't use
 
         for (int i = 0; i < 3; i++)
         {
-            Vector3 vertix = binary_reader.GetVector3();
-            AddVertix(vertix, first_mesh);
+            Vector3 vertex = binaryReader.GetVector3();
+            AddVertex(vertex);
         }
-        binary_reader.ReadUInt16(); // non-sense attribute byte
+        binaryReader.ReadUInt16(); // non-sense attribute byte
     }
 
-    private void AddVertix(Vector3 vertix, bool first_mesh)
+    private void AddVertex(Vector3 vertex)
+    {
+        AddIndex(vertex);
+        allVertices.Add(vertex);
+    }
+
+    private void AddIndex(Vector3 currentVertex)
     {
         int index = 0;
-        foreach (Vector3 listed_vertix in allVertices)
+        foreach (Vector3 listedVertex in allVertices)
         {
-            if (listed_vertix.Equals(vertix))
+            if (listedVertex.Equals(currentVertex))
             {
-                if(first_mesh)
-                    this.indices.Add(index);
+                indices.Add(index);
                 return;
             }
-            index++;   
+            index++;
         }
-        this.indices.Add(index);
-        allVertices.Add(vertix);
-
+        indices.Add(index);
     }
 }
 
@@ -170,9 +175,11 @@ public static class STLImportUtils
         for (int i = 0; i < 3; i++)
         {
             vector3[i] = binaryReader.ReadSingle();
-            if (i == 2)
-                vector3[i] = -vector3[i];
         }
+        
+        //maintaining Unity counter-clockwise orientation
+        vector3.z = -vector3.z;
+
         return vector3;
     }
 }
