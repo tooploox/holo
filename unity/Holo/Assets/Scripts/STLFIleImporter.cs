@@ -57,16 +57,12 @@ public class STLFileImporter
 
     private void AddIndex(Vector3 currentVertex)
     {
-        int index = 0;
-        foreach (Vector3 listedVertex in sTLMeshVertices)
+        int foundIndex = sTLMeshVertices.FindIndex(listedVertex => listedVertex.Equals(currentVertex));
+        if (foundIndex == -1)
         {
-            if (listedVertex.Equals(currentVertex))
-            {
-                indices.Add(index);
-                return;
-            }
-            index++;
+            foundIndex = indices.Count;
         }
-        indices.Add(index);
+
+        indices.Add(foundIndex);
     }
 }
