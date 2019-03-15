@@ -193,8 +193,6 @@ namespace HoloToolkit.Unity.UX
 
         private GameObject objectToBound;
 
-        private Collider objectCollider;
-
         private AppBar appBarInstance;
 
         private GameObject[] rotateHandles;
@@ -259,8 +257,6 @@ namespace HoloToolkit.Unity.UX
         private void Start()
         {
             objectToBound = this.gameObject;
-            objectCollider = objectToBound.GetComponent<BoxCollider>();
-            Debug.Log("Bound object name: " + objectToBound.name);
 
             boxInstance = Instantiate(BoundingBoxPrefab) as BoundingBox;
             boxInstance.Target = objectToBound;

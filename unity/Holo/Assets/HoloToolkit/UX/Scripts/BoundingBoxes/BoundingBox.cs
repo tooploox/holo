@@ -585,17 +585,6 @@ namespace HoloToolkit.Unity.UX
             return bounds;
         }
 
-        private static void addBoundPoints<T>(T meshObject, Bounds meshBounds, List<Vector3> boundsPoints, LayerMask ignoreLayers) where T : Component
-        {
-            if (ignoreLayers == (1 << meshObject.gameObject.layer | ignoreLayers))
-            {
-                return;
-            }
-
-            meshBounds.GetCornerPositions(meshObject.transform, ref corners);
-            boundsPoints.AddRange(corners);
-        }
-
         /// <summary>
         /// GetMeshFilterBoundsPoints - gets boundingbox points using MeshFilter method.
         /// </summary>
@@ -608,16 +597,15 @@ namespace HoloToolkit.Unity.UX
             for (int i = 0; i < meshFilters.Length; i++)
             {
                 var meshFilterObj = meshFilters[i];
-                addBoundPoints(meshFilterObj, meshFilterObj.sharedMesh.bounds, boundsPoints, ignoreLayers);
-            }
+                if (ignoreLayers == (1 << meshFilterObj.gameObject.layer | ignoreLayers))
+                {
+                    continue;
+                }
 
-            SkinnedMeshRenderer[] skinnedMeshRenderers = target.GetComponentsInChildren<SkinnedMeshRenderer>();
-            for(int i = 0; i < skinnedMeshRenderers.Length; ++i)
-            {
-                var skinnedMeshRendererObj = skinnedMeshRenderers[i];
-                addBoundPoints(skinnedMeshRendererObj, skinnedMeshRendererObj.sharedMesh.bounds, boundsPoints, ignoreLayers);
+                Bounds meshBounds = meshFilterObj.sharedMesh.bounds;
+                meshBounds.GetCornerPositions(meshFilterObj.transform, ref corners);
+                boundsPoints.AddRange(corners);
             }
-
             RectTransform[] rectTransforms = target.GetComponentsInChildren<RectTransform>();
             for (int i = 0; i < rectTransforms.Length; i++)
             {
