@@ -58,7 +58,7 @@ public class STLSeriesImporter
             stlFileImporter.LoadSTLFile(filePaths[i], firstMesh);
 
             // Check topology
-            if (!mesh.triangles.SequenceEqual(stlFileImporter.Indices))
+            if (mesh.triangles.Length != stlFileImporter.Indices.Length)
                 throw new Exception("Topology isn't the same");
 
             mesh.AddBlendShapeFrame(Path.GetFileName(filePaths[i]), 100f, stlFileImporter.STLMeshVertices, null, null);
