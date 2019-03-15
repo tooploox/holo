@@ -34,35 +34,35 @@ public class STLFileImporter
             }
         }
         if (firstMesh)
-            BaseVertices = new Vector3[sTLMeshVertices.Count];
+            BaseVertices = sTLMeshVertices.ToArray();
     }
 
     private void AdaptFacet(BinaryReader binaryReader, bool firstMesh)
     {
         binaryReader.GetVector3(); // A normal we don't use
 
-        for (int i = 0; i < 3; i++)
-        {
-            Vector3 vertex = binaryReader.GetVector3();
-            AddVertex(vertex);
-        }
+        Vector3 vertex0 = binaryReader.GetVector3();
+        Vector3 vertex1 = binaryReader.GetVector3();
+        Vector3 vertex2 = binaryReader.GetVector3();
+
+        AddVertex(vertex2);
+        AddVertex(vertex1);
+        AddVertex(vertex0);
         binaryReader.ReadUInt16(); // non-sense attribute byte
     }
 
-    private void AddVertex(Vector3 vertex)
+    private void AddVertex(Vector3 currentVertex)
     {
-        AddIndex(vertex);
-        sTLMeshVertices.Add(vertex);
-    }
-
-    private void AddIndex(Vector3 currentVertex)
-    {
-        int foundIndex = sTLMeshVertices.FindIndex(listedVertex => listedVertex.Equals(currentVertex));
-        if (foundIndex == -1)
+        for (int index = sTLMeshVertices.Count - 1; index >= 0; index--)
         {
-            foundIndex = indices.Count;
+            if (sTLMeshVertices[index].Equals(currentVertex))
+            {
+                indices.Add(index);
+                return;
+            }
         }
-
-        indices.Add(foundIndex);
+        int newIndex = sTLMeshVertices.Count;
+        indices.Add(newIndex);
+        sTLMeshVertices.Add(currentVertex);
     }
 }
