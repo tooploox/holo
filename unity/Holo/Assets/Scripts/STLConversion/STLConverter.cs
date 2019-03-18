@@ -18,7 +18,6 @@ public class STLSeriesConverter
 
         stlSeriesConverter.seriesGameObject.AddComponent<BlendShapeAnimation>();
         
-
         stlSeriesConverter.mesh = stlSeriesImporter.GetMesh();
         stlSeriesConverter.ExportMesh();
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -64,8 +65,7 @@ public class STLSeriesImporter
         EditorUtility.DisplayProgressBar("Convert STL series to a .prefab", "Conversion in progress", 0);
 
         bool firstMesh = true;
-        //for (int i = 0; i < filePaths.Length; i++)
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < filePaths.Length; i++)
         {
             stlFileImporter.LoadSTLFile(filePaths[i], firstMesh);
 
@@ -77,8 +77,8 @@ public class STLSeriesImporter
             }
 
             // Check topology
-            if (mesh.triangles.Length != stlFileImporter.Indices.Length)
-                throw new Exception("Topology isn't the same");
+            if (!mesh.triangles.SequenceEqual(stlFileImporter.Indices))
+                Debug.LogWarning("Topology isn't the same!");
 
             mesh.AddBlendShapeFrame(Path.GetFileName(filePaths[i]), 100f, stlFileImporter.Vertices, stlFileImporter.Normals, null);
 

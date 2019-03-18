@@ -41,7 +41,9 @@ public class STLFileImporter
         }
         if (firstMesh)
             BaseVertices = new Vector3[vertices.Count];
-            //BaseVertices = vertices.ToArray();
+        
+        //Normalising summed-up facets' normals
+        foreach (Vector3 normal in normals) normal.Normalize();
     }
 
     private void AdaptFacet(BinaryReader binaryReader, bool firstMesh)
@@ -69,6 +71,7 @@ public class STLFileImporter
             if (vertices[index].Equals(currentVertex))
             {
                 indices.Add(index);
+                normals[index] += currentNormal; //Summing up facets' normals to which vertex belongs to
                 return;
             }
         }
