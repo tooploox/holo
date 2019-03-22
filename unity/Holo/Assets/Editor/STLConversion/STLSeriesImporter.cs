@@ -45,10 +45,9 @@ public class STLSeriesImporter
             char lastChar = fileName[fileName.Length - 1];
             char endChar = '-';
             fileName = fileName.Remove(fileName.Length - 1);
+
             if (lastChar == endChar)
-            {
                 break;
-            }
         }
         FileName = fileName;
         importedSTLSeries.name = fileName;
