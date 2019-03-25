@@ -10,7 +10,6 @@ public class STLSeriesImporter
     GameObject importedSTLSeries = new GameObject();
     Mesh mesh = new Mesh();
     private string[] filePaths;
-    public string FileName { get; private set;}
     public GameObject GetGameObject()
     {
         return importedSTLSeries;
@@ -39,18 +38,12 @@ public class STLSeriesImporter
     private void GetFilename()
     {
         string fileName = Path.GetFileNameWithoutExtension(filePaths[0]);
+        int lastCharIndex = fileName.LastIndexOf("-");
+        if (lastCharIndex == -1)
+            importedSTLSeries.name = fileName;
+        else
+            importedSTLSeries.name = fileName.Substring(0, lastCharIndex);
 
-        while (true)
-        {
-            char lastChar = fileName[fileName.Length - 1];
-            char endChar = '-';
-            fileName = fileName.Remove(fileName.Length - 1);
-
-            if (lastChar == endChar)
-                break;
-        }
-        FileName = fileName;
-        importedSTLSeries.name = fileName;
     }
 
     //loads meshes from separate files into one GameObject
@@ -64,7 +57,8 @@ public class STLSeriesImporter
         EditorUtility.DisplayProgressBar("Convert STL series to a .prefab", "Conversion in progress", 0);
 
         bool firstMesh = true;
-        for (int i = 0; i < filePaths.Length; i++)
+        //for (int i = 0; i < filePaths.Length; i++)
+        for (int i = 0; i < 2; i++)
         {
             stlFileImporter.LoadSTLFile(filePaths[i], firstMesh);
 
