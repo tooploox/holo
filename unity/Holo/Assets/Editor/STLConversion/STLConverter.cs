@@ -7,7 +7,6 @@ public class STLSeriesConverter
 {
     GameObject seriesGameObject;
     Mesh mesh;
-    string rootFileName;
     [MenuItem("Holo/Convert STL series to a .prefab")]
     public static void ConvertSTL()
     {
@@ -15,7 +14,6 @@ public class STLSeriesConverter
         STLSeriesImporter seriesImporter = new STLSeriesImporter();
 
         seriesConverter.seriesGameObject = seriesImporter.GetGameObject();
-        seriesConverter.rootFileName = seriesImporter.FileName;
 
         seriesConverter.seriesGameObject.AddComponent<BlendShapeAnimation>();
 
@@ -28,16 +26,23 @@ public class STLSeriesConverter
     private void ExportToPrefab()
     {
 
-        string savePath = EditorUtility.SaveFilePanelInProject("Export to a  .prefab file", rootFileName, "prefab", "");
-
+        string savePath = EditorUtility.SaveFilePanelInProject("Export to a  .prefab file", seriesGameObject.name, "prefab", "");
+        CheckIfNameChanged(savePath);
         ExportMesh();
 
         PrefabUtility.SaveAsPrefabAsset(seriesGameObject, savePath);
     }
 
+    private void CheckIfNameChanged(string savePath)
+    {
+        int firstChar = savePath.LastIndexOf("/") + 1;
+        int nameLength = savePath.LastIndexOf(".")  - firstChar;
+        seriesGameObject.name = savePath.Substring(firstChar, nameLength);
+    }
+
     private void ExportMesh()
     {
-        AssetDatabase.CreateAsset(mesh, "Assets/" + rootFileName + ".mesh");
+        AssetDatabase.CreateAsset(mesh, "Assets/" + seriesGameObject.name + ".mesh");
     }
 
   
