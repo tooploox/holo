@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 
@@ -7,11 +8,17 @@ public class STLSeriesConverter
 {
     GameObject seriesGameObject;
     Mesh mesh;
+
+    string rootFolder;
+
     [MenuItem("Holo/Convert STL series to a .prefab")]
     public static void ConvertSTL()
     {
         STLSeriesConverter seriesConverter = new STLSeriesConverter();
-        STLSeriesImporter seriesImporter = new STLSeriesImporter();
+
+        seriesConverter.GetRootFolder();
+
+        STLSeriesImporter seriesImporter = new STLSeriesImporter(seriesConverter.rootFolder);
 
         seriesConverter.seriesGameObject = seriesImporter.GetGameObject();
 
@@ -21,6 +28,15 @@ public class STLSeriesConverter
 
         seriesConverter.ExportToPrefab();
     }
+
+    // gets path to the root folder.
+    private void GetRootFolder()
+    {
+        rootFolder = EditorUtility.OpenFolderPanel("Select STL series root folder", Application.dataPath, "");
+        if (String.IsNullOrEmpty(rootFolder))
+            throw new ArgumentException("Path cannot be null!");
+    }
+
 
     // Exports finished GameObject to a .prefab
     private void ExportToPrefab()

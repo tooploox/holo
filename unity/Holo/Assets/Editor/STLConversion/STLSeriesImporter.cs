@@ -10,6 +10,10 @@ public class STLSeriesImporter
     GameObject importedSTLSeries = new GameObject();
     Mesh mesh = new Mesh();
     private string[] filePaths;
+
+    bool cancelConvertion = false;
+    bool equalTopology = false; 
+
     public GameObject GetGameObject()
     {
         return importedSTLSeries;
@@ -20,20 +24,15 @@ public class STLSeriesImporter
         return mesh;
     }
     // Object constructor, initiates STL series import.
-    public STLSeriesImporter()
+    public STLSeriesImporter(string rootFolder)
     {
-        GetFilePaths();
+        filePaths = Directory.GetFiles(rootFolder + @"\");
         GetFilename();
         LoadFiles();
     }
 
 
-    // gets path to the subsequent STL meshes stored in a root folder.
-    private void GetFilePaths()
-    {
-        string rootFolder = EditorUtility.OpenFolderPanel("Select STL series root folder", Application.dataPath, "");
-        filePaths = Directory.GetFiles(rootFolder + @"\");
-    }
+
 
     private void GetFilename()
     {
@@ -54,11 +53,17 @@ public class STLSeriesImporter
 
         //Configuring progress bar
         float progressChunk = (float) 1 / filePaths.Length;
-        EditorUtility.DisplayProgressBar("Convert STL series to a .prefab", "Conversion in progress", 0);
+        cancelConvertion = EditorUtility.DisplayCancelableProgressBar("Convert STL series to a .prefab", "Conversion in progress", 0);
 
         bool firstMesh = true;
         for (int i = 0; i < filePaths.Length; i++)
         {
+            if (cancelConvertion)
+            {
+                UnityEngine.Object.DestroyImmediate(importedSTLSeries);
+                EditorUtility.ClearProgressBar();
+                throw new Exception("Convertion aborted");
+            }
             stlFileImporter.LoadSTLFile(filePaths[i], firstMesh);
 
             if(firstMesh)
@@ -69,12 +74,14 @@ public class STLSeriesImporter
             }
 
             // Check topology
-            if (!mesh.triangles.SequenceEqual(stlFileImporter.Indices))
+            equalTopology = mesh.triangles.SequenceEqual(stlFileImporter.Indices);
+            if (!equalTopology)
                 Debug.LogWarning("Topology isn't the same!");
 
             mesh.AddBlendShapeFrame(Path.GetFileName(filePaths[i]), 100f, stlFileImporter.Vertices, stlFileImporter.Normals, null);
 
-            EditorUtility.DisplayProgressBar("Convert STL series to a .prefab", "Conversion in progress", (i+1)*progressChunk);
+            cancelConvertion = EditorUtility.DisplayCancelableProgressBar("Convert STL series to a .prefab", "Conversion in progress", (i+1)*progressChunk);
+
         }
 
         skinnedMesh.sharedMesh = mesh;
