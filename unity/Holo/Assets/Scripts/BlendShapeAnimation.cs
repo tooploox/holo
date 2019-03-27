@@ -20,9 +20,14 @@ public class BlendShapeAnimation : MonoBehaviour
     /* Current state, may change in each Update() */
     private float currentIndex = 0f;
 
+    /* Should animation be played */
+    private bool playing = true;
+
     /* Public fields, configurable from Unity Editor */
     public bool mirrorAnimation = false;
     public float speed = 1f;
+
+    public bool GetPlayingStatus() { return playing; }
 
     void Awake()
     {
@@ -44,10 +49,18 @@ public class BlendShapeAnimation : MonoBehaviour
         mirrorMaxCurrentIndex = blendShapeCount - 1f;
     }
 
+    public void TogglePlay()
+    {
+        playing = !playing;
+    }
+
     private void Update()
     {
-        if (mirrorAnimation) UpdateMirror();
-        else UpdateCyclic();
+        if (playing)
+        {
+            if (mirrorAnimation) UpdateMirror();
+            else UpdateCyclic();
+        }
     }
 
     void UpdateMirror()
