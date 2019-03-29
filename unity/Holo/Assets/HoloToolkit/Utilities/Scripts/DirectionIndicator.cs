@@ -78,7 +78,7 @@ namespace HoloToolkit.Unity
 
             // Set local variables for the indicator.
             directionIndicatorDefaultRotation = indicator.transform.rotation;
-            directionIndicatorRenderer = indicator.GetComponent<Renderer>();
+            directionIndicatorRenderer = indicator.GetComponentInChildren<Renderer>();
 
             // Start with the indicator disabled.
             directionIndicatorRenderer.enabled = false;

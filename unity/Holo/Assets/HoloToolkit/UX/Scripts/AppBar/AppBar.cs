@@ -6,6 +6,7 @@ using HoloToolkit.Unity.InputModule;
 using HoloToolkit.Unity.Receivers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -243,6 +244,19 @@ namespace HoloToolkit.Unity.UX
                     State = AppBarStateEnum.Default;
                     // Deactivate BoundingBoxRig
                     boundingBox.Target.GetComponent<BoundingBoxRig>().Deactivate();
+                    break;
+
+                case "TogglePlay":
+                    State = AppBarStateEnum.Default;
+                    // Play / Pause Animation of model
+                    BlendShapeAnimation modelAnimaiton = boundingBox.Target.GetComponent<BlendShapeAnimation>();
+                    modelAnimaiton.TogglePlay();
+                    
+                    // Switch icon to Play <=> Pause
+                    AppBarButton toggleButton = buttonParent.GetComponentsInChildren<AppBarButton>().Single(b => b.name == "TogglePlay");
+                    ButtonTemplate buttonTmpl = buttons.Single(b => b.Name == "TogglePlay");
+                    buttonTmpl.Icon = modelAnimaiton.GetPlayingStatus() ? "PauseIcon" : "PlayIcon";
+                    toggleButton.Initialize(this, buttonTmpl, null);
                     break;
 
                 default:
