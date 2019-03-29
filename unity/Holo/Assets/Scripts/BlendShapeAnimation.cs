@@ -20,22 +20,21 @@ public class BlendShapeAnimation : MonoBehaviour
     /* Current state, may change in each Update() */
     private float currentIndex = 0f;
 
-    /* Should animation be played */
-    private bool playing = true;
-
     /* Public fields, configurable from Unity Editor */
-    public bool mirrorAnimation = false;
-    public float speed = 1f;
+    public bool MirrorAnimation = false;
+    public float Speed = 1f;
 
-    public bool GetPlayingStatus() { return playing; }
+    /* Public fields, but not serialized/configurable from Unity Editor */
+    [System.NonSerialized]
+    public bool Playing = true;
 
-    void Awake()
+    private void Awake()
     {
         skinnedMeshRenderer = GetComponent<SkinnedMeshRenderer>();
         skinnedMesh = GetComponent<SkinnedMeshRenderer>().sharedMesh;
     }
 
-    void Start()
+    private void Start()
     {
         blendShapeCount = skinnedMesh.blendShapeCount;        
         Debug.Log("BlendShapes count: " + blendShapeCount);
@@ -49,25 +48,22 @@ public class BlendShapeAnimation : MonoBehaviour
         mirrorMaxCurrentIndex = blendShapeCount - 1f;
     }
 
-    public void TogglePlay()
-    {
-        playing = !playing;
-    }
-
     private void Update()
     {
-        if (playing)
-        {
-            if (mirrorAnimation) UpdateMirror();
-            else UpdateCyclic();
+        if (Playing) {
+            if (MirrorAnimation) {
+                UpdateMirror();
+            } else {
+                UpdateCyclic();
+            }
         }
     }
 
-    void UpdateMirror()
+    private void UpdateMirror()
     {        
         if (mirrorIncreasing)
         {
-            currentIndex += Time.deltaTime * speed;
+            currentIndex += Time.deltaTime * Speed;
             if (currentIndex > mirrorMaxCurrentIndex)
             {
                 mirrorIncreasing = false;
@@ -76,7 +72,7 @@ public class BlendShapeAnimation : MonoBehaviour
         }
         else
         {
-            currentIndex -= Time.deltaTime * speed;
+            currentIndex -= Time.deltaTime * Speed;
             if (currentIndex < 0f)
             {
                 mirrorIncreasing = true;
@@ -88,16 +84,16 @@ public class BlendShapeAnimation : MonoBehaviour
         UpdateBlendShapes();
     }
 
-    void UpdateCyclic()
+    private void UpdateCyclic()
     {
-        currentIndex += Time.deltaTime * speed;
+        currentIndex += Time.deltaTime * Speed;
         currentIndex = Mathf.Repeat(currentIndex, blendShapeCount);
 
         UpdateBlendShapes();
     }
 
     /* Update current mesh shape, looking at currentIndex. */
-    void UpdateBlendShapes()
+    private void UpdateBlendShapes()
     {
         skinnedMeshRenderer.SetBlendShapeWeight(lastPreviousShape, 0f);
         skinnedMeshRenderer.SetBlendShapeWeight(lastNextShape, 0f);
@@ -115,5 +111,31 @@ public class BlendShapeAnimation : MonoBehaviour
 
         lastPreviousShape = previousShape;
         lastNextShape = nextShape;
+    }
+
+    private float MaxCurrentIndex()
+    {
+        return MirrorAnimation ? mirrorMaxCurrentIndex : blendShapeCount;
+    }
+
+    // Current time in animation, in range 0..1.
+    public float CurrentTime
+    {
+        get
+        {
+            return currentIndex / MaxCurrentIndex();
+        }
+        set
+        {
+            currentIndex = MaxCurrentIndex() * value;
+            if (!Playing) { // otherwise, newly set currentIndex would not be visible
+                UpdateBlendShapes();
+            }
+        }
+    }
+
+    public void TogglePlay()
+    {
+        Playing = !Playing;
     }
 }
