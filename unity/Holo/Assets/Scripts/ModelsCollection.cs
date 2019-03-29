@@ -51,14 +51,14 @@ public class ModelsCollection : MonoBehaviour, IClickHandler
     {
         foreach (ModelInstance modelInstance in modelInstances)
         {
-            Destroy(modelInstance.gameObject);
+            modelInstance.DetachFromScene();
         }
         modelInstances.Clear();
     }
 
     public void RemoveInstance(ModelInstance modelInstance)
     {
-        Destroy(modelInstance.gameObject);
+        modelInstance.DetachFromScene();
         modelInstances.Remove(modelInstance);
     }
 }

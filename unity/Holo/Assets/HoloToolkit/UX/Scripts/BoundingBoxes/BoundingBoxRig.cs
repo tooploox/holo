@@ -287,6 +287,11 @@ namespace HoloToolkit.Unity.UX
             ClearHandles();
         }
 
+        public void DetachAppBar()
+        {
+            Destroy(appBarInstance);
+        }
+
         private void UpdateBoundsPoints()
         {
             handleCentroids = GetBounds();

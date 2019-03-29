@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
+using HoloToolkit.Unity.UX;
 
 public class ModelInstance : MonoBehaviour, IClickHandler
 {
@@ -26,14 +27,16 @@ public class ModelInstance : MonoBehaviour, IClickHandler
     {
         playing = !playing;
         PlayOrStopText.text = (playing ? "STOP" : "PLAY");
-        if (blendShapeAnimation != null) {
+        if (blendShapeAnimation != null)
+        {
             blendShapeAnimation.TogglePlay();
         }
     }
 
     public void ClickRewind()
     {
-        if (blendShapeAnimation != null) {
+        if (blendShapeAnimation != null)
+        {
             blendShapeAnimation.CurrentTime = 0f;
         }
     }
@@ -145,6 +148,21 @@ public class ModelInstance : MonoBehaviour, IClickHandler
             // TODO: This is never called, why?
             // Debug.Log("updated time to " + newPosition.ToString());
             blendShapeAnimation.CurrentTime = newPosition;
+        }
+    }
+
+    public void DetachFromScene()
+    {
+        if (instance != null)
+        {
+            // Workaround: make sure that BoundingBoxRig is called, AppBar clone will no longer be updated
+            instance.GetComponent<BoundingBoxRig>().DetachAppBar();
+
+            Destroy(gameObject);
+
+            instance = null;
+            instanceTransformation = null;
+            blendShapeAnimation = null;
         }
     }
 }
