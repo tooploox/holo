@@ -57,8 +57,7 @@ public class STLSeriesImporter
         EditorUtility.DisplayProgressBar("Convert STL series to a .prefab", "Conversion in progress", 0);
 
         bool firstMesh = true;
-        //for (int i = 0; i < filePaths.Length; i++)
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < filePaths.Length; i++)
         {
             stlFileImporter.LoadSTLFile(filePaths[i], firstMesh);
 
