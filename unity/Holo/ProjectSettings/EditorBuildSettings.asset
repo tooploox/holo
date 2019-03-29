@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/HoloToolkit-Examples/Utilities/Scenes/SceneLauncher.unity
+    guid: fd656d2febd0dea46b3825b704706806
   m_configObjects: {}
