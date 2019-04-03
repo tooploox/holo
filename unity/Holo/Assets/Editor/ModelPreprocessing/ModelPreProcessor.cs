@@ -11,8 +11,8 @@ class ModelPreprocessor
     string rootFolder;
     List<string> assetFilePaths = new List<string>();
 
-    [MenuItem("Holo/Convert model to unity package")]
-    public static void ConvertSTL()
+    [MenuItem("Holo/Convert model to a AssetBundle's GameObject")]
+    public static void PreprocessModel()
     {
         ModelPreprocessor modelPreprocessor = new ModelPreprocessor();
 
@@ -44,7 +44,6 @@ class ModelPreprocessor
         assetBundleCreator.Mesh = mesh;
         assetBundleCreator.ModelGameObject = modelGameObject;
         assetBundleCreator.Create();
-
     }
 
 
