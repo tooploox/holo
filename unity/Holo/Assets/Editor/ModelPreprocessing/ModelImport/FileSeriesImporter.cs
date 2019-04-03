@@ -5,51 +5,50 @@ using UnityEditor;
 using UnityEngine;
 
 //A class for importing a STL series from a dir
-public class STLSeriesImporter
+public class FileSeriesImporter
 {
-    GameObject importedSTLSeries = new GameObject();
+    GameObject seriesGameObject = new GameObject();
     Mesh mesh = new Mesh();
     private string[] filePaths;
-
+    private string extension;
     bool cancelConvertion = false;
     bool equalTopology = false; 
 
     public GameObject GetGameObject()
     {
-        return importedSTLSeries;
+        return seriesGameObject;
     }
 
     public Mesh GetMesh()
     {
         return mesh;
     }
-    // Object constructor, initiates STL series import.
-    public STLSeriesImporter(string rootFolder)
+    
+    // Object constructor, initiates file series import.
+    public FileSeriesImporter(string rootFolder)
     {
         filePaths = Directory.GetFiles(rootFolder + @"\");
         GetFilename();
         LoadFiles();
     }
 
-
-
-
     private void GetFilename()
     {
         string fileName = Path.GetFileNameWithoutExtension(filePaths[0]);
+        extension = Path.GetExtension(filePaths[0]);
         int lastCharIndex = fileName.LastIndexOf("-");
         if (lastCharIndex == -1)
-            importedSTLSeries.name = fileName;
+            seriesGameObject.name = fileName;
         else
-            importedSTLSeries.name = fileName.Substring(0, lastCharIndex);
+            seriesGameObject.name = fileName.Substring(0, lastCharIndex);
 
     }
 
     //loads meshes from separate files into one GameObject
     private void LoadFiles()
     {
-        SkinnedMeshRenderer skinnedMesh = importedSTLSeries.AddComponent<SkinnedMeshRenderer>();
-        STLFileImporter stlFileImporter = new STLFileImporter();
+        SkinnedMeshRenderer skinnedMesh = seriesGameObject.AddComponent<SkinnedMeshRenderer>();
+        FileImporter fileImporter = new FileImporter(extension);
 
         //Configuring progress bar
         float progressChunk = (float) 1 / filePaths.Length;
@@ -60,34 +59,34 @@ public class STLSeriesImporter
         {
             if (cancelConvertion)
             {
-                UnityEngine.Object.DestroyImmediate(importedSTLSeries);
+                UnityEngine.Object.DestroyImmediate(seriesGameObject);
                 EditorUtility.ClearProgressBar();
                 throw new Exception("Convertion aborted");
             }
-            stlFileImporter.LoadSTLFile(filePaths[i], firstMesh);
+            fileImporter.LoadFile(filePaths[i], firstMesh);
 
             if(firstMesh)
             {
-                mesh.vertices = stlFileImporter.BaseVertices;
-                mesh.triangles = stlFileImporter.Indices;
+                mesh.vertices = fileImporter.BaseVertices;
+                mesh.triangles = fileImporter.Indices;
                 firstMesh = false;
             }
 
             // Check topology
-            equalTopology = mesh.triangles.SequenceEqual(stlFileImporter.Indices);
+            equalTopology = mesh.triangles.SequenceEqual(fileImporter.Indices);
             if (!equalTopology)
                 Debug.LogWarning("Topology isn't the same!");
 
-            mesh.AddBlendShapeFrame(Path.GetFileName(filePaths[i]), 100f, stlFileImporter.Vertices, stlFileImporter.Normals, null);
+            mesh.AddBlendShapeFrame(Path.GetFileName(filePaths[i]), 100f, fileImporter.Vertices, fileImporter.Normals, null);
 
-            cancelConvertion = EditorUtility.DisplayCancelableProgressBar("Convert STL series to a .prefab", "Conversion in progress", (i+1)*progressChunk);
+            cancelConvertion = EditorUtility.DisplayCancelableProgressBar("Converting meshes", "Conversion in progress", (i+1)*progressChunk);
 
         }
 
         skinnedMesh.sharedMesh = mesh;
-        skinnedMesh.sharedMaterial = Resources.Load<Material>("Test Object Material");
+        skinnedMesh.sharedMaterial = Resources.Load<Material>("MRTK_Standard_Gray");
         skinnedMesh.sharedMesh.RecalculateNormals();
         EditorUtility.ClearProgressBar();
-
+        seriesGameObject.AddComponent<BlendShapeAnimation>();
     }
 }

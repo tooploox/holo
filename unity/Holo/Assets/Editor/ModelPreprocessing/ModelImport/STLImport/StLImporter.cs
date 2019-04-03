@@ -5,7 +5,7 @@ using UnityEngine;
 
 
 //Loads a single STL file and turns it into a list of vertices (x,y,z) & if firstMesh: a list of indexes
-public class STLFileImporter
+public class StlImporter
 {
     private List<int> indices = new List<int>();
     public int[] Indices { get => indices.ToArray(); }
@@ -22,7 +22,7 @@ public class STLFileImporter
 
     private uint facetCount = 1;
 
-    public void LoadSTLFile(string file_path, bool firstMesh)
+    public void LoadSTLFile(string file_path)
     {
         vertices.Clear();
         indices.Clear();
@@ -36,17 +36,15 @@ public class STLFileImporter
                 facetCount = binaryReader.ReadUInt32();
 
                 for (uint i = 0; i < facetCount; i++)
-                    AdaptFacet(binaryReader, firstMesh);
+                    AdaptFacet(binaryReader);
             }
         }
-        if (firstMesh)
-            BaseVertices = new Vector3[vertices.Count];
         
         //Normalising summed-up facets' normals
         foreach (Vector3 normal in normals) normal.Normalize();
     }
 
-    private void AdaptFacet(BinaryReader binaryReader, bool firstMesh)
+    private void AdaptFacet(BinaryReader binaryReader)
     {
         Vector3 currentNormal = binaryReader.GetVector3();
 

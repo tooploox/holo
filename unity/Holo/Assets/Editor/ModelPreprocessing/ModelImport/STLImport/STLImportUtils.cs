@@ -3,7 +3,7 @@ using UnityEngine;
 
 
 //Static class containing methods for extracting and adapting vertices from a STL file. 
-public static class STLImportUtils
+public static class StLImportUtils
 {
     public static Vector3 GetVector3(this BinaryReader binaryReader)
     {
