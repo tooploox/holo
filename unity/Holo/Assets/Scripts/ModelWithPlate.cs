@@ -1,25 +1,40 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
-using System.Linq;
+﻿using UnityEngine;
 using HoloToolkit.Unity.UX;
 
-public class ModelInstance : MonoBehaviour, IClickHandler
+public class ModelWithPlate : MonoBehaviour, IClickHandler
 {
     private bool playing = true;
 
     public TextMesh PlayOrStopText;
     public GameObject Decorations;
+    public GameObject ModelButtons;
+
+    private void Start()
+    {
+        ModelButtons.SetActive(instance != null); // always false at Start
+    }
 
     public void Click(GameObject clickObject)
     {
         switch (clickObject.name)
         {
-            case "Play": ClickTogglePlay(); break;
+            case "TogglePlay": ClickTogglePlay(); break;
             case "Rewind": ClickRewind(); break;
-            case "Remove": ClickRemove(); break;
-            default: Debug.LogWarning("Click on unknown object " + clickObject.name); break;
+            case "Remove":
+                {
+                    InstancePath = null;
+                    break;
+                }
+            default:
+                {
+                    const string addPrefix = "Add_";
+                    if (clickObject.name.StartsWith(addPrefix)) {
+                        InstancePath = "Models/" + clickObject.name.Substring(addPrefix.Length);
+                    } else {
+                        Debug.LogWarning("Click on unknown object " + clickObject.name); 
+                    }
+                    break;
+                }
         }
     }
 
@@ -29,7 +44,7 @@ public class ModelInstance : MonoBehaviour, IClickHandler
         PlayOrStopText.text = (playing ? "STOP" : "PLAY");
         if (blendShapeAnimation != null)
         {
-            blendShapeAnimation.TogglePlay();
+            blendShapeAnimation.Playing = playing;
         }
     }
 
@@ -41,34 +56,36 @@ public class ModelInstance : MonoBehaviour, IClickHandler
         }
     }
 
-    public void ClickRemove()
-    {
-        ModelsCollection.Singleton.RemoveInstance(this);
-    }
-
-    // Only non-null if Template was set.
+    // All variables below are non-null if InstancePath was set.
     private BlendShapeAnimation blendShapeAnimation;
     private GameObject instance;
     private GameObject instanceTransformation;
 
     public GameObject Instance { get { return instance; } }
 
-    private string template;
+    private string instancePath;
 
     // Currently loaded animated shape.
     // This is a path to an object (prefab, fbx etc. -- anything that can be loaded as GameObject),
     // relative to Assets/Resources/ .
     // Set to "" to unload.
-    public string Template
+    public string InstancePath
     {
-        get { return template; }
+        get { return instancePath; }
         set
         {
+            // restore Decorations to be child of our GameObject
+            Decorations.transform.parent = transform;
+
             // First release previous instance
             if (instance != null)
             {
+                // Workaround: make sure that BoundingBoxRig is called, AppBar clone will no longer be updated
+                instance.GetComponent<BoundingBoxRig>().DetachAppBar();
+
                 Destroy(instance);
                 Destroy(instanceTransformation);
+
                 instance = null;
                 instanceTransformation = null;
                 blendShapeAnimation = null;
@@ -76,6 +93,7 @@ public class ModelInstance : MonoBehaviour, IClickHandler
 
             if (!string.IsNullOrEmpty(value))
             {
+                // TODO: first Resources.Load takes a bit
                 GameObject template = Resources.Load<GameObject>(value);
                 if (template == null)
                 {
@@ -83,8 +101,8 @@ public class ModelInstance : MonoBehaviour, IClickHandler
                 }
 
                 instanceTransformation = new GameObject("InstanceTransformation");
+                instanceTransformation.transform.parent = transform;
 
-                // TODO: do not do Resources.Load each time, keep a list of loaded GameObjects in ModelsCollection.Templates
                 instance = Instantiate<GameObject>(template, instanceTransformation.transform);
 
                 // transform instance to be centered with a box of size (2,2,2)
@@ -98,8 +116,7 @@ public class ModelInstance : MonoBehaviour, IClickHandler
                     scale = 2 / maxSize;
                 }
                 instanceTransformation.transform.localScale = new Vector3(scale, scale, scale);
-                instanceTransformation.transform.localPosition = -b.center * scale + new Vector3(0f, 1f, 0f);
-                instanceTransformation.transform.parent = transform;
+                instanceTransformation.transform.localPosition = -b.center * scale + new Vector3(0f, 2f, 0f);
 
                 // This way dragging the animated model will also drag the decorations
                 Decorations.transform.parent = instance.transform;
@@ -114,8 +131,14 @@ public class ModelInstance : MonoBehaviour, IClickHandler
                     Debug.LogWarning("BlendShapeAnimation component not found inside " + value + ", adding");
                     blendShapeAnimation = instance.AddComponent<BlendShapeAnimation>();
                 }
-                // TODO: The default Speed 1 should be a good default.
-                blendShapeAnimation.Speed = 10f;
+                // default speed to play in 1 second
+                int blendShapesCount = skinnedMesh.sharedMesh.blendShapeCount;
+                if (blendShapesCount != 0) {
+                    blendShapeAnimation.Speed = skinnedMesh.sharedMesh.blendShapeCount;
+                } else {
+                    Debug.LogWarning("Model has no blend shapes " + value);
+                }
+                blendShapeAnimation.Playing = playing;
                 // TODO: this should be changed into "throw new...", not a warning.
                 // After new import STL->GameObject is ready.
                 Animator animator = instance.GetComponent<Animator>();
@@ -126,43 +149,30 @@ public class ModelInstance : MonoBehaviour, IClickHandler
                 }
             }
 
-            template = value;
+            ModelButtons.SetActive(instance != null);
+            instancePath = value;
         }
     }
 
+    // TODO update time slider now
+    /*
     private void Update()
     {
         if (playing && blendShapeAnimation != null)
         {
-            // TODO: This is called but doesn't update UI, why?
-            // Debug.Log("update slider to " + blendShapeAnimation.CurrentTime.ToString());
-            // TODO
-            //timeSlider.value = blendShapeAnimation.CurrentTime;
+            timeSlider.value = blendShapeAnimation.CurrentTime;
         }
     }
+    */
 
+    // TODO: read time slider now
+    /*
     private void TimeSliderValueChanged(float newPosition)
     {
         if (blendShapeAnimation != null)
         {
-            // TODO: This is never called, why?
-            // Debug.Log("updated time to " + newPosition.ToString());
             blendShapeAnimation.CurrentTime = newPosition;
         }
     }
-
-    public void DetachFromScene()
-    {
-        if (instance != null)
-        {
-            // Workaround: make sure that BoundingBoxRig is called, AppBar clone will no longer be updated
-            instance.GetComponent<BoundingBoxRig>().DetachAppBar();
-
-            Destroy(gameObject);
-
-            instance = null;
-            instanceTransformation = null;
-            blendShapeAnimation = null;
-        }
-    }
+    */
 }
