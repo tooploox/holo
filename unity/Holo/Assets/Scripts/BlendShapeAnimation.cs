@@ -36,7 +36,7 @@ public class BlendShapeAnimation : MonoBehaviour
 
     private void Start()
     {
-        blendShapeCount = skinnedMesh.blendShapeCount;        
+        blendShapeCount = skinnedMesh.blendShapeCount;
         Debug.Log("BlendShapes count: " + blendShapeCount);
 
         // Make sure all blend shapes start with weight 0, in case user was playing around with them in Unity Editor.
