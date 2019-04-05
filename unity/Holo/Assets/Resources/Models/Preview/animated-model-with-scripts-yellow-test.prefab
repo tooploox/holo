@@ -13,11 +13,8 @@ GameObject:
   - component: {fileID: 4972541234533549945}
   - component: {fileID: 4972541234522678132}
   - component: {fileID: 4972541234522678143}
-  - component: {fileID: 4972541234522678128}
-  - component: {fileID: 4972541234522678130}
-  - component: {fileID: 4972541234522678133}
   m_Layer: 0
-  m_Name: animated-model-with-scripts-yellow
+  m_Name: animated-model-with-scripts-yellow-test
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -54,7 +51,7 @@ SkinnedMeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 51d93c38cead35d46843b157c9d0d669, type: 2}
+  - {fileID: 2100000, guid: c461b5d611bed684e891d67e30721be1, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -133,66 +130,3 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MirrorAnimation: 0
   Speed: 1
---- !u!114 &4972541234522678128
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4972541234540950713}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6eb034688bcf84b4bb52b3a3310868c3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  hostTransform: {fileID: 0}
-  boundingBoxPrefab: {fileID: 114030465538688920, guid: 865a8ded6c47efd4285f04f3aebe99e9,
-    type: 3}
-  manipulationMode: 7
-  rotationConstraint: 0
-  enableOneHandMovement: 1
---- !u!114 &4972541234522678130
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4972541234540950713}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4768146f072b50149a922df192dfb58f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  flattenedAxis: 0
-  scaleHandleMaterial: {fileID: 2100000, guid: 4a9072a0d8623aa44abf31f02d209a09, type: 2}
-  rotateHandleMaterial: {fileID: 2100000, guid: 4a9072a0d8623aa44abf31f02d209a09,
-    type: 2}
-  interactingMaterial: {fileID: 2100000, guid: b614a09bc429623478e946d8170b15ae, type: 2}
-  scaleRate: 6
-  appBarHoverOffsetZ: 0.05
-  maxScale: 2
-  rotationType: 0
-  handMotionToRotate: 1
-  rotateAroundPivot: 0
-  boundingBoxPrefab: {fileID: 114030465538688920, guid: 865a8ded6c47efd4285f04f3aebe99e9,
-    type: 3}
-  appBarPrefab: {fileID: 114050950401502068, guid: aa610ada334bff640a535f0d23a9a15c,
-    type: 3}
---- !u!114 &4972541234522678133
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4972541234540950713}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 52a72bdb251e5ce488e5c51f0a9c657b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Cursor: {fileID: 1000012943254746, guid: b2db04283121ca74495c2ee000fb4243, type: 3}
-  DirectionIndicatorObject: {fileID: 173238, guid: 7a25fdffdc1e849459f3adfb768cd696,
-    type: 3}
-  DirectionIndicatorColor: {r: 0.23921569, g: 0.80784315, b: 0.78431374, a: 1}
-  VisibilitySafeFactor: -0.05
-  MetersFromCursor: 0.1
