@@ -96,7 +96,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     // Unload currently loaded instance.
     // May be safely called even when instance is already unloaded.
     // LoadInstance() calls this automatically at the beginning.
-    private void UnloadInstance()
+    private void UnloadInstance(bool refreshUi = true)
     {
         // restore Decorations to be child of our GameObject
         Decorations.transform.parent = transform;
@@ -115,7 +115,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             instanceAnimation = null;
             instanceIsPreview = false; // value does not matter, but for security better to set it to something well-defined
 
-            RefreshUserInterface();
+            if (refreshUi) {
+                RefreshUserInterface();
+            }
         }
     }
 
@@ -125,7 +127,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     // newIsPreview.
     private void LoadInstance(string newInstancePath, bool newIsPreview)
     {
-        UnloadInstance();
+        UnloadInstance(false);
 
         string fullInstancePath = "Models/";
         if (newIsPreview) {
@@ -196,8 +198,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         set {
             if (plateVisible != value) {
                 plateVisible = value;
-                // TODO run animation
-                PlateAnimated.SetActive(value);
+                PlateAnimated.GetComponent<Animator>().SetBool("expanded", value);
             }
         }
     }
