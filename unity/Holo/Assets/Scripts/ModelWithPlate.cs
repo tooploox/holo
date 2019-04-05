@@ -5,7 +5,6 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 {
     /* Public fields that should be set in Unity Editor */
     public TextMesh PlayOrStopText;
-    public GameObject Decorations;
     public GameObject ButtonsModel;
     public GameObject ButtonsModelPreview;
     public GameObject PlateAnimated;
@@ -98,14 +97,8 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     // LoadInstance() calls this automatically at the beginning.
     private void UnloadInstance(bool refreshUi = true)
     {
-        // restore Decorations to be child of our GameObject
-        Decorations.transform.parent = transform;
-
         // First release previous instance
         if (instance != null) {
-            // Workaround: make sure that BoundingBoxRig.DetachAppBar is called, AppBar clone will no longer be updated
-            instance.GetComponent<BoundingBoxRig>().DetachAppBar();
-
             Destroy(instance);
             Destroy(instanceTransformation);
 
@@ -157,9 +150,6 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         }
         instanceTransformation.transform.localScale = new Vector3(scale, scale, scale);
         instanceTransformation.transform.localPosition = -b.center * scale + new Vector3(0f, 2f, 0f);
-
-        // This way dragging the animated model will also drag the decorations
-        Decorations.transform.parent = instance.transform;
 
         instanceAnimation = instance.GetComponent<BlendShapeAnimation>();
         if (instanceAnimation == null) {
