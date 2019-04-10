@@ -7,19 +7,13 @@ using UnityEngine;
 
 public class VTKImporter
 {
-    private List<int> indices = new List<int>();
-    public int[] Indices { get => indices.ToArray(); }
-
-    public Vector3[] BaseVertices { get; private set; }
-
-    private List<Vector3> vertices = new List<Vector3>();
-    public Vector3[] Vertices { get => vertices.ToArray(); }
-
+    public int[] Indices { get; private set; }
+    public Vector3[] Vertices { get; private set; }
+    public Vector3[] Normals { get; private set; }
+    private StreamReader streamReader;
     public void LoadFile(string file_path)
     {
-        vertices.Clear();
-        indices.Clear();
-        using (StreamReader streamReader = new StreamReader(file_path, Encoding.ASCII))
+        using (streamReader = new StreamReader(file_path, Encoding.ASCII))
         {
             streamReader.ReadLine(); //DataFile version
             streamReader.ReadLine(); //vtk output
@@ -28,48 +22,35 @@ public class VTKImporter
             if (!encoding.Equals("ASCII"))
                 throw new Exception("Wrong file encoding!");
 
-            string datatype = streamReader.ReadLine();
-            //if (!datatype.Equals("DATASET POLYDATA"))
-              //  throw new Exception("Wrong file datatype!");
-
-            GetVertices(streamReader);
-
-            SkipLines(streamReader);
-
-            GetIndices(streamReader);
+            string[] datatype = streamReader.ReadLine().Split(' ');
+            switch (datatype[1])
+            {
+                case "POLYDATA":
+                    ImportFromPolydata();
+                    break;
+                case "UNSTRUCTURED_GRID":
+                    streamReader.ReadLine(); // Blank line
+                    ImportFromUnstructuredGrid();
+                    break;
+                default:
+                    throw new Exception("Wrong file datatype!");
+            }
         }
     }
 
-    private void GetVertices(StreamReader streamReader)
+    public void ImportFromPolydata()
     {
-        string[] pointsData = streamReader.ReadLine().Split(' ');
-        int numberOfVertices = int.Parse(pointsData[1]);
-        BaseVertices = new Vector3[numberOfVertices];
-
-        int lineCount = (numberOfVertices - 1) / 3 + 1;
-        for (int i = 0; i < lineCount; i++)
-        {
-            vertices.AddRange(streamReader.GetLineVertices());
-        }
-
+        PolyDataImporter polyDataImporter = new PolyDataImporter(streamReader);
+        Indices = polyDataImporter.Indices;
+        Vertices = polyDataImporter.Vertices;
+        Normals = polyDataImporter.Normals;
     }
 
-    //skipping data about lines joining vertices
-    private void SkipLines(StreamReader streamReader)
+    public void ImportFromUnstructuredGrid()
     {
-        string[] linesData = streamReader.ReadLine().Split(' ');
-        int numberOfLines = int.Parse(linesData[1]);
-        for (int i = 0; i < numberOfLines; i++)
-            streamReader.ReadLine();
-        streamReader.ReadLine(); //skipping an empty Line
+        UnstructuredGridImporter unstructuredGridImporter = new UnstructuredGridImporter(streamReader);
+        Indices = unstructuredGridImporter.Indices;
+        Vertices = unstructuredGridImporter.Vertices;
+        Normals = unstructuredGridImporter.Normals;
     }
-
-    private void GetIndices(StreamReader streamReader)
-    {
-        string[] indicesData = streamReader.ReadLine().Split(' ');
-        int numberOfLines = int.Parse(indicesData[1]);
-        for (int i = 0; i < numberOfLines; i++)
-            indices.AddRange(streamReader.GetLineIndices());
-    }
-
 }

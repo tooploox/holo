@@ -60,12 +60,10 @@ public static class VTKImportUtils
 
         for(int i = 1; i <matches.Count; i++) //omitting number of indices in a facet
         {
-            string indexString = matches[i].Value;
-            indices.Add(int.Parse(indexString));
+            int index = int.Parse(matches[i].Value);
+            indices.Add(index);   
         }
-
-            
-
+        indices.Reverse();
         return indices;
     }
 }

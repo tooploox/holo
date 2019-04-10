@@ -60,5 +60,6 @@ public class FileImporter
         vtkImporter.LoadFile(filePath);
         Vertices = vtkImporter.Vertices;
         Indices = vtkImporter.Indices;
+        Normals = vtkImporter.Normals;
     }
 }
