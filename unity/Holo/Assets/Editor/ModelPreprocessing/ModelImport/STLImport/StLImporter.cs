@@ -5,7 +5,7 @@ using UnityEngine;
 
 
 //Loads a single STL file and turns it into a list of vertices (x,y,z) & if firstMesh: a list of indexes
-public class StlImporter
+public class STLImporter
 {
     private List<int> indices = new List<int>();
     public int[] Indices { get => indices.ToArray(); }
@@ -22,7 +22,7 @@ public class StlImporter
 
     private uint facetCount = 1;
 
-    public void LoadSTLFile(string file_path)
+    public void LoadFile(string file_path)
     {
         vertices.Clear();
         indices.Clear();

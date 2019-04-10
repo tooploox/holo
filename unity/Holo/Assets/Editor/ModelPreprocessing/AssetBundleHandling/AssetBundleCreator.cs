@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -9,17 +9,21 @@ class AssetBundleCreator
     public Mesh Mesh { get; set; }
 
     private string rootAssetsDir;
-    private List<string> assetsPath = new List<string>();
-    AssetBundleBuild[] buildMap = new AssetBundleBuild[1];
+    private Dictionary<string, string> assetsPath = new Dictionary<string, string>();
+    private AssetBundleBuild[] buildMapArray;
     
     //Creates AssetBundle
-    public void Create()
+    public void Create(GameObject modelGameObject, Mesh mesh)
     {
+        Mesh = mesh;
+        ModelGameObject = modelGameObject;
+
         rootAssetsDir = @"Assets/" + ModelGameObject.name;
         SaveFilesForExport();
         BuildMapABs();
+
         AssetDatabase.CreateFolder("Assets", ModelGameObject.name + "_bundles");
-        BuildPipeline.BuildAssetBundles(rootAssetsDir + "_bundles", buildMap, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
+        BuildPipeline.BuildAssetBundles(rootAssetsDir + "_bundles", buildMapArray, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
     }
 
     // Exports finished GameObject to a .prefab
@@ -27,17 +31,20 @@ class AssetBundleCreator
     {
         AssetDatabase.CreateFolder("Assets", ModelGameObject.name);
 
-        assetsPath.Add(rootAssetsDir + @"/" + ModelGameObject.name + ".mesh");
-        AssetDatabase.CreateAsset(Mesh, assetsPath[0]);
+        assetsPath.Add("mesh", rootAssetsDir + @"/" + ModelGameObject.name + ".mesh");
+        AssetDatabase.CreateAsset(Mesh, assetsPath["mesh"]);
 
-        assetsPath.Add(rootAssetsDir + @"/" + ModelGameObject.name + ".prefab");
-        PrefabUtility.SaveAsPrefabAsset(ModelGameObject, assetsPath[1]);       
+        assetsPath.Add("GameObject", rootAssetsDir + @"/" + ModelGameObject.name + ".prefab");
+        PrefabUtility.SaveAsPrefabAsset(ModelGameObject, assetsPath["GameObject"]);       
     }
 
     private void BuildMapABs()
     {
         // Create the array of bundle build details.
-        buildMap[0].assetBundleName = ModelGameObject.name + "_bundle";
-        buildMap[0].assetNames = assetsPath.ToArray();
+        AssetBundleBuild buildMap = new AssetBundleBuild();
+        buildMap.assetBundleName = ModelGameObject.name + "_bundle";
+        buildMap.assetNames = assetsPath.Values.ToArray();
+
+        buildMapArray = new AssetBundleBuild[1] {buildMap};
     }
 }

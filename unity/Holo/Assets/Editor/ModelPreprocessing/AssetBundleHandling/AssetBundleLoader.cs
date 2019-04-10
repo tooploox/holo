@@ -1,43 +1,57 @@
-﻿using System.IO;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
 class AssetBundleLoader
 {
-    GameObject gameObject;
-    Mesh mesh;
+    private AssetBundle assetBundle;
+    private string bundlePath;
+    private string bundleName;
+
+    private GameObject gameObject;
+    private Mesh mesh;
 
     [MenuItem("Holo/Load an Asset Bundle")]
     public static void Load()
     {
         AssetBundleLoader assetBundleLoader = new AssetBundleLoader();
+        assetBundleLoader.GetBundleName();
+        assetBundleLoader.LoadBundle();
+        assetBundleLoader.LoadAssetFromBundle();
+    }
 
-        var assetBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "hypertrophy_bundle"));
-        if (assetBundle == null)
+    private void GetBundleName()
+    {
+       bundlePath = EditorUtility.OpenFilePanel("Choose AssetBundle to be loaded.", "", "");
+       bundleName = Path.GetFileNameWithoutExtension(bundlePath);
+    }
+
+    private void LoadBundle()
+    {
+        var loadedAssetBundle = AssetBundle.LoadFromFile(bundlePath);
+        if (loadedAssetBundle == null)
         {
             Debug.Log("Failed to load AssetBundle!");
             return;
         }
-        string[] assetPathArray = assetBundle.GetAllAssetNames();
-        assetBundleLoader.LoadAssetFromBundle(assetBundle, assetPathArray);
-        assetBundle.Unload(true);
+        assetBundle = loadedAssetBundle;
     }
 
-    private void LoadAssetFromBundle(AssetBundle assetBundle, string[] assetPathArray)
+    private void LoadAssetFromBundle()
     {
-        foreach (string assetPath in assetPathArray)
-        {
-            if (assetPath.EndsWith("prefab"))
-            {
-                AssetDatabase.CreateFolder("Assets", "Hypertrophy");
-                gameObject = assetBundle.LoadAsset<GameObject>(assetPath);
-                Object.Instantiate(gameObject);
-            }
-            if (assetPath.EndsWith("mesh"))
-                mesh = assetBundle.LoadAsset<Mesh>(assetPath);
-        }
+        List<string> assetPathList = assetBundle.GetAllAssetNames().ToList();
+
+        string gameObjectPath = assetPathList.Single(path => path.EndsWith(".prefab"));
+        string meshPath = assetPathList.Single(path => path.EndsWith(".mesh"));
+
+        gameObject = assetBundle.LoadAsset<GameObject>(gameObjectPath);
+        mesh = assetBundle.LoadAsset<Mesh>(meshPath);
+
         SkinnedMeshRenderer skinnedMesh = gameObject.GetComponent<SkinnedMeshRenderer>();
         skinnedMesh.sharedMesh = mesh;
+        Object.Instantiate(gameObject);
+        Mesh.Instantiate(mesh);
     }
 }

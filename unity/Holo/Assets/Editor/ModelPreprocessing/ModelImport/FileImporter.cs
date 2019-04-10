@@ -1,12 +1,9 @@
 ﻿using System;
-using System.IO;
-using System.Linq;
-using UnityEditor;
 using UnityEngine;
 
 public class FileImporter
 {
-    private StlImporter stlFileImporter;
+    private STLImporter stlFileImporter;
     private string fileExtension;
 
     public Vector3[] BaseVertices { get; private set; }
@@ -18,12 +15,13 @@ public class FileImporter
     public FileImporter(string extension)
     {
         fileExtension = extension;
-        if (extension == ".stl")
-            stlFileImporter = new StlImporter();
-        else
+        switch (fileExtension)
         {
-            EditorUtility.ClearProgressBar();
-            throw new Exception("Type not supported!");
+            case ".stl":
+                stlFileImporter = new STLImporter();
+                break;
+            default:
+                throw new Exception("Type not supported!");
         }
     }
 
@@ -41,7 +39,7 @@ public class FileImporter
 
     private void LoadStlFile(string filePath)
     {
-        stlFileImporter.LoadSTLFile(filePath);
+        stlFileImporter.LoadFile(filePath);
         Vertices = stlFileImporter.Vertices;
         Indices = stlFileImporter.Indices;
         Normals = stlFileImporter.Normals;

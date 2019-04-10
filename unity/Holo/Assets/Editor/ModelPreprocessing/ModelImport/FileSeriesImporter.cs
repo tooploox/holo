@@ -7,10 +7,12 @@ using UnityEngine;
 //A class for importing a STL series from a dir
 public class FileSeriesImporter
 {
-    GameObject seriesGameObject = new GameObject();
-    Mesh mesh = new Mesh();
+    private GameObject seriesGameObject = new GameObject();
+    private Mesh mesh = new Mesh();
+
     private string[] filePaths;
     private string extension;
+
     bool cancelConvertion = false;
     bool equalTopology = false; 
 
@@ -25,23 +27,22 @@ public class FileSeriesImporter
     }
     
     // Object constructor, initiates file series import.
-    public FileSeriesImporter(string rootFolder)
+    public FileSeriesImporter(string rootDirectory)
     {
-        filePaths = Directory.GetFiles(rootFolder + @"\");
-        GetFilename();
+        GetFiles(rootDirectory);
+        GetGameObjectName(rootDirectory);
         LoadFiles();
     }
 
-    private void GetFilename()
+    private void GetFiles(string rootDirectory)
     {
-        string fileName = Path.GetFileNameWithoutExtension(filePaths[0]);
+        filePaths = Directory.GetFiles(rootDirectory + @"\");
         extension = Path.GetExtension(filePaths[0]);
-        int lastCharIndex = fileName.LastIndexOf("-");
-        if (lastCharIndex == -1)
-            seriesGameObject.name = fileName;
-        else
-            seriesGameObject.name = fileName.Substring(0, lastCharIndex);
-
+    }
+    private void GetGameObjectName(string rootFolder)
+    {
+        string rootdir = Path.GetFullPath(rootFolder).TrimEnd(Path.DirectorySeparatorChar);
+        seriesGameObject.name = rootdir.Split(Path.DirectorySeparatorChar).Last();
     }
 
     //loads meshes from separate files into one GameObject
@@ -55,7 +56,7 @@ public class FileSeriesImporter
         cancelConvertion = EditorUtility.DisplayCancelableProgressBar("Convert STL series to a .prefab", "Conversion in progress", 0);
 
         bool firstMesh = true;
-        for (int i = 0; i < filePaths.Length; i++)
+        for(int i = 0; i < filePaths.Length; i++)
         {
             if (cancelConvertion)
             {
@@ -80,9 +81,7 @@ public class FileSeriesImporter
             mesh.AddBlendShapeFrame(Path.GetFileName(filePaths[i]), 100f, fileImporter.Vertices, fileImporter.Normals, null);
 
             cancelConvertion = EditorUtility.DisplayCancelableProgressBar("Converting meshes", "Conversion in progress", (i+1)*progressChunk);
-
         }
-
         skinnedMesh.sharedMesh = mesh;
         skinnedMesh.sharedMaterial = Resources.Load<Material>("MRTK_Standard_Gray");
         skinnedMesh.sharedMesh.RecalculateNormals();
