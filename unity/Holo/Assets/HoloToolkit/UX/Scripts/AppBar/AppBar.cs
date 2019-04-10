@@ -249,13 +249,13 @@ namespace HoloToolkit.Unity.UX
                 case "TogglePlay":
                     State = AppBarStateEnum.Default;
                     // Play / Pause Animation of model
-                    BlendShapeAnimation modelAnimaiton = boundingBox.Target.GetComponent<BlendShapeAnimation>();
-                    modelAnimaiton.TogglePlay();
+                    BlendShapeAnimation blendShapeAnimation = boundingBox.Target.GetComponent<BlendShapeAnimation>();
+                    blendShapeAnimation.TogglePlay();
                     
                     // Switch icon to Play <=> Pause
                     AppBarButton toggleButton = buttonParent.GetComponentsInChildren<AppBarButton>().Single(b => b.name == "TogglePlay");
                     ButtonTemplate buttonTmpl = buttons.Single(b => b.Name == "TogglePlay");
-                    buttonTmpl.Icon = modelAnimaiton.GetPlayingStatus() ? "PauseIcon" : "PlayIcon";
+                    buttonTmpl.Icon = blendShapeAnimation.Playing ? "PauseIcon" : "PlayIcon";
                     toggleButton.Initialize(this, buttonTmpl, null);
                     break;
 
