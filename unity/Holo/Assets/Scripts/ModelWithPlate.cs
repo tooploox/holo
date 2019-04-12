@@ -181,18 +181,18 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             Destroy(animator);
         }
 
-        // Add Direction indicator for loaded model
-        instance.AddComponent<DirectionIndicator>();
-        DirectionIndicator directionInd = instance.GetComponent<DirectionIndicator>();
-        directionInd.Cursor = GameObject.Find("DefaultCursor");
-        directionInd.DirectionIndicatorObject = Resources.Load(
-            "Assets/GFX/UI/HandDetectedFeedbackMod.prefab", typeof(GameObject)) as GameObject;
-        directionInd.DirectionIndicatorColor.r = 61.0f;
-        directionInd.DirectionIndicatorColor.g = 206.0f;
-        directionInd.DirectionIndicatorColor.b = 200.0f;
-        directionInd.VisibilitySafeFactor = -0.5f;
-        directionInd.MetersFromCursor = 0.1f;
-        directionInd.Awake();
+        //// Add Direction indicator for loaded model
+        //instance.AddComponent<DirectionIndicator>();
+        //DirectionIndicator directionInd = instance.GetComponent<DirectionIndicator>();
+        //directionInd.Cursor = GameObject.Find("DefaultCursor");
+        //directionInd.DirectionIndicatorObject = Resources.Load(
+        //    "Assets/GFX/UI/HandDetectedFeedbackMod.prefab", typeof(GameObject)) as GameObject;
+        //directionInd.DirectionIndicatorColor.r = 61.0f;
+        //directionInd.DirectionIndicatorColor.g = 206.0f;
+        //directionInd.DirectionIndicatorColor.b = 200.0f;
+        //directionInd.VisibilitySafeFactor = -0.5f;
+        //directionInd.MetersFromCursor = 0.1f;
+        //directionInd.Awake();
 
         instancePath = newInstancePath;
         instanceIsPreview = newIsPreview;
