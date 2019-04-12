@@ -95,7 +95,6 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         ButtonsModelPreview.SetActive(instance != null && instanceIsPreview);
         PlayOrStopText.text = (instanceAnimation != null && instanceAnimation.Playing ? "STOP" : "PLAY");
         PlateVisible = instance == null || instanceIsPreview;
-        collectionButtons.SetActive(plateVisible);
     }
 
     // Unload currently loaded instance.
