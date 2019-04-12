@@ -1,4 +1,4 @@
-﻿Shader "Collection_Clipping_Plane"{
+﻿Shader "Clipping_Plane"{
 	//show values to edit in inspector
 	Properties{
 		_Color("Tint", Color) = (0, 0, 0, 1)
