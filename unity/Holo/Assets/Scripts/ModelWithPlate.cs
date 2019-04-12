@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using HoloToolkit.Unity;
 using HoloToolkit.Unity.UX;
 
 public class ModelWithPlate : MonoBehaviour, IClickHandler
@@ -9,9 +10,13 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public GameObject ButtonsModelPreview;
     public GameObject PlateAnimated;
 
+    private GameObject collectionButtons;
+
     private void Start()
     {
+        collectionButtons = GameObject.Find("buttonsAdd");
         RefreshUserInterface();
+        
     }
 
     public void Click(GameObject clickObject)
@@ -82,7 +87,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     private BlendShapeAnimation instanceAnimation;
     private GameObject instance;
     private GameObject instanceTransformation;
-    private bool instanceIsPreview;
+    private bool instanceIsPreview = false;
 
     private void RefreshUserInterface()
     {
@@ -90,6 +95,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         ButtonsModelPreview.SetActive(instance != null && instanceIsPreview);
         PlayOrStopText.text = (instanceAnimation != null && instanceAnimation.Playing ? "STOP" : "PLAY");
         PlateVisible = instance == null || instanceIsPreview;
+        collectionButtons.SetActive(plateVisible);
     }
 
     // Unload currently loaded instance.
@@ -149,7 +155,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             scale = 2 / maxSize;
         }
         instanceTransformation.transform.localScale = new Vector3(scale, scale, scale);
-        instanceTransformation.transform.localPosition = -b.center * scale + new Vector3(0f, 2f, 0f);
+        instanceTransformation.transform.localPosition = -b.center * scale + new Vector3(0f, 1.5f, 0f);
 
         instanceAnimation = instance.GetComponent<BlendShapeAnimation>();
         if (instanceAnimation == null) {
@@ -175,6 +181,19 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             Debug.LogWarning("Animator component found but not wanted inside " + newInstancePath + ", removing");
             Destroy(animator);
         }
+
+        // Add Direction indicator for loaded model
+        instance.AddComponent<DirectionIndicator>();
+        DirectionIndicator directionInd = instance.GetComponent<DirectionIndicator>();
+        directionInd.Cursor = GameObject.Find("DefaultCursor");
+        directionInd.DirectionIndicatorObject = Resources.Load(
+            "Assets/GFX/UI/HandDetectedFeedbackMod.prefab", typeof(GameObject)) as GameObject;
+        directionInd.DirectionIndicatorColor.r = 61.0f;
+        directionInd.DirectionIndicatorColor.g = 206.0f;
+        directionInd.DirectionIndicatorColor.b = 200.0f;
+        directionInd.VisibilitySafeFactor = -0.5f;
+        directionInd.MetersFromCursor = 0.1f;
+        directionInd.Awake();
 
         instancePath = newInstancePath;
         instanceIsPreview = newIsPreview;
