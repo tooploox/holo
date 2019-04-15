@@ -38,11 +38,16 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     // Constant after Start()
     private HandDraggable handDraggable;
 
+    public GameObject modelClipPlane;
+
     private void Start()
     {
         /* Adding components using code, simply because it's more friendly to version control */
         handDraggable = gameObject.AddComponent<HandDraggable>();
         handDraggable.RotationMode = HandDraggable.RotationModeEnum.LockObjectRotation;
+
+        modelClipPlane = GameObject.Find("modelClipPlane");
+        modelClipPlane.SetActive(false);
 
         RefreshUserInterface();
         InitializeAddButtons();
@@ -140,6 +145,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     private void ClickRemove()
     {
         UnloadInstance();
+        modelClipPlane.SetActive(false);
     }
 
     private void ClickCancelPreview()
@@ -155,6 +161,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     private void ClickConfirmPreview()
     {
         LoadInstance(instanceIndex.Value, false);
+        modelClipPlane.SetActive(true);
     }
 
 
