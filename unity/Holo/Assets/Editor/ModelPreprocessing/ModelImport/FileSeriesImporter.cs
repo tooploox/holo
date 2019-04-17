@@ -53,7 +53,7 @@ public class FileSeriesImporter
 
         //Configuring progress bar
         float progressChunk = (float) 1 / filePaths.Length;
-        cancelConvertion = EditorUtility.DisplayCancelableProgressBar("Convert STL series to a .prefab", "Conversion in progress", 0);
+        cancelConvertion = EditorUtility.DisplayCancelableProgressBar("Convrting meshes", "Conversion in progress", 0);
 
         bool firstMesh = true;
         for(int i = 0; i < filePaths.Length; i++)
@@ -85,6 +85,7 @@ public class FileSeriesImporter
         skinnedMesh.sharedMesh = mesh;
         skinnedMesh.sharedMaterial = Resources.Load<Material>("MRTK_Standard_Gray");
         skinnedMesh.sharedMesh.RecalculateNormals();
+        skinnedMesh.sharedMesh.RecalculateBounds();
         EditorUtility.ClearProgressBar();
         seriesGameObject.AddComponent<BlendShapeAnimation>();
     }

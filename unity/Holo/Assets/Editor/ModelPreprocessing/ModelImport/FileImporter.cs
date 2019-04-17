@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class FileImporter
 {
-    private StlImporter stlFileImporter;
+    private STLImporter sTLImporter;
     private VTKImporter vtkImporter;
     private string fileExtension;
 
@@ -20,7 +20,7 @@ public class FileImporter
     {
         fileExtension = extension;
         if (extension == ".stl")
-            stlFileImporter = new StlImporter();
+            sTLImporter = new STLImporter();
         else if (extension == ".vtk")
         {
             vtkImporter = new VTKImporter();
@@ -49,10 +49,10 @@ public class FileImporter
 
     private void LoadStlFile(string filePath)
     {
-        stlFileImporter.LoadFile(filePath);
-        Vertices = stlFileImporter.Vertices;
-        Indices = stlFileImporter.Indices;
-        Normals = stlFileImporter.Normals;
+        sTLImporter.LoadFile(filePath);
+        Vertices = sTLImporter.Vertices;
+        Indices = sTLImporter.Indices;
+        Normals = sTLImporter.Normals;
     }
 
     private void LoadVtkFile(string filePath)

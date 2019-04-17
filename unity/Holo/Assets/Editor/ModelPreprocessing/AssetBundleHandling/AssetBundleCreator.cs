@@ -22,8 +22,7 @@ class AssetBundleCreator
         SaveFilesForExport();
         BuildMapABs();
 
-        AssetDatabase.CreateFolder("Assets", ModelGameObject.name + "_bundles");
-        BuildPipeline.BuildAssetBundles(rootAssetsDir + "_bundles", buildMapArray, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
+        BuildPipeline.BuildAssetBundles(Application.dataPath + "/StreamingAssets", buildMapArray, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
     }
 
     // Exports finished GameObject to a .prefab
