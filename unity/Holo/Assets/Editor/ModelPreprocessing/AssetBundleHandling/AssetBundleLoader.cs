@@ -8,7 +8,6 @@ class AssetBundleLoader
 {
     private AssetBundle assetBundle;
     private string bundlePath;
-    private string bundleName;
 
     private GameObject gameObject;
     private Mesh mesh;
@@ -17,23 +16,18 @@ class AssetBundleLoader
     public static void Load()
     {
         AssetBundleLoader assetBundleLoader = new AssetBundleLoader();
-        assetBundleLoader.GetBundleName();
-        assetBundleLoader.LoadBundle();
+
+        string bundlePath = EditorUtility.OpenFilePanel("Choose AssetBundle to be loaded.", "", "");
+        assetBundleLoader.LoadBundle(bundlePath);
         assetBundleLoader.LoadAssetFromBundle();
     }
 
-    private void GetBundleName()
-    {
-       bundlePath = EditorUtility.OpenFilePanel("Choose AssetBundle to be loaded.", "", "");
-       bundleName = Path.GetFileNameWithoutExtension(bundlePath);
-    }
-
-    private void LoadBundle()
+    private void LoadBundle(string bundlePath)
     {
         var loadedAssetBundle = AssetBundle.LoadFromFile(bundlePath);
         if (loadedAssetBundle == null)
         {
-            Debug.Log("Failed to load AssetBundle!");
+            Debug.LogError("Failed to load AssetBundle!");
             return;
         }
         assetBundle = loadedAssetBundle;

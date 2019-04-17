@@ -13,8 +13,8 @@ public class FileSeriesImporter
     private string[] filePaths;
     private string extension;
 
-    bool cancelConvertion = false;
-    bool equalTopology = false; 
+    private bool cancelConvertion = false;
+    private bool equalTopology = false; 
 
     public GameObject GetGameObject()
     {
