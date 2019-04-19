@@ -16,7 +16,7 @@ class LocalConfig : ScriptableObject
     public static void CreateLocalConfigAsset()
     {
         LocalConfig localConfig = new LocalConfig();
-        AssetDatabase.CreateAsset(localConfig, "Assets/Resources/localConfig.asset");
+        AssetDatabase.CreateAsset(localConfig, "Assets/Resources/LocalConfig.asset");
     }
     #endif
 }

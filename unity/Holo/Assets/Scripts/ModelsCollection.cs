@@ -29,7 +29,7 @@ public class ModelsCollection : MonoBehaviour
     private void LoadBundlesFiles()
     {
         bundlesFiles = new string[] { };
-        LocalConfig localConfig = Resources.Load<LocalConfig>("localConfig");
+        LocalConfig localConfig = Resources.Load<LocalConfig>("LocalConfig");
         if (localConfig != null && !string.IsNullOrEmpty(localConfig.BundlesDirectory))
         {
             string dir = localConfig.BundlesDirectory;
