@@ -73,9 +73,7 @@ public class ModelsCollection : MonoBehaviour
             bundles[i] = new AssetBundleLoader();
             bundles[i].LoadBundle(bundlesFiles[i]);
         }
-        return bundles[i].LoadMainGameObject();
-
-        // TODO: material unset, isPreview unused
+        return bundles[i].LoadMainGameObject();        
     }
 
     private void Update()

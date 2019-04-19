@@ -14,6 +14,8 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public GameObject ButtonsModel;
     public GameObject ButtonsModelPreview;
     public GameObject PlateAnimated;
+    public Material MaterialPreview;
+    public Material MaterialNonPreview;
 
     private void Start()
     {
@@ -212,6 +214,10 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             Destroy(animator);
         }
 
+        // Assign material, designating preview / not preview
+        // TODO: in the actual application, the "preview" flag should load a simpler mesh
+        skinnedMesh.sharedMaterial = newIsPreview ? MaterialPreview : MaterialNonPreview;
+
         //// Add Direction indicator for loaded model
         //instance.AddComponent<DirectionIndicator>();
         //DirectionIndicator directionInd = instance.GetComponent<DirectionIndicator>();
@@ -224,7 +230,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         //directionInd.VisibilitySafeFactor = -0.5f;
         //directionInd.MetersFromCursor = 0.1f;
         //directionInd.Awake();
-        
+
         instanceIndex = newInstanceIndex;
         instanceIsPreview = newIsPreview;
         RefreshUserInterface();        
