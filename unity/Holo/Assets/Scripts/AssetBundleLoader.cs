@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using UnityEditor;
 using UnityEngine;
 
-class AssetBundleLoader
+public class AssetBundleLoader
 {
     private AssetBundle assetBundle;
     private string bundlePath;
@@ -12,17 +11,7 @@ class AssetBundleLoader
     private GameObject gameObject;
     private Mesh mesh;
 
-    [MenuItem("Holo/Load an Asset Bundle")]
-    public static void Load()
-    {
-        AssetBundleLoader assetBundleLoader = new AssetBundleLoader();
-
-        string bundlePath = EditorUtility.OpenFilePanel("Choose AssetBundle to be loaded.", "", "");
-        assetBundleLoader.LoadBundle(bundlePath);
-        assetBundleLoader.LoadAssetFromBundle();
-    }
-
-    private void LoadBundle(string bundlePath)
+    public void LoadBundle(string bundlePath)
     {
         var loadedAssetBundle = AssetBundle.LoadFromFile(bundlePath);
         if (loadedAssetBundle == null)
@@ -33,7 +22,7 @@ class AssetBundleLoader
         assetBundle = loadedAssetBundle;
     }
 
-    private void LoadAssetFromBundle()
+    public void LoadAssetFromBundle()
     {
         List<string> assetPathList = assetBundle.GetAllAssetNames().ToList();
 
@@ -47,5 +36,12 @@ class AssetBundleLoader
         skinnedMesh.sharedMesh = mesh;
         Object.Instantiate(gameObject);
         Mesh.Instantiate(mesh);
+
+        /* TODO: testing 
+        GameObject goInstance = Object.Instantiate<GameObject>(gameObject);
+        Mesh meshInstance = Object.Instantiate<Mesh>(mesh);
+        SkinnedMeshRenderer skinnedMesh = goInstance.GetComponent<SkinnedMeshRenderer>();
+        skinnedMesh.sharedMesh = meshInstance;
+        */
     }
 }
