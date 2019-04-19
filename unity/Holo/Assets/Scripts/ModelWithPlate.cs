@@ -10,7 +10,7 @@ using HoloToolkit.Unity.Buttons;
 public class ModelWithPlate : MonoBehaviour, IClickHandler
 {
     /* Public fields that should be set in Unity Editor */
-    public TextMesh PlayOrStopText;
+    public CompoundButtonText PlayOrStopText;
     public GameObject ButtonsModel;
     public GameObject ButtonsModelPreview;
     public GameObject PlateAnimated;
@@ -138,7 +138,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     {
         ButtonsModel.SetActive(instance != null && !instanceIsPreview);
         ButtonsModelPreview.SetActive(instance != null && instanceIsPreview);
-        PlayOrStopText.text = (instanceAnimation != null && instanceAnimation.Playing ? "STOP" : "PLAY");
+        PlayOrStopText.Text = (instanceAnimation != null && instanceAnimation.Playing ? "STOP" : "PLAY");
         PlateVisible = instance == null || instanceIsPreview;
     }
 
