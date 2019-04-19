@@ -1,6 +1,11 @@
-﻿using UnityEngine;
+﻿using System.IO;
+using System.Collections.Generic;
+
+using UnityEngine;
+
 using HoloToolkit.Unity;
 using HoloToolkit.Unity.UX;
+using HoloToolkit.Unity.Buttons;
 
 public class ModelWithPlate : MonoBehaviour, IClickHandler
 {
@@ -10,13 +15,53 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public GameObject ButtonsModelPreview;
     public GameObject PlateAnimated;
 
-    private GameObject collectionButtons;
-
     private void Start()
     {
-        collectionButtons = GameObject.Find("buttonsAdd");
         RefreshUserInterface();
-        
+        LoadBundles();
+    }
+
+    /* Absolute filenames to asset bundles with models. */
+    private string[] bundlesFiles;
+
+    /* Number of "add" buttons we have in the scene. */
+    private const int addButtonsCount = 15;
+
+    /* Suffix to recognize bundle filename. May be an extension (with dot) or a normal filename suffix. */
+    private const string bundleFileSuffix = "_bundle";
+
+    /* Initialize bundlesFiles */
+    private void LoadBundles()
+    {
+        bundlesFiles = new string[] { };
+        LocalConfig localConfig = Resources.Load<LocalConfig>("localConfig");
+        if (localConfig != null && !string.IsNullOrEmpty(localConfig.BundlesDirectory))
+        {
+            string dir = localConfig.BundlesDirectory;
+            bundlesFiles = Directory.GetFiles(dir, "*" + bundleFileSuffix);
+            if (bundlesFiles.Length == 0)
+            {
+                Debug.LogWarning("No asset bundles found in directory \"" + dir + "\". Make sure to set correct BundlesDirectory in LocalConfig in Assets/Resources/LocalConfig.asset.");
+            }
+            else
+            {
+                Debug.Log("Found " + bundlesFiles.Length.ToString() + " asset bundles in \"" + dir + "\".");
+
+                // set add buttons captions
+                List<GameObject> interactables = GetComponent<ButtonsClickReceiver>().interactables;
+                for (int i = 0; i < Mathf.Min(addButtonsCount, bundlesFiles.Length); i++)
+                {
+                    GameObject addButton = interactables.Find(gameObject => gameObject.name == "Add" + i.ToString());
+                    string modelName = Path.GetFileName(bundlesFiles[i]);
+                    modelName = modelName.Substring(0, modelName.Length - bundleFileSuffix.Length);
+                    addButton.GetComponent<CompoundButtonText>().Text = modelName;
+                }
+            }
+        }
+        else
+        {
+            Debug.LogWarning("No Assets/Resources/LocalConfig.asset. Create it from Unity Editor by \"Holo -> Create Local Configuration\"");
+        }
     }
 
     public void Click(GameObject clickObject)
