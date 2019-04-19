@@ -18,52 +18,48 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     private void Start()
     {
         RefreshUserInterface();
-        LoadBundles();
+        InitializeAddButtons();
     }
-
-    /* Absolute filenames to asset bundles with models. */
-    private string[] bundlesFiles;
 
     /* Number of "add" buttons we have in the scene. */
     private const int addButtonsCount = 15;
 
-    /* Suffix to recognize bundle filename. May be an extension (with dot) or a normal filename suffix. */
-    private const string bundleFileSuffix = "_bundle";
-
-    /* Initialize bundlesFiles */
-    private void LoadBundles()
+    /* Find the GameObject of some "AddXxx" button. */
+    private GameObject FindAddButton(int i)
     {
-        bundlesFiles = new string[] { };
-        LocalConfig localConfig = Resources.Load<LocalConfig>("localConfig");
-        if (localConfig != null && !string.IsNullOrEmpty(localConfig.BundlesDirectory))
-        {
-            string dir = localConfig.BundlesDirectory;
-            bundlesFiles = Directory.GetFiles(dir, "*" + bundleFileSuffix);
-            if (bundlesFiles.Length == 0)
-            {
-                Debug.LogWarning("No asset bundles found in directory \"" + dir + "\". Make sure to set correct BundlesDirectory in LocalConfig in Assets/Resources/LocalConfig.asset.");
-            }
-            else
-            {
-                Debug.Log("Found " + bundlesFiles.Length.ToString() + " asset bundles in \"" + dir + "\".");
+        List<GameObject> interactables = GetComponent<ButtonsClickReceiver>().interactables;
+        return interactables.Find(gameObject => gameObject.name == "Add" + i.ToString());
+    }
 
-                // set add buttons captions
-                List<GameObject> interactables = GetComponent<ButtonsClickReceiver>().interactables;
-                for (int i = 0; i < Mathf.Min(addButtonsCount, bundlesFiles.Length); i++)
-                {
-                    GameObject addButton = interactables.Find(gameObject => gameObject.name == "Add" + i.ToString());
-                    string modelName = Path.GetFileName(bundlesFiles[i]);
-                    modelName = modelName.Substring(0, modelName.Length - bundleFileSuffix.Length);
-                    addButton.GetComponent<CompoundButtonText>().Text = modelName;
-                }
-            }
-        }
-        else
+    /* Initialize "AddXxx" buttons captions and existence. */
+    private void InitializeAddButtons()
+    {
+        if (ModelsCollection.Singleton == null)
         {
-            Debug.LogWarning("No Assets/Resources/LocalConfig.asset. Create it from Unity Editor by \"Holo -> Create Local Configuration\"");
+            Debug.LogError("ModelsCollection script must be executed before ModelWithPlate. Fix Unity \"Script Execution Order\".");
+            return;
+        }
+
+        int activeButtonsCount = Mathf.Min(addButtonsCount, ModelsCollection.Singleton.BundlesCount);
+
+        // set add buttons captions and existence, for the buttons that correspond to some bundles
+        for (int i = 0; i < activeButtonsCount; i++)
+        {            
+            string modelName = ModelsCollection.Singleton.BundleCaption(i);
+            GameObject button = FindAddButton(i);
+            button.GetComponent<CompoundButtonText>().Text = modelName;
+            button.SetActive(true);
+        }
+
+        // hide the rest of the buttons, when there are less models than buttons
+        for (int i = activeButtonsCount; i < addButtonsCount; i++)
+        {
+            GameObject button = FindAddButton(i);
+            button.SetActive(false);
         }
     }
 
+    /* Handle a click on some button inside. Called by ButtonsClickReceiver. */
     public void Click(GameObject clickObject)
     {
         switch (clickObject.name)
@@ -75,9 +71,11 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             case "CancelPreview": ClickCancelPreview(); break;
             default:
                 {
-                    const string addPrefix = "Add_";
-                    if (clickObject.name.StartsWith(addPrefix)) {
-                        ClickAdd(clickObject.name.Substring(addPrefix.Length));
+                    const string addPrefix = "Add";
+                    int addInstanceIndex;
+                    if (clickObject.name.StartsWith(addPrefix) &&
+                        int.TryParse(clickObject.name.Substring(addPrefix.Length), out addInstanceIndex)) {
+                        ClickAdd(addInstanceIndex);
                     } else {
                         Debug.LogWarning("Click on unknown object " + clickObject.name);
                     }
@@ -116,19 +114,19 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         UnloadInstance();
     }
 
-    private void ClickAdd(string newinstancePath)
+    private void ClickAdd(int newInstanceIndex)
     {
-        LoadInstance(newinstancePath, true);
+        LoadInstance(newInstanceIndex, true);
     }
 
     private void ClickConfirmPreview()
     {
-        LoadInstance(instancePath, false);
+        LoadInstance(instanceIndex.Value, false);
     }
 
     /* All the variables below are non-null if and only if after 
      * LoadInstance call (and before UnloadInstance). */
-    private string instancePath;
+    private int? instanceIndex; // index to ModelsCollection
     private BlendShapeAnimation instanceAnimation;
     private GameObject instance;
     private GameObject instanceTransformation;
@@ -152,7 +150,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             Destroy(instance);
             Destroy(instanceTransformation);
 
-            instancePath = null;
+            instanceIndex = null;
             instance = null;
             instanceTransformation = null;
             instanceAnimation = null;
@@ -165,24 +163,12 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     }
 
     // Load new animated shape.
-    // newInstancePath is a path to an object (prefab, fbx etc. -- anything that can be loaded as GameObject),
-    // relative to "Assets/Resources/Models/" (with addsitional "Preview/" subdirectory if this
-    // newIsPreview.
-    private void LoadInstance(string newInstancePath, bool newIsPreview)
+    // newInstanceIndex is an index to ModelsCollection.
+    private void LoadInstance(int newInstanceIndex, bool newIsPreview)
     {
         UnloadInstance(false);
 
-        string fullInstancePath = "Models/";
-        if (newIsPreview) {
-            fullInstancePath += "Preview/";
-        }
-        fullInstancePath += newInstancePath;
-
-        // TODO: first Resources.Load takes a bit
-        GameObject template = Resources.Load<GameObject>(fullInstancePath);
-        if (template == null) {
-            throw new System.Exception("Cannot load GameObject from " + fullInstancePath);
-        }
+        GameObject template = ModelsCollection.Singleton.BundleLoad(newInstanceIndex, newIsPreview);
 
         instanceTransformation = new GameObject("InstanceTransformation");
         instanceTransformation.transform.parent = transform;
@@ -207,7 +193,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             // We should settle whether the stored object has or has not BlendShapeAnimation (I vote not,
             // but any decision is fine, just stick to it).
             // After new import STL->GameObject is ready.
-            Debug.LogWarning("BlendShapeAnimation component not found inside " + newInstancePath + ", adding");
+            Debug.LogWarning("BlendShapeAnimation component not found inside " + newInstanceIndex + ", adding");
             instanceAnimation = instance.AddComponent<BlendShapeAnimation>();
         }
         // default speed to play in 1 second
@@ -215,14 +201,14 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         if (blendShapesCount != 0) {
             instanceAnimation.Speed = skinnedMesh.sharedMesh.blendShapeCount;
         } else {
-            Debug.LogWarning("Model has no blend shapes " + newInstancePath);
+            Debug.LogWarning("Model has no blend shapes " + newInstanceIndex);
         }
         instanceAnimation.Playing = true;
         // TODO: this should be changed into "throw new...", not a warning.
         // After new import STL->GameObject is ready.
         Animator animator = instance.GetComponent<Animator>();
         if (animator != null) {
-            Debug.LogWarning("Animator component found but not wanted inside " + newInstancePath + ", removing");
+            Debug.LogWarning("Animator component found but not wanted inside " + newInstanceIndex + ", removing");
             Destroy(animator);
         }
 
@@ -238,8 +224,8 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         //directionInd.VisibilitySafeFactor = -0.5f;
         //directionInd.MetersFromCursor = 0.1f;
         //directionInd.Awake();
-
-        instancePath = newInstancePath;
+        
+        instanceIndex = newInstanceIndex;
         instanceIsPreview = newIsPreview;
         RefreshUserInterface();        
     }

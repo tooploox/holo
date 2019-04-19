@@ -13,6 +13,6 @@ class AssetBundleLoaderTest
 
         string bundlePath = EditorUtility.OpenFilePanel("Choose AssetBundle to be loaded.", "", "");
         assetBundleLoader.LoadBundle(bundlePath);
-        assetBundleLoader.LoadAssetFromBundle();
+        assetBundleLoader.InstantiateMainGameObject();
     }
 }

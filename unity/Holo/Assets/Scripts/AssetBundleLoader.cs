@@ -22,26 +22,19 @@ public class AssetBundleLoader
         assetBundle = loadedAssetBundle;
     }
 
-    public void LoadAssetFromBundle()
+    public GameObject LoadMainGameObject()
     {
         List<string> assetPathList = assetBundle.GetAllAssetNames().ToList();
 
         string gameObjectPath = assetPathList.Single(path => path.EndsWith(".prefab"));
-        string meshPath = assetPathList.Single(path => path.EndsWith(".mesh"));
-
         gameObject = assetBundle.LoadAsset<GameObject>(gameObjectPath);
-        mesh = assetBundle.LoadAsset<Mesh>(meshPath);
+        return gameObject;
+    }
 
-        SkinnedMeshRenderer skinnedMesh = gameObject.GetComponent<SkinnedMeshRenderer>();
-        skinnedMesh.sharedMesh = mesh;
-        Object.Instantiate(gameObject);
-        Mesh.Instantiate(mesh);
-
-        /* TODO: testing 
-        GameObject goInstance = Object.Instantiate<GameObject>(gameObject);
-        Mesh meshInstance = Object.Instantiate<Mesh>(mesh);
-        SkinnedMeshRenderer skinnedMesh = goInstance.GetComponent<SkinnedMeshRenderer>();
-        skinnedMesh.sharedMesh = meshInstance;
-        */
+    public GameObject InstantiateMainGameObject()
+    {
+        GameObject template = LoadMainGameObject();
+        GameObject instance = UnityEngine.Object.Instantiate<GameObject>(template);
+        return instance;
     }
 }
