@@ -5083,6 +5083,14 @@ PrefabInstance:
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 4300010, guid: c68a88ae5c5b91f41b94c83aa4c4196e, type: 3}
+    - target: {fileID: 4437881344481686, guid: 40da8a1b3b26ba743b892d890b95a9f9, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.035
+      objectReference: {fileID: 0}
+    - target: {fileID: 4437881344481686, guid: 40da8a1b3b26ba743b892d890b95a9f9, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.0075
+      objectReference: {fileID: 0}
     - target: {fileID: 114549673379926378, guid: 40da8a1b3b26ba743b892d890b95a9f9,
         type: 3}
       propertyPath: MainCollider
@@ -5119,7 +5127,8 @@ PrefabInstance:
         type: 3}
       propertyPath: Profile
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 11400000, guid: 470603dbc72fbc14f8c1b69d314faf75,
+        type: 2}
     - target: {fileID: 114284851947377390, guid: 40da8a1b3b26ba743b892d890b95a9f9,
         type: 3}
       propertyPath: TextMesh
