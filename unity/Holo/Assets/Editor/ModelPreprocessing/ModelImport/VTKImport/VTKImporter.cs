@@ -10,8 +10,17 @@ public class VTKImporter
     public int[] Indices { get; private set; }
     public Vector3[] Vertices { get; private set; }
     public Vector3[] Normals { get; private set; }
+    public Dictionary<string, Vector3> BoundingVertices { get; private set; } = new Dictionary<string, Vector3>()
+    { { "minVertex", new Vector3()},
+      { "maxVertex", new Vector3()}
+    };
+
     private StreamReader streamReader;
+    private UnstructuredGridImporter unstructuredGridImporter = new UnstructuredGridImporter();
+    private PolyDataImporter polyDataImporter = new PolyDataImporter();
+
     public void LoadFile(string file_path)
+
     {
         using (streamReader = new StreamReader(file_path, Encoding.ASCII))
         {
@@ -26,31 +35,22 @@ public class VTKImporter
             switch (datatype[1])
             {
                 case "POLYDATA":
-                    ImportFromPolydata();
+                    polyDataImporter.LoadFile(streamReader);
+                    Indices = polyDataImporter.Indices;
+                    Vertices = polyDataImporter.Vertices;
+                    Normals = polyDataImporter.Normals;
                     break;
                 case "UNSTRUCTURED_GRID":
-                    streamReader.ReadLine(); // Blank line
-                    ImportFromUnstructuredGrid();
+                    unstructuredGridImporter.LoadFile(streamReader);
+                    Indices = unstructuredGridImporter.Indices;
+                    Vertices = unstructuredGridImporter.Vertices;
+                    Normals = unstructuredGridImporter.Normals;
+                    BoundingVertices = unstructuredGridImporter.BoundingVertices;
+
                     break;
                 default:
                     throw new Exception("Wrong file datatype!");
             }
         }
-    }
-
-    public void ImportFromPolydata()
-    {
-        PolyDataImporter polyDataImporter = new PolyDataImporter(streamReader);
-        Indices = polyDataImporter.Indices;
-        Vertices = polyDataImporter.Vertices;
-        Normals = polyDataImporter.Normals;
-    }
-
-    public void ImportFromUnstructuredGrid()
-    {
-        UnstructuredGridImporter unstructuredGridImporter = new UnstructuredGridImporter(streamReader);
-        Indices = unstructuredGridImporter.Indices;
-        Vertices = unstructuredGridImporter.Vertices;
-        Normals = unstructuredGridImporter.Normals;
     }
 }

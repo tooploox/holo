@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using UnityEngine;
 
 class UnstructuredGridImporter
@@ -10,26 +9,31 @@ class UnstructuredGridImporter
 
     private List<Vector3> vertices = new List<Vector3>();
     public Vector3[] Vertices { get => vertices.ToArray(); }
-
     public Vector3[] Normals { get; private set; }
 
-    public UnstructuredGridImporter(StreamReader streamReader)
+    public Dictionary<string, Vector3> BoundingVertices { get; private set; } = new Dictionary<string, Vector3>()
+    { { "minVertex", new Vector3()},
+      { "maxVertex", new Vector3()}
+    };
+
+    public void LoadFile(StreamReader streamReader)
     {
+        streamReader.ReadLine(); // Blank line
+        vertices.Clear();
+        indices.Clear();
         GetVertices(streamReader);
         GetIndicesAndNormals(streamReader);
-    }
 
+    }
 
     private void GetVertices(StreamReader streamReader)
     {
         string[] pointsData = streamReader.ReadLine().Split(' ');
         int numberOfVertices = int.Parse(pointsData[1]);
         Normals = new Vector3[numberOfVertices];
-        for (int i = 0; i < numberOfVertices; i++)
-        {
-            vertices.AddRange(streamReader.GetLineVertices());
-        }
 
+        for (int i = 0; i < numberOfVertices; i++)
+            vertices.AddRange(streamReader.GetLineVertices());
     }
 
     private void GetIndicesAndNormals(StreamReader streamReader)
@@ -38,15 +42,18 @@ class UnstructuredGridImporter
         int numberOfLines = int.Parse(indicesData[1]);
         List<int> facetIndices = new List<int>();
         Vector3 currentNormal = new Vector3();
-
+        bool firstVertex = true;
         for (int i = 0; i < numberOfLines; i++)
         {
             facetIndices = streamReader.GetLineIndices();
-            indices.AddRange(facetIndices);
-
             currentNormal = CalculateFacetNormal(facetIndices);
+
             foreach (int index in facetIndices)
+            {
                 Normals[index] += currentNormal;
+                BoundingVertices.UpdateBoundingVertices(firstVertex, Vertices[index]);
+                firstVertex = false;
+            }
             indices.AddRange(facetIndices);
         }
         foreach (Vector3 normal in Normals)

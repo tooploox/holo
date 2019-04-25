@@ -12,7 +12,7 @@ class PolyDataImporter
 
     public Vector3[] Normals { get; private set; }
 
-    public PolyDataImporter(StreamReader streamReader)
+    public void LoadFile(StreamReader streamReader)
     {
         GetVertices(streamReader);
         SkipLines(streamReader);

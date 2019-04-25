@@ -1,6 +1,5 @@
 ﻿using System;
-using System.IO;
-using System.Linq;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -14,6 +13,10 @@ public class FileImporter
     public Vector3[] Vertices { get; private set; }
     public Vector3[] Normals { get; private set; }
     public int[] Indices { get; private set; }
+    public Dictionary<string, Vector3> BoundingVertices { get; private set; } = new Dictionary<string, Vector3>()
+    { { "minVertex", new Vector3()},
+      { "maxVertex", new Vector3()}
+    };
 
     //Getting format-specific FileImporter (only STL and VTK for now)
     public FileImporter(string extension)
@@ -34,6 +37,7 @@ public class FileImporter
 
     public void LoadFile(string filePath, bool firstMesh)
     {
+
         switch (fileExtension)
         {
             case ".stl":
@@ -61,5 +65,6 @@ public class FileImporter
         Vertices = vtkImporter.Vertices;
         Indices = vtkImporter.Indices;
         Normals = vtkImporter.Normals;
+        BoundingVertices = vtkImporter.BoundingVertices;
     }
 }
