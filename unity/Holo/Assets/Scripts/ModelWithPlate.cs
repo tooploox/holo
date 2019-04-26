@@ -17,21 +17,10 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public Material MaterialPreview;
     public Material MaterialNonPreview;
 
-    public Transform PlateRing;
-
     private void Start()
     {
         RefreshUserInterface();
         InitializeAddButtons();
-    }
-
-    private void Update()
-    {
-        /* Rotate the plate so that the menu is facing the user. */
-        Vector3 Target = Camera.main.transform.position;
-        Target.y = PlateRing.position.y;
-        PlateRing.LookAt(Target);
-        PlateRing.Rotate(-90, 0, 0);
     }
 
     /* Number of "add" buttons we have in the scene. */
