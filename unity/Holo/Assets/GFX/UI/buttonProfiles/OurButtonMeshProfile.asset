@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fa22bce62b991ca4b9aadff296ae1e8b, type: 3}
-  m_Name: DefaultButtonMeshProfile
+  m_Name: OurButtonMeshProfile
   m_EditorClassIdentifier: 
   ColorPropertyName: _Color
-  ValuePropertyName: 
+  ValuePropertyName: _BorderWidth
   SmoothStateChanges: 1
   StickyPressedEvents: 0
   StickyPressedTime: 0.15
@@ -21,37 +21,37 @@ MonoBehaviour:
   ButtonStates:
   - Name: Pressed
     ActiveState: 0
-    StateColor: {r: 0.8235294, g: 0.8235294, b: 0.8235294, a: 0.49803922}
-    StateValue: 0
+    StateColor: {r: 1, g: 1, b: 1, a: 1}
+    StateValue: 0.4
     Offset: {x: 0, y: 0, z: 0}
     Scale: {x: 1, y: 1, z: 1}
   - Name: Targeted
     ActiveState: 1
-    StateColor: {r: 1, g: 1, b: 1, a: 0.316}
-    StateValue: 0
+    StateColor: {r: 0, g: 0.90713024, b: 1, a: 1}
+    StateValue: 0.4
     Offset: {x: 0, y: 0, z: 0}
     Scale: {x: 1, y: 1, z: 1}
   - Name: Interactive
     ActiveState: 2
-    StateColor: {r: 1, g: 1, b: 1, a: 0}
+    StateColor: {r: 0.5660378, g: 0.5660378, b: 0.5660378, a: 1}
     StateValue: 0
     Offset: {x: 0, y: 0, z: 0}
     Scale: {x: 1, y: 1, z: 1}
   - Name: ObservationTargeted
     ActiveState: 3
-    StateColor: {r: 1, g: 1, b: 1, a: 1}
-    StateValue: 0
+    StateColor: {r: 0, g: 0, b: 0, a: 1}
+    StateValue: 0.4
     Offset: {x: 0, y: 0, z: 0}
     Scale: {x: 1, y: 1, z: 1}
   - Name: Observation
     ActiveState: 4
-    StateColor: {r: 0.4392157, g: 0.4392157, b: 0.4392157, a: 0}
+    StateColor: {r: 0, g: 0, b: 0, a: 1}
     StateValue: 0
     Offset: {x: 0, y: 0, z: 0}
     Scale: {x: 1, y: 1, z: 1}
   - Name: Disabled
     ActiveState: 5
-    StateColor: {r: 0.4392157, g: 0.4392157, b: 0.4392157, a: 0}
+    StateColor: {r: 0.7264151, g: 0.7264151, b: 0.7264151, a: 1}
     StateValue: 0
     Offset: {x: 0, y: 0, z: 0}
     Scale: {x: 1, y: 1, z: 1}
