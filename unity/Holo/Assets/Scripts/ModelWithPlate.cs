@@ -137,6 +137,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         LoadInstance(instanceIndex.Value, false);
     }
 
+
     /* All the variables below are non-null if and only if after 
      * LoadInstance call (and before UnloadInstance). */
     private int? instanceIndex; // index to ModelsCollection

@@ -184,7 +184,7 @@ PrefabInstance:
     - target: {fileID: 588889734508182343, guid: 5afe339537d1c07458cc3d05bdefda00,
         type: 3}
       propertyPath: m_Name
-      value: ButtonCliping
+      value: ButtonClipping
       objectReference: {fileID: 0}
     - target: {fileID: 146675853279685962, guid: 5afe339537d1c07458cc3d05bdefda00,
         type: 3}
