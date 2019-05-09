@@ -81,8 +81,16 @@ public class FileSeriesImporter
     private void InitiateMesh()
     {
         Mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-        Mesh.vertices = fileImporter.BaseVertices;
-        Mesh.triangles = fileImporter.Indices;
+        if (filePaths[0].Contains("lines"))
+        {
+            Mesh.vertices = fileImporter.BaseVertices;
+            Mesh.SetIndices(fileImporter.Indices, MeshTopology.Lines, 0);
+        }
+        else
+        {
+            Mesh.vertices = fileImporter.BaseVertices;
+            Mesh.triangles = fileImporter.Indices;
+        }
     }
 
     //Checks if topology stays the same between current and first file, sending a warning if it doesn't.
@@ -114,7 +122,8 @@ public class FileSeriesImporter
         SkinnedMeshRenderer skinnedMesh = ModelGameObject.AddComponent<SkinnedMeshRenderer>();
         skinnedMesh.sharedMesh = Mesh;
         skinnedMesh.sharedMaterial = Resources.Load<Material>("MRTK_Standard_Gray");
-        skinnedMesh.sharedMesh.RecalculateNormals();
+        if (!filePaths[0].Contains("lines"))
+            skinnedMesh.sharedMesh.RecalculateNormals();
         skinnedMesh.sharedMesh.bounds = CalculateBounds();
         EditorUtility.ClearProgressBar();
         ModelGameObject.AddComponent<BlendShapeAnimation>();

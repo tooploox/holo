@@ -55,8 +55,7 @@ public static class VTKImportUtils
 
         string LineVertices = streamReader.ReadLine();
         var matches = Regex.Matches(LineVertices, @"\d+");
-
-        for(int i = 1; i <matches.Count; i++) //omitting number of indices in a facet
+        for (int i = 1; i <matches.Count; i++) //omitting number of indices in a facet
         {
             int index = int.Parse(matches[i].Value);
             indices.Add(index);   

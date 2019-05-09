@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
@@ -12,26 +13,45 @@ class UnstructuredGridImporter
     public Vector3[] Normals { get; private set; }
 
     public Dictionary<string, Vector3> BoundingVertices { get; private set; } = new Dictionary<string, Vector3>()
-    { { "minVertex", new Vector3()},
-      { "maxVertex", new Vector3()}
+    {
+        { "minVertex", new Vector3()},
+        { "maxVertex", new Vector3()}
     };
 
     public void LoadFile(StreamReader streamReader)
     {
-        streamReader.ReadLine(); // Blank line
         vertices.Clear();
         indices.Clear();
-        GetVertices(streamReader);
-        GetIndicesAndNormals(streamReader);
 
+        bool verticesFlag = false;
+        bool normalsFlag = false;
+        while (!streamReader.EndOfStream)
+        {
+            if (verticesFlag & normalsFlag) break;
+            var line = streamReader.ReadLine();
+            if (string.IsNullOrEmpty(line)) continue;
+
+            if (line.IndexOf("POINTS", StringComparison.CurrentCultureIgnoreCase) >= 0)
+            {
+                string[] pointsData = line.Split(' ');
+                int numberOfVertices = int.Parse(pointsData[1]);
+                GetVertices(streamReader, numberOfVertices);
+                verticesFlag = true;
+            }
+
+            if (line.IndexOf("CELLS", StringComparison.CurrentCultureIgnoreCase) >= 0)
+            {
+                string[] cellsData = line.Split(' ');
+                int numberOfLines = int.Parse(cellsData[1]);
+                GetIndicesAndNormals(streamReader, numberOfLines);
+                normalsFlag = true;
+            }
+        }
     }
 
-    private void GetVertices(StreamReader streamReader)
+    private void GetVertices(StreamReader streamReader, int numberOfVertices)
     {
         List<Vector3> vertices = new List<Vector3>();
-        string[] pointsData = streamReader.ReadLine().Split(' ');
-
-        int numberOfVertices = int.Parse(pointsData[1]);
         Normals = new Vector3[numberOfVertices];
 
         for (int i = 0; i < numberOfVertices; i++)
@@ -39,30 +59,37 @@ class UnstructuredGridImporter
         Vertices = vertices.ToArray();
     }
 
-    private void GetIndicesAndNormals(StreamReader streamReader)
+    private void GetIndicesAndNormals(StreamReader streamReader, int numberOfLines)
     {
         //TODO: Change indices list to array
-        string[] indicesData = streamReader.ReadLine().Split(' ');
-        int numberOfLines = int.Parse(indicesData[1]);
         List<int> facetIndices = new List<int>();
-        Vector3 currentNormal = new Vector3();
+
         bool firstVertex = true;
 
         for (int i = 0; i < numberOfLines; i++)
         {
             facetIndices = streamReader.GetLineIndices();
-            currentNormal = CalculateFacetNormal(facetIndices);
-
             foreach (int index in facetIndices)
             {
-                Normals[index] += currentNormal;
                 BoundingVertices.UpdateBoundingVertices(firstVertex, Vertices[index]);
                 firstVertex = false;
             }
+            if(facetIndices.Count > 2)
+                UpdateFacetNormals(facetIndices);
             indices.AddRange(facetIndices);
         }
-        foreach (Vector3 normal in Normals)
-            normal.Normalize();
+        if (facetIndices.Count > 2)
+            foreach (Vector3 normal in Normals)
+                normal.Normalize();
+    }
+
+    //Updates facet normals
+    private void UpdateFacetNormals(List<int> facetIndices)
+    {
+        Vector3 currentNormal = new Vector3();
+        currentNormal = CalculateFacetNormal(facetIndices);
+        foreach (int index in facetIndices)
+            Normals[index] += currentNormal;
     }
 
     //Calculates a normal of a facet.
