@@ -32,8 +32,8 @@ class ModelPreprocessor
     private void GetModelData()
     {
         FileSeriesImporter seriesImporter = new FileSeriesImporter(rootDirectory);
-        modelGameObject = seriesImporter.GetGameObject();
-        mesh = seriesImporter.GetMesh();
+        modelGameObject = seriesImporter.ModelGameObject;
+        mesh = seriesImporter.Mesh;
     }
 
 

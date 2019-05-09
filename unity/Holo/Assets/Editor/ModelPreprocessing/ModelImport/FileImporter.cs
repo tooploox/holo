@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
+//A class for loading a specific file. Currently STL and specific VTK formats are supported.
 public class FileImporter
 {
     private STLImporter sTLImporter;
@@ -18,7 +19,7 @@ public class FileImporter
       { "maxVertex", new Vector3()}
     };
 
-    //Getting format-specific FileImporter (only STL and VTK for now)
+    //A constructor ensuring FileImporter is format-specific (only STL and VTK for now)
     public FileImporter(string extension)
     {
         fileExtension = extension;
@@ -35,6 +36,7 @@ public class FileImporter
         }
     }
 
+    //Loads a mesh from the given filepath.
     public void LoadFile(string filePath, bool firstMesh)
     {
 
@@ -51,6 +53,7 @@ public class FileImporter
             BaseVertices = new Vector3[Vertices.Length];
     }
 
+    //Loads a mesh from the STL file located in the given filepath.
     private void LoadStlFile(string filePath)
     {
         sTLImporter.LoadFile(filePath);
@@ -59,6 +62,7 @@ public class FileImporter
         Normals = sTLImporter.Normals;
     }
 
+    //Loads a mesh from the VTK file located in the given filepath.
     private void LoadVtkFile(string filePath)
     {
         vtkImporter.LoadFile(filePath);

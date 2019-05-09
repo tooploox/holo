@@ -9,9 +9,9 @@ class PolyDataImporter
 
     private List<Vector3> vertices = new List<Vector3>();
     public Vector3[] Vertices { get => vertices.ToArray(); }
-
     public Vector3[] Normals { get; private set; }
 
+    public bool facetsInwards = false;
     public void LoadFile(StreamReader streamReader)
     {
         GetVertices(streamReader);

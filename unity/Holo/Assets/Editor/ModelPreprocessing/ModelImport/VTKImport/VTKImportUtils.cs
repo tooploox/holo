@@ -18,7 +18,6 @@ public static class VTKImportUtils
         {
             vertices.Add(GetVector3(coordinate[0], coordinate[1], coordinate[2]));
         }
-
         return vertices;
     }
 
@@ -62,7 +61,6 @@ public static class VTKImportUtils
             int index = int.Parse(matches[i].Value);
             indices.Add(index);   
         }
-        indices.Reverse();
         return indices;
     }
 
@@ -78,17 +76,8 @@ public static class VTKImportUtils
         }
         else
         { 
-
-            if (currentVertex.x < minVertex.x) minVertex.x = currentVertex.x;
-            if (currentVertex.y < minVertex.y) minVertex.y = currentVertex.y;
-            if (currentVertex.z < minVertex.z) minVertex.z = currentVertex.z;
-
-            if (currentVertex.x < maxVertex.x) maxVertex.x = currentVertex.x;
-            if (currentVertex.y < maxVertex.y) maxVertex.y = currentVertex.y;
-            if (currentVertex.z < maxVertex.z) maxVertex.z = currentVertex.z;
-
-            currentBoundingVertices["minVertex"] = minVertex;
-            currentBoundingVertices["maxVertex"] = maxVertex;
+            currentBoundingVertices["minVertex"] = Vector3.Min(minVertex, currentVertex);
+            currentBoundingVertices["maxVertex"] = Vector3.Max(maxVertex, currentVertex);
         }
         return currentBoundingVertices;
     }
