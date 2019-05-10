@@ -10,6 +10,7 @@ public class VTKImporter
     public int[] Indices { get; private set; }
     public Vector3[] Vertices { get; private set; }
     public Vector3[] Normals { get; private set; }
+    public int IndicesInFacet { get; private set; }
     public Dictionary<string, Vector3> BoundingVertices { get; private set; } = new Dictionary<string, Vector3>()
     {
         { "minVertex", new Vector3()},
@@ -46,6 +47,7 @@ public class VTKImporter
                     Indices = unstructuredGridImporter.Indices;
                     Vertices = unstructuredGridImporter.Vertices;
                     Normals = unstructuredGridImporter.Normals;
+                    IndicesInFacet = unstructuredGridImporter.IndicesInFacet;
                     BoundingVertices = unstructuredGridImporter.BoundingVertices;
 
                     break;

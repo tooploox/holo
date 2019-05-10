@@ -11,6 +11,7 @@ class UnstructuredGridImporter
     private List<Vector3> vertices = new List<Vector3>();
     public Vector3[] Vertices { get; private set; }
     public Vector3[] Normals { get; private set; }
+    public int IndicesInFacet { get; private set; }
 
     public Dictionary<string, Vector3> BoundingVertices { get; private set; } = new Dictionary<string, Vector3>()
     {
@@ -61,7 +62,6 @@ class UnstructuredGridImporter
 
     private void GetIndicesAndNormals(StreamReader streamReader, int numberOfLines)
     {
-        //TODO: Change indices list to array
         List<int> facetIndices = new List<int>();
 
         bool firstVertex = true;
@@ -69,6 +69,8 @@ class UnstructuredGridImporter
         for (int i = 0; i < numberOfLines; i++)
         {
             facetIndices = streamReader.GetLineIndices();
+            if (firstVertex)
+                IndicesInFacet = facetIndices.Count;
             foreach (int index in facetIndices)
             {
                 BoundingVertices.UpdateBoundingVertices(firstVertex, Vertices[index]);

@@ -14,6 +14,7 @@ public class FileImporter
     public Vector3[] Vertices { get; private set; }
     public Vector3[] Normals { get; private set; }
     public int[] Indices { get; private set; }
+    public int IndicesInFacet { get; private set; }
     public Dictionary<string, Vector3> BoundingVertices { get; private set; } = new Dictionary<string, Vector3>()
     { { "minVertex", new Vector3()},
       { "maxVertex", new Vector3()}
@@ -68,6 +69,7 @@ public class FileImporter
         vtkImporter.LoadFile(filePath);
         Vertices = vtkImporter.Vertices;
         Indices = vtkImporter.Indices;
+        IndicesInFacet = vtkImporter.IndicesInFacet;
         Normals = vtkImporter.Normals;
         BoundingVertices = vtkImporter.BoundingVertices;
     }

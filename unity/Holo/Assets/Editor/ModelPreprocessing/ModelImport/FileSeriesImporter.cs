@@ -81,7 +81,7 @@ public class FileSeriesImporter
     private void InitiateMesh()
     {
         Mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-        if (filePaths[0].Contains("lines"))
+        if (fileImporter.IndicesInFacet == 2)
         {
             Mesh.vertices = fileImporter.BaseVertices;
             Mesh.SetIndices(fileImporter.Indices, MeshTopology.Lines, 0);
@@ -122,7 +122,7 @@ public class FileSeriesImporter
         SkinnedMeshRenderer skinnedMesh = ModelGameObject.AddComponent<SkinnedMeshRenderer>();
         skinnedMesh.sharedMesh = Mesh;
         skinnedMesh.sharedMaterial = Resources.Load<Material>("MRTK_Standard_Gray");
-        if (!filePaths[0].Contains("lines"))
+        if (fileImporter.IndicesInFacet == 3)
             skinnedMesh.sharedMesh.RecalculateNormals();
         skinnedMesh.sharedMesh.bounds = CalculateBounds();
         EditorUtility.ClearProgressBar();

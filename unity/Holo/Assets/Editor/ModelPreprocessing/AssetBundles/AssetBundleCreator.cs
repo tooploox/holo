@@ -28,7 +28,8 @@ class AssetBundleCreator
     // Exports finished GameObject to a .prefab
     private void SaveFilesForExport()
     {
-        AssetDatabase.CreateFolder("Assets", ModelGameObject.name);
+        if (!AssetDatabase.IsValidFolder(@"Assets\" + ModelGameObject.name))
+            AssetDatabase.CreateFolder("Assets", ModelGameObject.name);
 
         assetsPath.Add("mesh", rootAssetsDir + @"/" + ModelGameObject.name + ".mesh");
         AssetDatabase.CreateAsset(Mesh, assetsPath["mesh"]);
