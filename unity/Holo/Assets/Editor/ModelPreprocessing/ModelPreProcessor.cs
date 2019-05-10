@@ -5,14 +5,23 @@ using UnityEngine;
 
 class ModelPreprocessor
 {
+    public string rootDirectory;
+
     private GameObject modelGameObject;
     private Mesh mesh;
     private AssetBundleCreator assetBundleCreator = new AssetBundleCreator();
-    private string rootDirectory;
     private List<string> assetFilePaths = new List<string>();
 
+    public static void PreprocessModelBatchMode(string rootDirectory)
+    {
+        ModelPreprocessor modelPreprocessor = new ModelPreprocessor();
+        modelPreprocessor.rootDirectory = rootDirectory;
+        modelPreprocessor.GetModelData();
+        modelPreprocessor.assetBundleCreator.Create(modelPreprocessor.modelGameObject, modelPreprocessor.mesh);
+    }
+
     [MenuItem("Holo/Convert model to a AssetBundle's GameObject")]
-    public static void PreprocessModel()
+    public static void PreprocessModelEditor()
     {
         ModelPreprocessor modelPreprocessor = new ModelPreprocessor();
 
