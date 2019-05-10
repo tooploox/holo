@@ -30,9 +30,9 @@ public class ModelsCollection : MonoBehaviour
     {
         bundlesFiles = new string[] { };
         LocalConfig localConfig = Resources.Load<LocalConfig>("LocalConfig");
-        if (localConfig != null && !string.IsNullOrEmpty(localConfig.BundlesDirectory))
+        if (localConfig != null && !string.IsNullOrEmpty(localConfig.FinalBundlesDirectory))
         {
-            string dir = localConfig.BundlesDirectory;
+            string dir = localConfig.FinalBundlesDirectory;
             bundlesFiles = Directory.GetFiles(dir, "*" + bundleFileSuffix);
             if (bundlesFiles.Length == 0)
             {
