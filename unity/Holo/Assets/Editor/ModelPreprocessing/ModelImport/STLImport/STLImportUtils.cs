@@ -12,7 +12,6 @@ public static class STLImportUtils
         {
             vector3[i] = binaryReader.ReadSingle();
         }
-
         //maintaining Unity counter-clockwise orientation
         vector3.z = -vector3.z;
 

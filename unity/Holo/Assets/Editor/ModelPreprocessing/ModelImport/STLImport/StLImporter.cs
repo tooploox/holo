@@ -20,7 +20,7 @@ public class STLImporter
 
 
 
-    private uint facetCount = 1;
+    private uint facetCount;
 
     public void LoadFile(string file_path)
     {
@@ -36,7 +36,9 @@ public class STLImporter
                 facetCount = binaryReader.ReadUInt32();
 
                 for (uint i = 0; i < facetCount; i++)
+                {
                     AdaptFacet(binaryReader);
+                }
             }
         }
         
