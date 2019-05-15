@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 
@@ -42,7 +43,7 @@ public class FileImporter
     //Loads a mesh from the given filepath.
     public void LoadFile(string filePath, bool firstMesh)
     {
-
+        CheckExtension(filePath);
         switch (fileExtension)
         {
             case ".stl":
@@ -58,6 +59,15 @@ public class FileImporter
         }
     }
 
+    private void CheckExtension(string filePath)
+    {
+        string currentExtension = Path.GetExtension(filePath);
+        if (!fileExtension.Equals(currentExtension))
+        {
+            EditorUtility.ClearProgressBar();
+            throw new Exception("File extensions are not consistent!");
+        }
+    }
     //Loads a mesh from the STL file located in the given filepath.
     private void LoadStlFile(string filePath)
     {
