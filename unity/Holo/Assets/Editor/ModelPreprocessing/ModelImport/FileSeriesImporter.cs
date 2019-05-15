@@ -55,13 +55,15 @@ public class FileSeriesImporter
         {
             cancelImport = EditorUtility.DisplayCancelableProgressBar("Converting meshes", "Conversion in progress", (i + 1) * progressChunk);
             if (cancelImport)
+            {
                 AbortImport();
-
+            }
             fileImporter.LoadFile(filePaths[i], firstMesh);
 
             if (firstMesh)
+            {
                 InitiateMesh();
-
+            }
             CheckTopology(i);
             UpdateBounds(firstMesh);   
             Mesh.AddBlendShapeFrame(Path.GetFileName(filePaths[i]), 100f, fileImporter.Vertices, fileImporter.Normals, null);
@@ -98,7 +100,9 @@ public class FileSeriesImporter
     {
         bool equalTopology = Mesh.triangles.SequenceEqual(fileImporter.Indices);
         if (!equalTopology)
+        {
             Debug.LogWarning("Topology isn't the same! Mesh nr: " + meshIndex.ToString());
+        }
     }
 
     //After each frame updates Boundingbox borders of the object.
@@ -123,7 +127,9 @@ public class FileSeriesImporter
         skinnedMesh.sharedMesh = Mesh;
         skinnedMesh.sharedMaterial = Resources.Load<Material>("MRTK_Standard_Gray");
         if (fileImporter.IndicesInFacet == 3)
+        {
             skinnedMesh.sharedMesh.RecalculateNormals();
+        }
         skinnedMesh.sharedMesh.bounds = CalculateBounds();
         EditorUtility.ClearProgressBar();
         ModelGameObject.AddComponent<BlendShapeAnimation>();

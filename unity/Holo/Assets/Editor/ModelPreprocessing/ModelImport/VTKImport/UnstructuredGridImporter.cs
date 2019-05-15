@@ -28,9 +28,15 @@ class UnstructuredGridImporter
         bool normalsFlag = false;
         while (!streamReader.EndOfStream)
         {
-            if (verticesFlag & normalsFlag) break;
             var line = streamReader.ReadLine();
-            if (string.IsNullOrEmpty(line)) continue;
+            if (verticesFlag & normalsFlag)
+            {
+                break;
+            }
+            if (string.IsNullOrEmpty(line))
+            {
+                continue;
+            }
 
             if (line.IndexOf("POINTS", StringComparison.CurrentCultureIgnoreCase) >= 0)
             {
@@ -56,7 +62,9 @@ class UnstructuredGridImporter
         Normals = new Vector3[numberOfVertices];
 
         for (int i = 0; i < numberOfVertices; i++)
+        {
             vertices.AddRange(streamReader.GetLineVertices());
+        }
         Vertices = vertices.ToArray();
     }
 
@@ -70,28 +78,37 @@ class UnstructuredGridImporter
         {
             facetIndices = streamReader.GetLineIndices();
             if (firstVertex)
+            {
                 IndicesInFacet = facetIndices.Count;
+            }
             foreach (int index in facetIndices)
             {
                 BoundingVertices.UpdateBoundingVertices(firstVertex, Vertices[index]);
                 firstVertex = false;
             }
-            if(facetIndices.Count > 2)
+            if (facetIndices.Count > 2)
+            {
                 UpdateFacetNormals(facetIndices);
+            }
             indices.AddRange(facetIndices);
         }
         if (facetIndices.Count > 2)
+        {
             foreach (Vector3 normal in Normals)
+            {
                 normal.Normalize();
+            }
+        }
     }
-
     //Updates facet normals
     private void UpdateFacetNormals(List<int> facetIndices)
     {
         Vector3 currentNormal = new Vector3();
         currentNormal = CalculateFacetNormal(facetIndices);
         foreach (int index in facetIndices)
+        { 
             Normals[index] += currentNormal;
+        }
     }
 
     //Calculates a normal of a facet.

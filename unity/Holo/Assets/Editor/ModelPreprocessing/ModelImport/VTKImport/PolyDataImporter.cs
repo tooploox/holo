@@ -19,7 +19,6 @@ class PolyDataImporter
         GetIndicesAndNormals(streamReader);
     }
 
-
     private void GetVertices(StreamReader streamReader)
     {
         string[] pointsData = streamReader.ReadLine().Split(' ');
@@ -30,7 +29,6 @@ class PolyDataImporter
         {
             vertices.AddRange(streamReader.GetLineVertices());
         }
-
     }
 
     //skipping data about lines joining vertices
@@ -39,7 +37,9 @@ class PolyDataImporter
         string[] linesData = streamReader.ReadLine().Split(' ');
         int numberOfLines = int.Parse(linesData[1]);
         for (int i = 0; i < numberOfLines; i++)
+        {
             streamReader.ReadLine();
+        }
         streamReader.ReadLine(); //skipping an empty Line
     }
 
@@ -57,12 +57,15 @@ class PolyDataImporter
 
             currentNormal = CalculateFacetNormal(facetIndices);
             foreach (int index in facetIndices)
+            {
                 Normals[index] += currentNormal;
+            }
             indices.AddRange(facetIndices);
         }
         foreach (Vector3 normal in Normals)
+        {
             normal.Normalize();
-
+        }
     }
 
     private Vector3 CalculateFacetNormal(List<int> facetIndices)

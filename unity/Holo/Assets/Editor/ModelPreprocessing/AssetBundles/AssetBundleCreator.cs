@@ -29,8 +29,9 @@ class AssetBundleCreator
     private void SaveFilesForExport()
     {
         if (!AssetDatabase.IsValidFolder(@"Assets\" + ModelGameObject.name))
+        {
             AssetDatabase.CreateFolder("Assets", ModelGameObject.name);
-
+        }
         assetsPath.Add("mesh", rootAssetsDir + @"/" + ModelGameObject.name + ".mesh");
         AssetDatabase.CreateAsset(Mesh, assetsPath["mesh"]);
 

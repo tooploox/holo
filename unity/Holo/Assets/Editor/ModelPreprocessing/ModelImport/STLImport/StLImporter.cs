@@ -36,7 +36,9 @@ public class STLImporter
                 facetCount = binaryReader.ReadUInt32();
 
                 for (uint i = 0; i < facetCount; i++)
+                {
                     AdaptFacet(binaryReader);
+                }
             }
         }
         

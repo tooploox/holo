@@ -31,7 +31,9 @@ public class VTKImporter
 
             string encoding = streamReader.ReadLine();
             if (!encoding.Equals("ASCII"))
+            {
                 throw new Exception("Wrong file encoding!");
+            }
 
             string[] datatype = streamReader.ReadLine().Split(' ');
             switch (datatype[1])

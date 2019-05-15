@@ -25,7 +25,9 @@ public class FileImporter
     {
         fileExtension = extension;
         if (extension == ".stl")
+        {
             sTLImporter = new STLImporter();
+        }
         else if (extension == ".vtk")
         {
             vtkImporter = new VTKImporter();
@@ -51,7 +53,9 @@ public class FileImporter
                 break;
         }
         if (firstMesh)
+        {
             BaseVertices = new Vector3[Vertices.Length];
+        }
     }
 
     //Loads a mesh from the STL file located in the given filepath.

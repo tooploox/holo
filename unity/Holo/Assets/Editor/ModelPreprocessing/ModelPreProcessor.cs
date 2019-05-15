@@ -26,7 +26,9 @@ class ModelPreprocessor
     {
         rootDirectory = EditorUtility.OpenFolderPanel("Select STL series root folder", Application.dataPath, "");
         if (String.IsNullOrEmpty(rootDirectory))
+        {
             throw new ArgumentException("Path cannot be null!");
+        }
     }
 
     private void GetModelData()
