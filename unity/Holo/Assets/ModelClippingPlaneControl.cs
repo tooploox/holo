@@ -6,10 +6,11 @@ using HoloToolkit.Unity.UX;
 
 public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
 {
-    public GameObject clippingPlaneQuad;
-    public GameObject clippingPlane;
-    public GameObject clippingPlaneModifyBtn;
-    public GameObject rotationGizmo;
+    public GameObject ClippingPlaneQuad;
+    public GameObject ClippingPlane;
+    public GameObject ClippingPlaneModifyBtn;
+
+    public GameObject LoadedModel;
 
     BoundingBoxRig clipPlaneQuadBbox;
     Material currentModelMaterial;
@@ -20,9 +21,9 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
 
     void Start()
     {
-        clipPlaneQuadBbox = clippingPlaneQuad.GetComponent<BoundingBoxRig>();
+        clipPlaneQuadBbox = ClippingPlaneQuad.GetComponent<BoundingBoxRig>();
         clipPlaneQuadBbox.DetachAppBar();
-        clippingPlaneQuad.GetComponent<HandDraggable>().enabled = false;
+        ClippingPlaneQuad.GetComponent<HandDraggable>().enabled = false;
         ResetState();
     }
 
@@ -31,15 +32,11 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
         Debug.Log("Clicked obj: " + clickObj.name);
         switch (clickObj.name)
         {
-            case "Remove":
-                ResetState();
-                break;
-
-            case "clipPlaneOnOff":
+            case "ButtonClipping":
                 ClickedClipPlane();
                 break;
 
-            case "clipPlaneModify":
+            case "ButtonClippingManipulator":
                 ClickedClipPlaneModify();
                 break;
         }
@@ -53,12 +50,12 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
         if (clipPlaneModifyActive)
         {
             clipPlaneQuadBbox.Activate();
-            clippingPlaneQuad.GetComponent<HandDraggable>().enabled = true;
+            ClippingPlaneQuad.GetComponent<HandDraggable>().enabled = true;
         }
         else
         {
             clipPlaneQuadBbox.Deactivate();
-            clippingPlaneQuad.GetComponent<HandDraggable>().enabled = false;
+            ClippingPlaneQuad.GetComponent<HandDraggable>().enabled = false;
         }
     }
 
@@ -78,8 +75,11 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
         {
             currentModelMaterial = renderer.material;
             string clipMat = currentModelMaterial.name + "Clip";
+            Debug.Log("TEST " + clipMat);
             clipMat = clipMat.Replace(" (Instance)", ""); // We instantiate models from prefabs.
+            Debug.Log("TEST1 " + clipMat);
             clipMat = materialsPath + clipMat;
+            Debug.Log("TEST2 " + clipMat);
             currentModelMaterialClip = Resources.Load<Material>(clipMat);
             if (!currentModelMaterialClip)
             {
@@ -87,13 +87,13 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
             }
         }
         clipPlaneOn = !clipPlaneOn;
-        clippingPlane.SetActive(clipPlaneOn);
-        clippingPlaneModifyBtn.SetActive(clipPlaneOn);
+        ClippingPlane.SetActive(clipPlaneOn);
+        ClippingPlaneModifyBtn.SetActive(clipPlaneOn);
 
         if (clipPlaneOn && currentModelMaterialClip)
         {
             renderer.material = currentModelMaterialClip;
-            clippingPlane.GetComponent<ClippingPlane>().mat = currentModelMaterialClip;
+            ClippingPlane.GetComponent<ClippingPlane>().mat = currentModelMaterialClip;
         }
         else if (!clipPlaneOn)
         {
@@ -101,15 +101,16 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
         }
     }
 
-    void ResetState()
+    public void ResetState()
     {
+        LoadedModel = null;
         clipPlaneOn = false;
         clipPlaneModifyActive = false;
         currentModelMaterial = null;
         currentModelMaterialClip = null;
 
-        clippingPlane.SetActive(false);
-        clippingPlaneModifyBtn.SetActive(false);
+        ClippingPlane.SetActive(false);
+        ClippingPlaneModifyBtn.SetActive(false);
         clipPlaneQuadBbox.Deactivate();
     }
 }
