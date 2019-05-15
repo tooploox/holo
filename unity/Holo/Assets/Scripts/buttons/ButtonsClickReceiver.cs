@@ -7,12 +7,14 @@ using HoloToolkit.Unity.InputModule;
  * It will detect clicks on buttons (on Interactables list, inherited from InteractionReceiver),
  * and call IClickHandler.Click when necessary.
  */
+
+
 public class ButtonsClickReceiver : InteractionReceiver
 {
 	void Start()
 	{
 	}
-
+    
     // Track clicking interactable things. 
     // You need to make InputDown, then InputUp on the same GameObject to register as click.
     private GameObject clicking;
@@ -26,7 +28,7 @@ public class ButtonsClickReceiver : InteractionReceiver
     {
         //Debug.Log(obj.name + " : FocusExit");
     }
-
+    
 	protected override void InputDown(GameObject obj, InputEventData eventData)
     {
 		//Debug.Log(obj.name + " : InputDown");
