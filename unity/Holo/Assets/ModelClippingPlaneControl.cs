@@ -6,7 +6,6 @@ using HoloToolkit.Unity.UX;
 
 public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
 {
-    public GameObject ClippingPlaneQuad;
     public GameObject ClippingPlane;
     public GameObject ClippingPlaneModifyBtn;
 
@@ -21,9 +20,8 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
 
     void Start()
     {
-        clipPlaneQuadBbox = ClippingPlaneQuad.GetComponent<BoundingBoxRig>();
-        clipPlaneQuadBbox.DetachAppBar();
-        ClippingPlaneQuad.GetComponent<HandDraggable>().enabled = false;
+        clipPlaneQuadBbox = ClippingPlane.GetComponent<BoundingBoxRig>();
+        ClippingPlane.GetComponent<HandDraggable>().enabled = false;
         ResetState();
     }
 
@@ -50,12 +48,12 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
         if (clipPlaneModifyActive)
         {
             clipPlaneQuadBbox.Activate();
-            ClippingPlaneQuad.GetComponent<HandDraggable>().enabled = true;
+            ClippingPlane.GetComponent<HandDraggable>().enabled = true;
         }
         else
         {
             clipPlaneQuadBbox.Deactivate();
-            ClippingPlaneQuad.GetComponent<HandDraggable>().enabled = false;
+            ClippingPlane.GetComponent<HandDraggable>().enabled = false;
         }
     }
 

@@ -52,7 +52,7 @@ MonoBehaviour:
   flattenedAxisThickness: 0.01
   scalePadding: 0.05
   flattenedScalePadding: 0
-  boundsCalculationMethod: 0
+  boundsCalculationMethod: 1
   ignoreLayers:
     serializedVersion: 2
     m_Bits: 4
