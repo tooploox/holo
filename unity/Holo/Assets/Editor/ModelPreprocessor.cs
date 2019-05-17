@@ -12,16 +12,8 @@ class ModelPreprocessor
     private AssetBundleCreator assetBundleCreator = new AssetBundleCreator();
     private List<string> assetFilePaths = new List<string>();
 
-    public static void PreprocessModelBatchMode(string rootDirectory)
-    {
-        ModelPreprocessor modelPreprocessor = new ModelPreprocessor();
-        modelPreprocessor.rootDirectory = rootDirectory;
-        modelPreprocessor.GetModelData();
-        modelPreprocessor.assetBundleCreator.Create(modelPreprocessor.modelGameObject, modelPreprocessor.mesh);
-    }
-
     [MenuItem("Holo/Convert model to a AssetBundle's GameObject")]
-    public static void PreprocessModelEditor()
+    public static void PreprocessModel()
     {
         ModelPreprocessor modelPreprocessor = new ModelPreprocessor();
 
@@ -33,7 +25,30 @@ class ModelPreprocessor
     // gets path to the root folder.
     private void GetRootDirectory()
     {
-        rootDirectory = EditorUtility.OpenFolderPanel("Select STL series root folder", Application.dataPath, "");
+        if (Application.isBatchMode)
+        {
+            Debug.Log("It's Batchmode!");
+            string[] args = Environment.GetCommandLineArgs();
+            bool rootDirExists = false;
+            for (int i = 0; i < args.Length; i++)
+            {
+                Debug.Log("ARG " + i + ": " + args[i]);
+                if (args[i] == "-rootDirectory")
+                {
+                    rootDirectory = args[i + 1];
+                    rootDirExists = true;
+                }
+            }
+            if (!rootDirExists)
+            {
+                throw new Exception("Model's root directory has not been assigned!");
+            }
+        }
+        else
+        {
+            Debug.Log("It's not Batchmode!");
+            rootDirectory = EditorUtility.OpenFolderPanel("Select STL series root folder", Application.dataPath, "");
+        }
         if (String.IsNullOrEmpty(rootDirectory))
         {
             throw new ArgumentException("Path cannot be null!");
