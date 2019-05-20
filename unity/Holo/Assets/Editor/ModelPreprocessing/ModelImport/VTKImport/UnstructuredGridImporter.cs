@@ -46,7 +46,7 @@ class UnstructuredGridImporter
                 verticesFlag = true;
             }
 
-            if (line.IndexOf("CELLS", StringComparison.CurrentCultureIgnoreCase) >= 0)
+            if (line.IndexOf("CELLS", StringComparison.CurrentCultureIgnoreCase) >= 0 & verticesFlag == true)
             {
                 string[] cellsData = line.Split(' ');
                 int numberOfLines = int.Parse(cellsData[1]);
@@ -60,10 +60,16 @@ class UnstructuredGridImporter
     {
         List<Vector3> vertices = new List<Vector3>();
         Normals = new Vector3[numberOfVertices];
-
+        bool firstVertex = true;
         for (int i = 0; i < numberOfVertices; i++)
         {
-            vertices.AddRange(streamReader.GetLineVertices());
+            List<Vector3> lineVertices = streamReader.GetLineVertices();
+            vertices.AddRange(lineVertices);
+            foreach (Vector3 vertex in lineVertices)
+            {
+                BoundingVertices.UpdateBoundingVertices(firstVertex, vertex);
+            }
+            firstVertex = false;
         }
         Vertices = vertices.ToArray();
     }
@@ -80,11 +86,6 @@ class UnstructuredGridImporter
             if (firstVertex)
             {
                 IndicesInFacet = facetIndices.Count;
-            }
-            foreach (int index in facetIndices)
-            {
-                BoundingVertices.UpdateBoundingVertices(firstVertex, Vertices[index]);
-                firstVertex = false;
             }
             if (facetIndices.Count > 2)
             {
