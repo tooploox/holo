@@ -22,6 +22,7 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
     {
         clipPlaneQuadBbox = ClippingPlane.GetComponent<BoundingBoxRig>();
         ClippingPlane.GetComponent<HandDraggable>().enabled = false;
+
         ResetState();
     }
 
@@ -73,11 +74,8 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
         {
             currentModelMaterial = renderer.material;
             string clipMat = currentModelMaterial.name + "Clip";
-            Debug.Log("TEST " + clipMat);
             clipMat = clipMat.Replace(" (Instance)", ""); // We instantiate models from prefabs.
-            Debug.Log("TEST1 " + clipMat);
             clipMat = materialsPath + clipMat;
-            Debug.Log("TEST2 " + clipMat);
             currentModelMaterialClip = Resources.Load<Material>(clipMat);
             if (!currentModelMaterialClip)
             {
