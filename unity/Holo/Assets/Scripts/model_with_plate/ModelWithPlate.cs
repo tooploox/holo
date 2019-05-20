@@ -16,6 +16,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public GameObject PlateAnimated;
     public Material MaterialPreview;
     public Material MaterialNonPreview;
+    public Transform InstanceParent;
 
     private void Start()
     {
@@ -174,7 +175,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         GameObject template = ModelsCollection.Singleton.BundleLoad(newInstanceIndex, newIsPreview);
 
         instanceTransformation = new GameObject("InstanceTransformation");
-        instanceTransformation.transform.parent = transform;
+        instanceTransformation.transform.parent = InstanceParent.transform;
 
         instance = Instantiate<GameObject>(template, instanceTransformation.transform);
 
