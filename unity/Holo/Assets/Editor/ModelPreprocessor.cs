@@ -12,6 +12,9 @@ class ModelPreprocessor
     private AssetBundleCreator assetBundleCreator = new AssetBundleCreator();
     private List<string> assetFilePaths = new List<string>();
 
+    /* To use in batchmode: "<Path to Unity.exe>" -quit -batchmode -logFile "<Path to the logfile>" 
+     -executeMethod ModelPreprocessor.PreprocessModel -rootDirectory "<Directory of the folder which stores the meshes>"
+    */
     [MenuItem("Holo/Convert model to a AssetBundle's GameObject")]
     public static void PreprocessModel()
     {
