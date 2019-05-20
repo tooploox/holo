@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Collections;
 using System.Collections.Generic;
 
 using UnityEngine;
@@ -39,7 +40,8 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     private HandDraggable handDraggable;
 
     public GameObject ModelClipPlane;
-    private ModelClippingPlaneControl ModelClipPlaneCtrl;
+
+    ModelClippingPlaneControl ModelClipPlaneCtrl;
 
     private void Start()
     {
@@ -80,7 +82,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
         // set add buttons captions and existence, for the buttons that correspond to some bundles
         for (int i = 0; i < activeButtonsCount; i++)
-        {            
+        {
             string modelName = ModelsCollection.Singleton.BundleCaption(i);
             GameObject button = FindAddButton(i);
             button.GetComponent<CompoundButtonText>().Text = modelName;
@@ -108,6 +110,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             case "ButtonTranslate": ClickChangeTransformationState(TransformationState.Translate); break;
             case "ButtonRotate": ClickChangeTransformationState(TransformationState.Rotate); break;
             case "ButtonScale": ClickChangeTransformationState(TransformationState.Scale); break;
+
             default:
                 {
                     const string addPrefix = "Add";
@@ -165,7 +168,6 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         ModelClipPlane.SetActive(true);
         ModelClipPlaneCtrl.LoadedModel = instance;
     }
-
 
     /* All the variables below are non-null if and only if after 
      * LoadInstance call (and before UnloadInstance). */
