@@ -21,8 +21,7 @@ class AssetBundleCreator
         rootAssetsDir = @"Assets/" + ModelGameObject.name;
         SaveFilesForExport();
         BuildMapABs();
-
-        BuildPipeline.BuildAssetBundles(Application.dataPath + "/StreamingAssets", buildMapArray, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
+        SaveAssetBundles();
     }
 
     // Exports finished GameObject to a .prefab
@@ -47,5 +46,16 @@ class AssetBundleCreator
         buildMap.assetNames = assetsPath.Values.ToArray();
 
         buildMapArray = new AssetBundleBuild[1] {buildMap};
+    }
+
+    private void SaveAssetBundles()
+    {
+        if (!AssetDatabase.IsValidFolder(@"Assets\StreamingAssets"))
+        {
+            AssetDatabase.CreateFolder("Assets", "StreamingAssets");
+        }
+        BuildPipeline.BuildAssetBundles(Application.dataPath + "/StreamingAssets", buildMapArray, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
+        AssetDatabase.DeleteAsset("Assets/StreamingAssets/StreamingAssets");
+        AssetDatabase.DeleteAsset("Assets/StreamingAssets/StreamingAssets.manifest");
     }
 }
