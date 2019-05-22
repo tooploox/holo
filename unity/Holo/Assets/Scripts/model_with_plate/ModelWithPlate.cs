@@ -284,7 +284,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         // using material, not sharedMaterial, deliberately: we only change color of this material instance
         Color newColor = active ? ButtonActiveColor : ButtonInactiveColor;
         //Debug.Log("changing color of " + button.name + " to " + newColor.ToString());
+        // both _EmissiveColor and _Color (Albedo in editor) should be set to make proper effect.
         iconRenderer.material.SetColor("_EmissiveColor", newColor);
+        iconRenderer.material.SetColor("_Color", newColor);
     }
 
     private void ClickChangeTransformationState(TransformationState newState)
