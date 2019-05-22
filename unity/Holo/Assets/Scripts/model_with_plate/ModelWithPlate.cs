@@ -17,6 +17,20 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public Material MaterialPreview;
     public Material MaterialNonPreview;
     public Transform InstanceParent;
+    public CompoundButton ButtonTranslate;
+    public CompoundButton ButtonRotate;
+    public CompoundButton ButtonScale;
+    public Color ButtonActiveColor = new Color(0f, 0.90f, 0.88f);
+    public Color ButtonInactiveColor = new Color(1f, 1f, 1f);
+
+    private enum TransformationState
+    {
+        None,
+        Translate,
+        Rotate,
+        Scale
+    }
+    private TransformationState transformationState;
 
     private void Start()
     {
@@ -72,6 +86,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             case "Remove": ClickRemove(); break;
             case "ConfirmPreview": ClickConfirmPreview(); break;
             case "CancelPreview": ClickCancelPreview(); break;
+            case "ButtonTranslate": ClickChangeTransformationState(TransformationState.Translate); break;
+            case "ButtonRotate": ClickChangeTransformationState(TransformationState.Rotate); break;
+            case "ButtonScale": ClickChangeTransformationState(TransformationState.Scale); break;
             default:
                 {
                     const string addPrefix = "Add";
@@ -248,6 +265,39 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
                 PlateAnimated.GetComponent<Animator>().SetBool("expanded", value);
             }
         }
+    }
+
+    private void SetButtonState(CompoundButton button, bool active)
+    {
+        CompoundButtonIcon icon = button.GetComponent<CompoundButtonIcon>();
+        if (icon == null)
+        {
+            Debug.LogWarning("Missing CompoundButtonIcon on " + button.name);
+            return;
+        }
+        MeshRenderer iconRenderer = icon.IconMeshFilter.GetComponent<MeshRenderer>();
+        if (iconRenderer == null)
+        {
+            Debug.LogWarning("Missing MeshRenderer on CompoundButtonIcon.IconMeshFilter attached to " + button.name);
+            return;
+        }
+        // using material, not sharedMaterial, deliberately: we only change color of this material instance
+        Color newColor = active ? ButtonActiveColor : ButtonInactiveColor;
+        //Debug.Log("changing color of " + button.name + " to " + newColor.ToString());
+        iconRenderer.material.SetColor("_EmissiveColor", newColor);
+    }
+
+    private void ClickChangeTransformationState(TransformationState newState)
+    {
+        if (newState == transformationState) {
+            // clicking again on the same sidebar button just toggles it off
+            newState = TransformationState.None;
+        }
+        transformationState = newState;
+
+        SetButtonState(ButtonTranslate, newState == TransformationState.Translate);
+        SetButtonState(ButtonRotate, newState == TransformationState.Rotate);
+        SetButtonState(ButtonScale, newState == TransformationState.Scale);
     }
 
     // TODO update time slider now
