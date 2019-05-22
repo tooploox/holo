@@ -26,14 +26,16 @@ class ModelPreprocessor
     {
         rootDirectory = EditorUtility.OpenFolderPanel("Select STL series root folder", Application.dataPath, "");
         if (String.IsNullOrEmpty(rootDirectory))
+        {
             throw new ArgumentException("Path cannot be null!");
+        }
     }
 
     private void GetModelData()
     {
         FileSeriesImporter seriesImporter = new FileSeriesImporter(rootDirectory);
-        modelGameObject = seriesImporter.GetGameObject();
-        mesh = seriesImporter.GetMesh();
+        modelGameObject = seriesImporter.ModelGameObject;
+        mesh = seriesImporter.Mesh;
     }
 
 
