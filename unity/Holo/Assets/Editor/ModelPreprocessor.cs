@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
 class ModelPreprocessor
 {
     /* To use in batchmode: "<Path to Unity.exe>" -quit -batchmode -logFile "<Path to the logfile>" 
-     * -executeMethod ModelPreprocessor.PreprocessModel -rootDirectory "<Directory of the folder which stores the meshes>"
+    * -executeMethod ModelPreprocessor.PreprocessModel -rootDirectory "<Directory of the folder which stores the meshes>"
     */
     [MenuItem("Holo/Convert model to a AssetBundle's GameObject")]
     public static void ConvertSeries()
