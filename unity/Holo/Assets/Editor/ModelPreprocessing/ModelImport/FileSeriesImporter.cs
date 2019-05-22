@@ -9,7 +9,7 @@ using UnityEngine;
 public class FileSeriesImporter
 {
     public GameObject ModelGameObject { get; private set; } = new GameObject();
-    public Mesh Mesh { get; private set; } = new Mesh();
+    public Mesh ModelMesh { get; private set; } = new Mesh();
 
     private string[] filePaths;
     private string extension;
@@ -44,7 +44,7 @@ public class FileSeriesImporter
     private void LoadFiles()
     {
         fileImporter = new FileImporter(extension);
-        Mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+        ModelMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
 
         //Configuring progress bar
         float progressChunk = (float) 1 / filePaths.Length;
@@ -66,7 +66,7 @@ public class FileSeriesImporter
             }
             CheckTopology(i);
             UpdateBounds(firstMesh);   
-            Mesh.AddBlendShapeFrame(Path.GetFileName(filePaths[i]), 100f, fileImporter.Vertices, fileImporter.Normals, null);
+            ModelMesh.AddBlendShapeFrame(Path.GetFileName(filePaths[i]), 100f, fileImporter.Vertices, fileImporter.Normals, null);
             firstMesh = false;
         }
     }
@@ -82,23 +82,23 @@ public class FileSeriesImporter
     // Mesh initiation.
     private void InitiateMesh()
     {
-        Mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+        ModelMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
         if (fileImporter.IndicesInFacet == 2)
         {
-            Mesh.vertices = fileImporter.BaseVertices;
-            Mesh.SetIndices(fileImporter.Indices, MeshTopology.Lines, 0);
+            ModelMesh.vertices = fileImporter.BaseVertices;
+            ModelMesh.SetIndices(fileImporter.Indices, MeshTopology.Lines, 0);
         }
         else
         {
-            Mesh.vertices = fileImporter.BaseVertices;
-            Mesh.triangles = fileImporter.Indices;
+            ModelMesh.vertices = fileImporter.BaseVertices;
+            ModelMesh.triangles = fileImporter.Indices;
         }
     }
 
     //Checks if topology stays the same between current and first file, sending a warning if it doesn't.
     private void CheckTopology(int meshIndex)
     {
-        bool equalTopology = Mesh.triangles.SequenceEqual(fileImporter.Indices);
+        bool equalTopology = ModelMesh.GetIndices(0).SequenceEqual(fileImporter.Indices);  
         if (!equalTopology)
         {
             Debug.LogWarning("Topology isn't the same! Mesh nr: " + meshIndex.ToString());
@@ -124,7 +124,7 @@ public class FileSeriesImporter
     private void ConfigureMesh()
     {
         SkinnedMeshRenderer skinnedMesh = ModelGameObject.AddComponent<SkinnedMeshRenderer>();
-        skinnedMesh.sharedMesh = Mesh;
+        skinnedMesh.sharedMesh = ModelMesh;
         skinnedMesh.sharedMaterial = Resources.Load<Material>("MRTK_Standard_Gray");
         if (fileImporter.IndicesInFacet == 3)
         {

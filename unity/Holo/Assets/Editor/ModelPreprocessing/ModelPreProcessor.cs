@@ -35,7 +35,7 @@ class ModelPreprocessor
     {
         FileSeriesImporter seriesImporter = new FileSeriesImporter(rootDirectory);
         modelGameObject = seriesImporter.ModelGameObject;
-        mesh = seriesImporter.Mesh;
+        mesh = seriesImporter.ModelMesh;
     }
 
 
