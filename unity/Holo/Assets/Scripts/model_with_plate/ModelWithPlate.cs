@@ -326,6 +326,8 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         SetButtonState(ButtonScale, newState == TransformationState.Scale);
 
         handDraggable.enabled = newState == TransformationState.Translate;
+        InstanceParent.GetComponent<BoxCollider>().enabled = newState == TransformationState.Rotate;
+        InstanceParent.GetComponent<BoundingBoxRig>().enabled = newState == TransformationState.Rotate;
     }
 
     // TODO update time slider now
