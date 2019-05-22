@@ -602,6 +602,12 @@ namespace HoloToolkit.Unity.UX
                     continue;
                 }
 
+                Mesh mesh = meshFilterObj.sharedMesh != null ? meshFilterObj.sharedMesh : meshFilterObj.mesh;
+                if (mesh == null)
+                {
+                    Debug.LogWarning("Invalid BoundingBox prefab, missing mesh");
+                    continue;
+                }
                 Bounds meshBounds = meshFilterObj.sharedMesh.bounds;
                 meshBounds.GetCornerPositions(meshFilterObj.transform, ref corners);
                 boundsPoints.AddRange(corners);

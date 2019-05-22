@@ -264,9 +264,12 @@ namespace HoloToolkit.Unity.UX
 
             BuildRig();
 
-            appBarInstance = Instantiate(appBarPrefab) as AppBar;
-            appBarInstance.BoundingBox = boxInstance;
-            appBarInstance.HoverOffsetZ = appBarHoverOffsetZ;
+            if (appBarPrefab != null)
+            {
+                appBarInstance = Instantiate(appBarPrefab) as AppBar;
+                appBarInstance.BoundingBox = boxInstance;
+                appBarInstance.HoverOffsetZ = appBarHoverOffsetZ;
+            }
 
             boxInstance.IsVisible = false;
         }
@@ -289,7 +292,10 @@ namespace HoloToolkit.Unity.UX
 
         public void DetachAppBar()
         {
-            Destroy(appBarInstance);
+            if (appBarInstance != null)
+            {
+                Destroy(appBarInstance);
+            }
         }
 
         private void UpdateBoundsPoints()
