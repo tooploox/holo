@@ -15,7 +15,7 @@ class LocalConfig : ScriptableObject
     [MenuItem("Holo/Create Local Configuration (to specify BundlesDirectory)")]
     public static void CreateLocalConfigAsset()
     {
-        LocalConfig localConfig = new LocalConfig();
+        LocalConfig localConfig = ScriptableObject.CreateInstance<LocalConfig>();
         AssetDatabase.CreateAsset(localConfig, "Assets/Resources/LocalConfig.asset");
     }
     #endif
