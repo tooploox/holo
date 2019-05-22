@@ -10,18 +10,20 @@ using HoloToolkit.Unity.Buttons;
 public class ModelWithPlate : MonoBehaviour, IClickHandler
 {
     /* Public fields that should be set in Unity Editor */
-    public CompoundButtonText PlayOrStopText;
     public GameObject ButtonsModel;
     public GameObject ButtonsModelPreview;
     public GameObject PlateAnimated;
     public Material MaterialPreview;
     public Material MaterialNonPreview;
     public Transform InstanceParent;
+    public CompoundButton ButtonTogglePlay;
     public CompoundButton ButtonTranslate;
     public CompoundButton ButtonRotate;
     public CompoundButton ButtonScale;
     public Color ButtonActiveColor = new Color(0f, 0.90f, 0.88f);
     public Color ButtonInactiveColor = new Color(1f, 1f, 1f);
+    public Texture2D ButtonIconPlay;
+    public Texture2D ButtonIconPause;
 
     private enum TransformationState
     {
@@ -157,8 +159,19 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     {
         ButtonsModel.SetActive(instance != null && !instanceIsPreview);
         ButtonsModelPreview.SetActive(instance != null && instanceIsPreview);
-        PlayOrStopText.Text = (instanceAnimation != null && instanceAnimation.Playing ? "STOP" : "PLAY");
         PlateVisible = instance == null || instanceIsPreview;
+
+        // update ButtonTogglePlay caption and icon
+        bool playing = instanceAnimation != null && instanceAnimation.Playing;
+        string playOrPauseText = playing ? "PAUSE" : "PLAY";
+        ButtonTogglePlay.GetComponent<CompoundButtonText>().Text = playOrPauseText;
+        Texture2D playOrPatseIcon = playing ? ButtonIconPause : ButtonIconPlay;
+        MeshRenderer iconRenderer = ButtonTogglePlay.GetComponent<CompoundButtonIcon>().IconMeshFilter.GetComponent<MeshRenderer>();
+        if (iconRenderer != null) {
+            iconRenderer.sharedMaterial.mainTexture = playOrPatseIcon;
+        } else {
+            Debug.LogWarning("ButtonTogglePlay icon does not have MeshRenderer");
+        }        
     }
 
     // Unload currently loaded instance.
