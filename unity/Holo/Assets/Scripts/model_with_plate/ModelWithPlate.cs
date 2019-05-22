@@ -6,6 +6,7 @@ using UnityEngine;
 using HoloToolkit.Unity;
 using HoloToolkit.Unity.UX;
 using HoloToolkit.Unity.Buttons;
+using HoloToolkit.Unity.InputModule;
 
 public class ModelWithPlate : MonoBehaviour, IClickHandler
 {
@@ -32,12 +33,22 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         Rotate,
         Scale
     }
-    private TransformationState transformationState;
+    private TransformationState transformationState = TransformationState.None;
+
+    // Constant after Start()
+    private HandDraggable handDraggable;
 
     private void Start()
     {
+        /* Adding components using code, simply because it's more friendly to version control */
+        handDraggable = gameObject.AddComponent<HandDraggable>();
+        handDraggable.RotationMode = HandDraggable.RotationModeEnum.LockObjectRotation;
+
         RefreshUserInterface();
         InitializeAddButtons();
+
+        // This sets proper state of buttons and components like handDraggable
+        ClickChangeTransformationState(TransformationState.None);
     }
 
     /* Number of "add" buttons we have in the scene. */
@@ -313,6 +324,8 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         SetButtonState(ButtonTranslate, newState == TransformationState.Translate);
         SetButtonState(ButtonRotate, newState == TransformationState.Rotate);
         SetButtonState(ButtonScale, newState == TransformationState.Scale);
+
+        handDraggable.enabled = newState == TransformationState.Translate;
     }
 
     // TODO update time slider now
