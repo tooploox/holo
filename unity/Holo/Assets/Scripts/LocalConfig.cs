@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -14,14 +16,10 @@ class LocalConfig : ScriptableObject
     public string GetBundlesDirectory()
     {
     #if ENABLE_WINMD_SUPPORT
-        return Path.Combine(Application.persistentDataPath, "Bundles");
+        return Application.persistentDataPath;
     #else
         return BundlesDirectory;
     #endif
-    }
-    private void OnEnable()
-    {
-        BundlesDirectory = Application.persistentDataPath;
     }
 
 #if UNITY_EDITOR

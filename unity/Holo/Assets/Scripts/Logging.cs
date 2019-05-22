@@ -41,6 +41,9 @@ public class Logging : MonoBehaviour
     void HandleLog(string LogString, string StackTrace, LogType Type)
     {
         LogToFile(LogString);
-        LogToFile(StackTrace);
+        if (!string.IsNullOrEmpty(StackTrace))
+        {
+            LogToFile(StackTrace);
+        }
     }
 }

@@ -13,7 +13,7 @@ PlayerSettings:
   useOnDemandResources: 0
   accelerometerFrequency: 60
   companyName: MicroscopeIT
-  productName: Holo
+  productName: HoloModelSeries
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
@@ -586,11 +586,11 @@ PlayerSettings:
       EnterpriseAuthentication: False
       HumanInterfaceDevice: True
       InputInjectionBrokered: False
-      InternetClient: False
-      InternetClientServer: False
+      InternetClient: True
+      InternetClientServer: True
       Location: False
       LowLevelDevices: False
-      Microphone: False
+      Microphone: True
       MusicLibrary: False
       Objects3D: True
       OfflineMapsManagement: False
@@ -598,12 +598,12 @@ PlayerSettings:
       PhoneCallHistoryPublic: False
       PicturesLibrary: False
       PointOfService: False
-      PrivateNetworkClientServer: False
+      PrivateNetworkClientServer: True
       Proximity: False
       RecordedCallsFolder: False
       RemoteSystem: False
       RemovableStorage: False
-      SharedUserCertificates: False
+      SharedUserCertificates: True
       SpatialPerception: True
       SystemManagement: False
       UserAccountInformation: False
