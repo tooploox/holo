@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Collections.Generic;
 
 using UnityEngine;
@@ -13,7 +14,7 @@ public class ModelsCollection : MonoBehaviour
     }
 
     /* Absolute filenames to asset bundles with models. */
-    private string[] bundlesFiles;
+    private string[] bundlesFiles = { }; //< never null
     private AssetBundleLoader[] bundles;
 
     /* Suffix to recognize bundle filename. May be an extension (with dot) or a normal filename suffix. */
@@ -30,22 +31,18 @@ public class ModelsCollection : MonoBehaviour
     {
         bundlesFiles = new string[] { };
         LocalConfig localConfig = Resources.Load<LocalConfig>("LocalConfig");
-        if (localConfig != null && !string.IsNullOrEmpty(localConfig.BundlesDirectory))
-        {
-            string dir = localConfig.BundlesDirectory;
-            bundlesFiles = Directory.GetFiles(dir, "*" + bundleFileSuffix);
-            if (bundlesFiles.Length == 0)
-            {
-                Debug.LogWarning("No asset bundles found in directory \"" + dir + "\". Make sure to set correct BundlesDirectory in LocalConfig in Assets/Resources/LocalConfig.asset.");
-            }
-            else
-            {
-                Debug.Log("Found " + bundlesFiles.Length.ToString() + " asset bundles in \"" + dir + "\".");                
-            }
-        }
-        else
+        if (localConfig == null || string.IsNullOrEmpty(localConfig.BundlesDirectory))
         {
             Debug.LogWarning("No Assets/Resources/LocalConfig.asset. Create it from Unity Editor by \"Holo -> Create Local Configuration\"");
+            return;
+        }
+
+        string dir = localConfig.BundlesDirectory;
+        bundlesFiles = Directory.GetFiles(dir, "*" + bundleFileSuffix);
+        if (bundlesFiles.Length == 0) {
+            Debug.LogWarning("No asset bundles found in directory \"" + dir + "\". Make sure to set correct BundlesDirectory in LocalConfig in Assets/Resources/LocalConfig.asset.");
+        } else {
+            Debug.Log("Found " + bundlesFiles.Length.ToString() + " asset bundles in \"" + dir + "\".");                
         }
 
         bundles = new AssetBundleLoader[bundlesFiles.Length];
@@ -61,6 +58,10 @@ public class ModelsCollection : MonoBehaviour
      * */
     public string BundleCaption(int i)
     {
+        if (i < 0 || i >= BundlesCount) {
+            throw new Exception("Invalid bundle index " + i.ToString());
+        }
+
         string result = Path.GetFileName(bundlesFiles[i]);
         result = result.Substring(0, result.Length - bundleFileSuffix.Length);
         return result;
@@ -68,6 +69,10 @@ public class ModelsCollection : MonoBehaviour
 
     public GameObject BundleLoad(int i, bool isPreview)
     {
+        if (i < 0 || i >= BundlesCount) {
+            throw new Exception("Invalid bundle index " + i.ToString());
+        }
+
         if (bundles[i] == null)
         {
             bundles[i] = new AssetBundleLoader();
