@@ -11,12 +11,25 @@ class LocalConfig : ScriptableObject
     public string BundlesDirectory;
     #pragma warning restore CS0649
 
-    #if UNITY_EDITOR
+    public string GetBundlesDirectory()
+    {
+    #if ENABLE_WINMD_SUPPORT
+        return Path.Combine(Application.persistentDataPath, "Bundles");
+    #else
+        return BundlesDirectory;
+    #endif
+    }
+    private void OnEnable()
+    {
+        BundlesDirectory = Application.persistentDataPath;
+    }
+
+#if UNITY_EDITOR
     [MenuItem("Holo/Create Local Configuration (to specify BundlesDirectory)")]
     public static void CreateLocalConfigAsset()
     {
         LocalConfig localConfig = ScriptableObject.CreateInstance<LocalConfig>();
         AssetDatabase.CreateAsset(localConfig, "Assets/Resources/LocalConfig.asset");
     }
-    #endif
+#endif
 }
