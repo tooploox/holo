@@ -1,51 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
 class ModelPreprocessor
 {
-    public string rootDirectory;
-
-    private GameObject modelGameObject;
-    private Mesh mesh;
-    private AssetBundleCreator assetBundleCreator = new AssetBundleCreator();
-    private List<string> assetFilePaths = new List<string>();
-
     /* To use in batchmode: "<Path to Unity.exe>" -quit -batchmode -logFile "<Path to the logfile>" 
-     -executeMethod ModelPreprocessor.PreprocessModel -rootDirectory "<Directory of the folder which stores the meshes>"
+     * -executeMethod ModelPreprocessor.PreprocessModel -rootDirectory "<Directory of the folder which stores the meshes>"
     */
     [MenuItem("Holo/Convert model to a AssetBundle's GameObject")]
-    public static void PreprocessModel()
+    public static void ConvertSeries()
     {
         ModelPreprocessor modelPreprocessor = new ModelPreprocessor();
+        AssetBundleCreator assetBundleCreator = new AssetBundleCreator();
 
-        modelPreprocessor.GetRootDirectory();
-        modelPreprocessor.GetModelData();
-        modelPreprocessor.assetBundleCreator.Create(modelPreprocessor.modelGameObject, modelPreprocessor.mesh);
+        string rootDirectory = modelPreprocessor.GetRootDirectory();
+        (GameObject modelGameObject, Mesh modelMesh) = modelPreprocessor.LoadModelData(rootDirectory);
+        assetBundleCreator.Create(modelGameObject, modelMesh);
     }
 
     // gets path to the root folder.
-    private void GetRootDirectory()
+    private string GetRootDirectory()
     {
+        string rootDirectory = "";
         if (Application.isBatchMode)
         {
             Debug.Log("It's Batchmode!");
             string[] args = Environment.GetCommandLineArgs();
-            bool rootDirExists = false;
-            for (int i = 0; i < args.Length; i++)
-            {
-                Debug.Log("ARG " + i + ": " + args[i]);
-                if (args[i] == "-rootDirectory")
-                {
-                    rootDirectory = args[i + 1];
-                    rootDirExists = true;
-                }
-            }
-            if (!rootDirExists)
-            {
-                throw new Exception("Model's root directory has not been assigned!");
-            }
+            int directoryFlagIndex = Array.FindIndex(args, a => a.Equals("-rootDirectory"));
+            Debug.Log("rootDirectoryIndex:" + directoryFlagIndex.ToString());
+            rootDirectory = args[directoryFlagIndex + 1];
+            if (String.IsNullOrEmpty(rootDirectory)) throw new Exception("Model's root directory has not been assigned!");
         }
         else
         {
@@ -56,14 +42,12 @@ class ModelPreprocessor
         {
             throw new ArgumentException("Path cannot be null!");
         }
+        return rootDirectory;
     }
 
-    private void GetModelData()
+    private (GameObject, Mesh) LoadModelData(string rootDirectory)
     {
         FileSeriesImporter seriesImporter = new FileSeriesImporter(rootDirectory);
-        modelGameObject = seriesImporter.ModelGameObject;
-        mesh = seriesImporter.ModelMesh;
+        return (seriesImporter.ModelGameObject, seriesImporter.ModelMesh);
     }
-
-
 }
