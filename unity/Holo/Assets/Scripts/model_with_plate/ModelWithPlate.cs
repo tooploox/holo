@@ -6,22 +6,49 @@ using UnityEngine;
 using HoloToolkit.Unity;
 using HoloToolkit.Unity.UX;
 using HoloToolkit.Unity.Buttons;
+using HoloToolkit.Unity.InputModule;
 
 public class ModelWithPlate : MonoBehaviour, IClickHandler
 {
     /* Public fields that should be set in Unity Editor */
-    public CompoundButtonText PlayOrStopText;
     public GameObject ButtonsModel;
     public GameObject ButtonsModelPreview;
     public GameObject PlateAnimated;
     public Material MaterialPreview;
     public Material MaterialNonPreview;
     public Transform InstanceParent;
+    public CompoundButton ButtonTogglePlay;
+    public CompoundButton ButtonTranslate;
+    public CompoundButton ButtonRotate;
+    public CompoundButton ButtonScale;
+    public Color ButtonActiveColor = new Color(0f, 0.90f, 0.88f);
+    public Color ButtonInactiveColor = new Color(1f, 1f, 1f);
+    public Texture2D ButtonIconPlay;
+    public Texture2D ButtonIconPause;
+
+    private enum TransformationState
+    {
+        None,
+        Translate,
+        Rotate,
+        Scale
+    }
+    private TransformationState transformationState = TransformationState.None;
+
+    // Constant after Start()
+    private HandDraggable handDraggable;
 
     private void Start()
     {
+        /* Adding components using code, simply because it's more friendly to version control */
+        handDraggable = gameObject.AddComponent<HandDraggable>();
+        handDraggable.RotationMode = HandDraggable.RotationModeEnum.LockObjectRotation;
+
         RefreshUserInterface();
         InitializeAddButtons();
+
+        // This sets proper state of buttons and components like handDraggable
+        ClickChangeTransformationState(TransformationState.None);
     }
 
     /* Number of "add" buttons we have in the scene. */
@@ -72,6 +99,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             case "Remove": ClickRemove(); break;
             case "ConfirmPreview": ClickConfirmPreview(); break;
             case "CancelPreview": ClickCancelPreview(); break;
+            case "ButtonTranslate": ClickChangeTransformationState(TransformationState.Translate); break;
+            case "ButtonRotate": ClickChangeTransformationState(TransformationState.Rotate); break;
+            case "ButtonScale": ClickChangeTransformationState(TransformationState.Scale); break;
             default:
                 {
                     const string addPrefix = "Add";
@@ -140,8 +170,19 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     {
         ButtonsModel.SetActive(instance != null && !instanceIsPreview);
         ButtonsModelPreview.SetActive(instance != null && instanceIsPreview);
-        PlayOrStopText.Text = (instanceAnimation != null && instanceAnimation.Playing ? "STOP" : "PLAY");
         PlateVisible = instance == null || instanceIsPreview;
+
+        // update ButtonTogglePlay caption and icon
+        bool playing = instanceAnimation != null && instanceAnimation.Playing;
+        string playOrPauseText = playing ? "PAUSE" : "PLAY";
+        ButtonTogglePlay.GetComponent<CompoundButtonText>().Text = playOrPauseText;
+        Texture2D playOrPatseIcon = playing ? ButtonIconPause : ButtonIconPlay;
+        MeshRenderer iconRenderer = ButtonTogglePlay.GetComponent<CompoundButtonIcon>().IconMeshFilter.GetComponent<MeshRenderer>();
+        if (iconRenderer != null) {
+            iconRenderer.sharedMaterial.mainTexture = playOrPatseIcon;
+        } else {
+            Debug.LogWarning("ButtonTogglePlay icon does not have MeshRenderer");
+        }        
     }
 
     // Unload currently loaded instance.
@@ -248,6 +289,43 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
                 PlateAnimated.GetComponent<Animator>().SetBool("expanded", value);
             }
         }
+    }
+
+    private void SetButtonState(CompoundButton button, bool active)
+    {
+        CompoundButtonIcon icon = button.GetComponent<CompoundButtonIcon>();
+        if (icon == null)
+        {
+            Debug.LogWarning("Missing CompoundButtonIcon on " + button.name);
+            return;
+        }
+        MeshRenderer iconRenderer = icon.IconMeshFilter.GetComponent<MeshRenderer>();
+        if (iconRenderer == null)
+        {
+            Debug.LogWarning("Missing MeshRenderer on CompoundButtonIcon.IconMeshFilter attached to " + button.name);
+            return;
+        }
+        // using material, not sharedMaterial, deliberately: we only change color of this material instance
+        Color newColor = active ? ButtonActiveColor : ButtonInactiveColor;
+        //Debug.Log("changing color of " + button.name + " to " + newColor.ToString());
+        // both _EmissiveColor and _Color (Albedo in editor) should be set to make proper effect.
+        iconRenderer.material.SetColor("_EmissiveColor", newColor);
+        iconRenderer.material.SetColor("_Color", newColor);
+    }
+
+    private void ClickChangeTransformationState(TransformationState newState)
+    {
+        if (newState == transformationState) {
+            // clicking again on the same sidebar button just toggles it off
+            newState = TransformationState.None;
+        }
+        transformationState = newState;
+
+        SetButtonState(ButtonTranslate, newState == TransformationState.Translate);
+        SetButtonState(ButtonRotate, newState == TransformationState.Rotate);
+        SetButtonState(ButtonScale, newState == TransformationState.Scale);
+
+        handDraggable.enabled = newState == TransformationState.Translate;
     }
 
     // TODO update time slider now
