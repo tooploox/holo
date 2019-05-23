@@ -31,13 +31,13 @@ public class ModelsCollection : MonoBehaviour
     {
         bundlesFiles = new string[] { };
         LocalConfig localConfig = Resources.Load<LocalConfig>("LocalConfig");
-        if (localConfig == null || string.IsNullOrEmpty(localConfig.BundlesDirectory))
+        if (localConfig == null || string.IsNullOrEmpty(localConfig.GetBundlesDirectory()))
         {
             Debug.LogWarning("No Assets/Resources/LocalConfig.asset. Create it from Unity Editor by \"Holo -> Create Local Configuration\"");
             return;
         }
 
-        string dir = localConfig.BundlesDirectory;
+        string dir = localConfig.GetBundlesDirectory();
         bundlesFiles = Directory.GetFiles(dir, "*" + bundleFileSuffix);
         if (bundlesFiles.Length == 0) {
             Debug.LogWarning("No asset bundles found in directory \"" + dir + "\". Make sure to set correct BundlesDirectory in LocalConfig in Assets/Resources/LocalConfig.asset.");
