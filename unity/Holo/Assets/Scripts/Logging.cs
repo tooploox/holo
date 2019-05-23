@@ -11,10 +11,7 @@ public class Logging : MonoBehaviour
         string LogFileName = DateTime.Now.ToString("ddMMyyyy-HHmmss") + "_log.txt";
 
         string LogFileDir = Path.Combine(Application.persistentDataPath, "Logs");
-        if (!Directory.Exists(LogFileDir))
-        {
-            Directory.CreateDirectory(LogFileDir);
-        }
+        Directory.CreateDirectory(LogFileDir);
 
         LogFilePath = Path.Combine(LogFileDir, LogFileName);
 
