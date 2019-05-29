@@ -22,8 +22,8 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public CompoundButton ButtonTranslate;
     public CompoundButton ButtonRotate;
     public CompoundButton ButtonScale;
-    public Color ButtonActiveColor = new Color(0f, 0.90f, 0.88f);
-    public Color ButtonInactiveColor = new Color(1f, 1f, 1f);
+    static public Color ButtonActiveColor = new Color(0f, 0.90f, 0.88f);
+    static public Color ButtonInactiveColor = new Color(1f, 1f, 1f);
     public Texture2D ButtonIconPlay;
     public Texture2D ButtonIconPause;
 
@@ -50,7 +50,6 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         handDraggable.RotationMode = HandDraggable.RotationModeEnum.LockObjectRotation;
 
         ModelClipPlaneCtrl = ModelClipPlane.GetComponentInChildren<ModelClippingPlaneControl>(); 
-        ModelClipPlane.SetActive(false);
 
         RefreshUserInterface();
         InitializeAddButtons();
@@ -303,7 +302,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         }
     }
 
-    private void SetButtonState(CompoundButton button, bool active)
+    static public void SetButtonState(CompoundButton button, bool active)
     {
         CompoundButtonIcon icon = button.GetComponent<CompoundButtonIcon>();
         if (icon == null)
