@@ -164,7 +164,6 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     private void ClickConfirmPreview()
     {
         LoadInstance(instanceIndex.Value, false);
-        ModelClipPlane.SetActive(true);
         ModelClipPlaneCtrl.LoadedModel = instance;
     }
 
@@ -229,7 +228,6 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         instanceTransformation.transform.parent = InstanceParent.transform;
 
         instance = Instantiate<GameObject>(template, instanceTransformation.transform);
-        instance.name = "mainModel";
 
         // transform instance to be centered with a box of size (2,2,2)
         SkinnedMeshRenderer skinnedMesh = instance.GetComponent<SkinnedMeshRenderer>();

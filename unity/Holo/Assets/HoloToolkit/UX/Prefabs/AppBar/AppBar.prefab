@@ -133,10 +133,22 @@ MonoBehaviour:
   UseAdjust: 1
   UseHide: 1
   DisplayType: 0
-  State: 0
+  State: 2
   CustomButtonIconProfile: {fileID: 11400000, guid: a05b72560895bf146a8fcc7cdc391aae,
     type: 2}
-  buttons: []
+  buttons:
+  - DefaultPosition: 1
+    ManipulationPosition: 1
+    Type: 0
+    Name: TogglePlay
+    Icon: PauseIcon
+    Text: TogglePlay
+    EventTarget: {fileID: 0}
+    OnTappedEvent:
+      m_PersistentCalls:
+        m_Calls: []
+      m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
   buttonParent: {fileID: 4691479528535670}
   baseRenderer: {fileID: 1275815092924048}
   backgroundBar: {fileID: 1093294406509342}

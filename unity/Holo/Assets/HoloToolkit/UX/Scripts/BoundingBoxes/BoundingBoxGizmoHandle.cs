@@ -159,7 +159,6 @@ namespace HoloToolkit.Unity.UX
         {
             if (inputDownEventData != null)
             {
-                Debug.Log("MARAS");
                 Vector3 currentHandPosition = Vector3.zero;
                 Quaternion currentHandOrientation = Quaternion.identity;
 
