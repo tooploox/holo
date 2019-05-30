@@ -315,6 +315,8 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
     private void ClickChangeTransformationState(TransformationState newState)
     {
+        bool rotationBoxRigActiveOld = transformationState == TransformationState.Rotate;
+
         if (newState == transformationState) {
             // clicking again on the same sidebar button just toggles it off
             newState = TransformationState.None;
@@ -325,9 +327,32 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         SetButtonState(ButtonRotate, newState == TransformationState.Rotate);
         SetButtonState(ButtonScale, newState == TransformationState.Scale);
 
+        // turn on/off translation manipulation
         handDraggable.enabled = newState == TransformationState.Translate;
-        InstanceParent.GetComponent<BoxCollider>().enabled = newState == TransformationState.Rotate;
-        InstanceParent.GetComponent<BoundingBoxRig>().enabled = newState == TransformationState.Rotate;
+
+        // turn on/off rotation manipulation
+        BoundingBoxRig rotationBoxRig = InstanceParent.GetComponent<BoundingBoxRig>();
+        /*
+         * We do not switch BoundingBoxRig or BoxCollider enabled now.
+         * It would serve no purpose (calling Activate or Deactivate is enough),
+         * and it woud actually break Activate (because you cannot call Activate in the same
+         * frame as setting enabled=true for the 1st frame, this causes problems in BoundingBoxRig
+         * as private "objectToBound" is only assigned in BoundingBoxRig.Start).
+         * 
+        rotationBoxRig.enabled = newState == TransformationState.Rotate;
+        BoxCollider rotationBoxCollider = InstanceParent.GetComponent<BoxCollider>();
+        rotationBoxCollider.enabled = newState == TransformationState.Rotate;
+        */
+        // call rotationBoxRig.Activate or Deactivate
+        bool rotationBoxRigActiveNew = newState == TransformationState.Rotate;
+        if (rotationBoxRigActiveOld != rotationBoxRigActiveNew)
+        {
+            if (rotationBoxRigActiveNew) {
+                rotationBoxRig.Activate();
+            } else {
+                rotationBoxRig.Deactivate();
+            }
+        }
     }
 
     // TODO update time slider now
