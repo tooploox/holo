@@ -464,7 +464,9 @@ namespace HoloToolkit.Unity
 
                 // Query
                 string query = string.Format(API_InstallQuery, FinalizeUrl(targetDevice.IP));
+#pragma warning disable CS0618 // deprecated
                 query += "?package=" + WWW.EscapeURL(fileName);
+#pragma warning restore CS0618 // deprecated
 
                 var response = WebRequestPost(query, form, GetBasicAuthHeader(targetDevice));
 
@@ -561,7 +563,9 @@ namespace HoloToolkit.Unity
 
             string query = string.Format("{0}?package={1}",
                 string.Format(API_InstallQuery, FinalizeUrl(targetDevice.IP)),
+#pragma warning disable CS0618 // deprecated
                 WWW.EscapeURL(appDetails.PackageFullName));
+#pragma warning restore CS0618 // deprecated
 
             bool success = WebRequestDelete(query, GetBasicAuthHeader(targetDevice), showDialog);
             MachineName targetMachine = GetMachineName(targetDevice);
@@ -598,8 +602,10 @@ namespace HoloToolkit.Unity
 
             string query = string.Format(API_AppQuery, FinalizeUrl(targetDevice.IP)) +
                 string.Format("?appid={0}&package={1}",
+#pragma warning disable CS0618 // deprecated
                 WWW.EscapeURL(EncodeTo64(appDetails.PackageRelativeId)),
                 WWW.EscapeURL(appDetails.PackageFullName));
+#pragma warning restore CS0618 // deprecated
             WebRequestPost(query, null, GetBasicAuthHeader(targetDevice), false);
 
             return IsAppRunning(PlayerSettings.productName, targetDevice);
@@ -629,7 +635,9 @@ namespace HoloToolkit.Unity
 
             string query = string.Format("{0}?package={1}",
                 string.Format(API_AppQuery, FinalizeUrl(targetDevice.IP)),
+#pragma warning disable CS0618 // deprecated
                 WWW.EscapeURL(EncodeTo64(appDetails.PackageFullName)));
+#pragma warning restore CS0618 // deprecated
 
             bool success = WebRequestDelete(query, GetBasicAuthHeader(targetDevice), showDialog);
             MachineName targetMachine = GetMachineName(targetDevice);

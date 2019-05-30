@@ -50,7 +50,9 @@ namespace HoloToolkit.Unity
 
         private static void PrefabInstanceUpdated(GameObject instance)
         {
+#pragma warning disable CS0618 // deprecated
             var prefab = PrefabUtility.GetPrefabParent(instance) as GameObject;
+#pragma warning restore CS0618 // deprecated
             foreach (var atlasPrefabReference in References)
             {
                 if (atlasPrefabReference.Prefabs.Contains(prefab))
