@@ -58,6 +58,9 @@ MonoBehaviour:
   boundingBoxPrefab: {fileID: 114030465538688920, guid: 60aa4f31ba4f4b0498fead0e05addd65,
     type: 3}
   appBarPrefab: {fileID: 0}
+  EnableRotation: 1
+  EnableScale: 0
+  RotationConstrainAxis: 2
 --- !u!65 &6760340147669039560
 BoxCollider:
   m_ObjectHideFlags: 0
