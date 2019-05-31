@@ -25,6 +25,8 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public Color ButtonInactiveColor = new Color(1f, 1f, 1f);
     public Texture2D ButtonIconPlay;
     public Texture2D ButtonIconPause;
+    // Drop here "Prefabs/ModelWithPlateRotationRig"
+    public GameObject RotationBoxRigTemplate;
 
     private enum TransformationState
     {
@@ -166,6 +168,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     private GameObject instanceTransformation;
     private bool instanceIsPreview = false;
 
+    // Created only when instance != null, as it initializes bbox in Start and assumes it's not empty
+    private GameObject rotationBoxRig;
+
     private void RefreshUserInterface()
     {
         ButtonsModel.SetActive(instance != null && !instanceIsPreview);
@@ -194,11 +199,13 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         if (instance != null) {
             Destroy(instance);
             Destroy(instanceTransformation);
+            Destroy(rotationBoxRig);
 
             instanceIndex = null;
             instance = null;
             instanceTransformation = null;
             instanceAnimation = null;
+            rotationBoxRig = null;
             instanceIsPreview = false; // value does not matter, but for security better to set it to something well-defined
 
             if (refreshUi) {
@@ -206,6 +213,14 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             }
         }
     }
+
+    /* Resulting instance will be in box of max size instanceMaxSize, 
+     * with center in instanceMove above plate origin.
+     * This should match the plate designed sizes.
+     */
+    const float instanceMaxSize = 1.3f;
+    const float expandedPlateHeight = 0.4f;
+    Vector3 instanceMove = new Vector3(0f, expandedPlateHeight + instanceMaxSize / 2f, 0f); // constant
 
     // Load new animated shape.
     // newInstanceIndex is an index to ModelsCollection.
@@ -215,22 +230,33 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
         GameObject template = ModelsCollection.Singleton.BundleLoad(newInstanceIndex, newIsPreview);
 
+        /* Instantiate BoundingBoxRig dynamically, as in the next frame (when BoundingBoxRig.Start is run)
+         * it will assume that bounding box of children is not empty.
+         * So we cannot create BoundingBoxRig earlier.
+         * We also cannot create it later, right before calling Activate, as then BoundingBoxRig.Activate would
+         * happen before BoundingBoxRig.Start.
+         */
+        rotationBoxRig = Instantiate<GameObject>(RotationBoxRigTemplate, InstanceParent.transform);
+
         instanceTransformation = new GameObject("InstanceTransformation");
-        instanceTransformation.transform.parent = InstanceParent.transform;
+        instanceTransformation.transform.parent = rotationBoxRig.transform;
 
         instance = Instantiate<GameObject>(template, instanceTransformation.transform);
 
-        // transform instance to be centered with a box of size (2,2,2)
         SkinnedMeshRenderer skinnedMesh = instance.GetComponent<SkinnedMeshRenderer>();
         // Note that we use bounds, not localBounds, because we want to preserve local rotations
         Bounds b = skinnedMesh.bounds;
         float scale = 1f;
         float maxSize = Mathf.Max(new float[] { b.size.x, b.size.y, b.size.z });
         if (maxSize > Mathf.Epsilon) {
-            scale = 2 / maxSize;
+            scale = instanceMaxSize / maxSize;
         }
-        instanceTransformation.transform.localScale = new Vector3(scale, scale, scale);
-        instanceTransformation.transform.localPosition = -b.center * scale + new Vector3(0f, 1.5f, 0f);
+        instanceTransformation.transform.localScale = new Vector3(scale, scale, scale);        
+        instanceTransformation.transform.localPosition = -b.center * scale + instanceMove;
+
+        // set proper BoxCollider bounds
+        rotationBoxRig.GetComponent<BoxCollider>().center = instanceMove;
+        rotationBoxRig.GetComponent<BoxCollider>().size = b.size * scale;
 
         instanceAnimation = instance.GetComponent<BlendShapeAnimation>();
         if (instanceAnimation == null) {
@@ -331,26 +357,23 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         handDraggable.enabled = newState == TransformationState.Translate;
 
         // turn on/off rotation manipulation
-        BoundingBoxRig rotationBoxRig = InstanceParent.GetComponent<BoundingBoxRig>();
         /*
-         * We do not switch BoundingBoxRig or BoxCollider enabled now.
+         * We do not switch BoundingBoxRig enabled now.
          * It would serve no purpose (calling Activate or Deactivate is enough),
          * and it woud actually break Activate (because you cannot call Activate in the same
          * frame as setting enabled=true for the 1st frame, this causes problems in BoundingBoxRig
          * as private "objectToBound" is only assigned in BoundingBoxRig.Start).
          * 
         rotationBoxRig.enabled = newState == TransformationState.Rotate;
-        BoxCollider rotationBoxCollider = InstanceParent.GetComponent<BoxCollider>();
-        rotationBoxCollider.enabled = newState == TransformationState.Rotate;
         */
         // call rotationBoxRig.Activate or Deactivate
         bool rotationBoxRigActiveNew = newState == TransformationState.Rotate;
-        if (rotationBoxRigActiveOld != rotationBoxRigActiveNew)
+        if (rotationBoxRigActiveOld != rotationBoxRigActiveNew && rotationBoxRig != null)
         {
             if (rotationBoxRigActiveNew) {
-                rotationBoxRig.Activate();
+                rotationBoxRig.GetComponent<BoundingBoxRig>().Activate();
             } else {
-                rotationBoxRig.Deactivate();
+                rotationBoxRig.GetComponent<BoundingBoxRig>().Deactivate();
             }
         }
     }
