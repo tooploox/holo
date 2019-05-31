@@ -368,7 +368,7 @@ namespace HoloToolkit.Unity.UX
         [SerializeField]
         // When to constrain Rotation to a specific axis.
         // Change this only when BoundingBoxRig is *not* activated.
-        public RotationConstrainAxisEnum RotationConstrainAxis;
+        public RotationConstrainAxisEnum RotationConstrainAxis = RotationConstrainAxisEnum.AllAxes;
 
         private void UpdateCornerHandles()
         {
