@@ -229,7 +229,7 @@ namespace HoloToolkit.Unity.UX
 
         private bool IsActiveRotationHandle(int i)
         {
-            if (EnableRotations)
+            if (EnableRotation)
             {
                 // rotateHandles 0-3 are for for Y axis,
                 // rotateHandles 4-7 are for for Z axis,
@@ -237,24 +237,24 @@ namespace HoloToolkit.Unity.UX
                 switch (i / 4)
                 {
                     case 0:
-                        return EnableRotations &&
-                            ((RotationsConstrainAxis == RotationsConstrainAxisEnum.AllAxes) ||
-                             (RotationsConstrainAxis == RotationsConstrainAxisEnum.Y));
+                        return EnableRotation &&
+                            ((RotationConstrainAxis == RotationConstrainAxisEnum.AllAxes) ||
+                             (RotationConstrainAxis == RotationConstrainAxisEnum.Y));
                     case 1:
-                        return EnableRotations &&
-                            ((RotationsConstrainAxis == RotationsConstrainAxisEnum.AllAxes) ||
-                             (RotationsConstrainAxis == RotationsConstrainAxisEnum.Z));
+                        return EnableRotation &&
+                            ((RotationConstrainAxis == RotationConstrainAxisEnum.AllAxes) ||
+                             (RotationConstrainAxis == RotationConstrainAxisEnum.Z));
                     case 2:
-                        return EnableRotations &&
-                            ((RotationsConstrainAxis == RotationsConstrainAxisEnum.AllAxes) ||
-                             (RotationsConstrainAxis == RotationsConstrainAxisEnum.X));
+                        return EnableRotation &&
+                            ((RotationConstrainAxis == RotationConstrainAxisEnum.AllAxes) ||
+                             (RotationConstrainAxis == RotationConstrainAxisEnum.X));
                     default:
                         Debug.LogWarning("Unexpected rotation handle index " + i);
-                        return EnableRotations;
+                        return EnableRotation;
                 }
             } else
             {
-                return EnableRotations;
+                return EnableRotation;
             }
         }
 
@@ -349,16 +349,16 @@ namespace HoloToolkit.Unity.UX
 
         [Header("Constraints")]
         [SerializeField]
-        // Whether to enable any rotations. 
+        // Whether to enable any Rotation. 
         // Change this only when BoundingBoxRig is *not* activated.
-        public bool EnableRotations;
+        public bool EnableRotation = true;
 
         [SerializeField]
         // Whether to enable any scaling. 
         // Change this only when BoundingBoxRig is *not* activated.
-        public bool EnableScale;
+        public bool EnableScale = true;
 
-        public enum RotationsConstrainAxisEnum
+        public enum RotationConstrainAxisEnum
         {
             AllAxes,
             X,
@@ -366,9 +366,9 @@ namespace HoloToolkit.Unity.UX
             Z
         }
         [SerializeField]
-        // When to constrain rotations to a specific axis.
+        // When to constrain Rotation to a specific axis.
         // Change this only when BoundingBoxRig is *not* activated.
-        public RotationsConstrainAxisEnum RotationsConstrainAxis;
+        public RotationConstrainAxisEnum RotationConstrainAxis;
 
         private void UpdateCornerHandles()
         {
