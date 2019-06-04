@@ -22,10 +22,11 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public CompoundButton ButtonTranslate;
     public CompoundButton ButtonRotate;
     public CompoundButton ButtonScale;
-    static public Color ButtonActiveColor = new Color(0f, 0.90f, 0.88f);
-    static public Color ButtonInactiveColor = new Color(1f, 1f, 1f);
+    public Color ButtonActiveColor = new Color(0f, 0.90f, 0.88f);
+    public Color ButtonInactiveColor = new Color(1f, 1f, 1f);
     public Texture2D ButtonIconPlay;
     public Texture2D ButtonIconPause;
+    public GameObject Instance { get { return instance; } }
 
     private enum TransformationState
     {
@@ -164,7 +165,6 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     private void ClickConfirmPreview()
     {
         LoadInstance(instanceIndex.Value, false);
-        ModelClipPlaneCtrl.LoadedModel = instance;
     }
 
     /* All the variables below are non-null if and only if after 
@@ -300,7 +300,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         }
     }
 
-    static public void SetButtonState(CompoundButton button, bool active)
+    public void SetButtonState(CompoundButton button, bool active)
     {
         CompoundButtonIcon icon = button.GetComponent<CompoundButtonIcon>();
         if (icon == null)

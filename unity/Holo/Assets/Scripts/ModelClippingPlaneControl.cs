@@ -7,18 +7,14 @@ using HoloToolkit.Unity.UX;
 
 public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
 {
-    public CompoundButton ClippingPlaneBtn;
-    public CompoundButton ClippingPlaneTranslationBtn;
-    public CompoundButton ClippingPlaneRotationBtn;
+    public CompoundButton ButtonClippingPlane;
+    public CompoundButton ButtonClippingPlaneTranslation;
+    public CompoundButton ButtonClippingPlaneRotation;
     public Material ClippingMaterial;
-    public Material DefaultModelMaterial;
-
-    public GameObject LoadedModel;
+    public GameObject ModelWithPlate;
 
     BoundingBoxRig clipPlaneQuadBbox;
-
-    private HandDraggable HandTranslation;
-    
+    HandDraggable HandTranslation;
     
     private enum ClipPlaneState
     {
@@ -63,20 +59,22 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
     {
         Debug.Log("Toggle translation of clip plane");
 
-        ModelWithPlate.SetButtonState(ClippingPlaneRotationBtn, false);
+        ModelWithPlate modelWithPlate = ModelWithPlate.GetComponent<ModelWithPlate>();
+
+        modelWithPlate.SetButtonState(ButtonClippingPlaneRotation, false);
         if (ClippingPlaneState == ClipPlaneState.Translation)
         {
             clipPlaneQuadBbox.Deactivate();
             HandTranslation.enabled = false;
             ClippingPlaneState = ClipPlaneState.Active;
-            ModelWithPlate.SetButtonState(ClippingPlaneTranslationBtn, false);
+            modelWithPlate.SetButtonState(ButtonClippingPlaneTranslation, false);
         }
         else
         {
             clipPlaneQuadBbox.Activate();
             HandTranslation.enabled = true;
             ClippingPlaneState = ClipPlaneState.Translation;
-            ModelWithPlate.SetButtonState(ClippingPlaneTranslationBtn, true);
+            modelWithPlate.SetButtonState(ButtonClippingPlaneTranslation, true);
         }
     }
 
@@ -85,31 +83,33 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
         Debug.Log("Toggle rotation of clip plane");
         HandTranslation.enabled = false;
 
-        ModelWithPlate.SetButtonState(ClippingPlaneTranslationBtn, false);
+        ModelWithPlate modelWithPlate = ModelWithPlate.GetComponent<ModelWithPlate>();
+        modelWithPlate.SetButtonState(ButtonClippingPlaneTranslation, false);
         if (ClippingPlaneState == ClipPlaneState.Rotation)
         {
             clipPlaneQuadBbox.Deactivate();
             ClippingPlaneState = ClipPlaneState.Active;
-            ModelWithPlate.SetButtonState(ClippingPlaneRotationBtn, false);
+            modelWithPlate.SetButtonState(ButtonClippingPlaneRotation, false);
         }
         else 
         {
             clipPlaneQuadBbox.Activate();
             ClippingPlaneState = ClipPlaneState.Rotation;
-            ModelWithPlate.SetButtonState(ClippingPlaneRotationBtn, true);
+            modelWithPlate.SetButtonState(ButtonClippingPlaneRotation, true);
         }
     }
 
     void ClickedClipPlane()
-    { 
-        if (!LoadedModel)
+    {
+        ModelWithPlate modelWithPlate = ModelWithPlate.GetComponent<ModelWithPlate>();
+        if (!modelWithPlate.Instance)
         {
             Debug.LogWarning("No model loaded for clipping plane");
             ClippingPlaneState = ClipPlaneState.Disabled;
             return;
         }
 
-        SkinnedMeshRenderer modelRenderer = LoadedModel.GetComponent<SkinnedMeshRenderer>();
+        SkinnedMeshRenderer modelRenderer = modelWithPlate.Instance.GetComponent<SkinnedMeshRenderer>();
 
         ClippingPlaneState = ClippingPlaneState == ClipPlaneState.Disabled ? ClipPlaneState.Active : ClipPlaneState.Disabled;
 
@@ -117,26 +117,25 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
         {
             modelRenderer.material = ClippingMaterial;
             
-            ClippingPlaneTranslationBtn.gameObject.SetActive(true);
-            ClippingPlaneRotationBtn.gameObject.SetActive(true);
-            ModelWithPlate.SetButtonState(ClippingPlaneBtn, true); 
+            ButtonClippingPlaneTranslation.gameObject.SetActive(true);
+            ButtonClippingPlaneRotation.gameObject.SetActive(true);
+            modelWithPlate.SetButtonState(ButtonClippingPlane, true); 
         }
         else
         {
-            modelRenderer.material = DefaultModelMaterial;
+            modelRenderer.material = modelWithPlate.MaterialNonPreview;
             clipPlaneQuadBbox.Deactivate();
-            ClippingPlaneTranslationBtn.gameObject.SetActive(false);
-            ClippingPlaneRotationBtn.gameObject.SetActive(false);
-            ModelWithPlate.SetButtonState(ClippingPlaneBtn, false);
+            ButtonClippingPlaneTranslation.gameObject.SetActive(false);
+            ButtonClippingPlaneRotation.gameObject.SetActive(false);
+            modelWithPlate.SetButtonState(ButtonClippingPlane, false);
         }
     }
 
     public void ResetState()
     {
-        LoadedModel = null;
         ClippingPlaneState = ClipPlaneState.Disabled;
-        ClippingPlaneTranslationBtn.gameObject.SetActive(false);
-        ClippingPlaneRotationBtn.gameObject.SetActive(false);
+        ButtonClippingPlaneTranslation.gameObject.SetActive(false);
+        ButtonClippingPlaneRotation.gameObject.SetActive(false);
         clipPlaneQuadBbox.Deactivate();
     }
 }
