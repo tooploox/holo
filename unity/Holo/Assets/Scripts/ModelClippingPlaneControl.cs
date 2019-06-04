@@ -45,58 +45,14 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
                 break;
 
             case "ButtonClippingTranslation":
-                ClickedClipPlaneTranslation();
+                ChangeButtonsState(ClipPlaneState.Translation);
                 break;
 
             case "ButtonClippingRotation":
-                ClickedClipPlaneRotation();
+                ChangeButtonsState(ClipPlaneState.Rotation);
                 break;
         }
 
-    }
-
-    void ClickedClipPlaneTranslation()
-    {
-        Debug.Log("Toggle translation of clip plane");
-
-        ModelWithPlate modelWithPlate = ModelWithPlate.GetComponent<ModelWithPlate>();
-
-        modelWithPlate.SetButtonState(ButtonClippingPlaneRotation, false);
-        if (ClippingPlaneState == ClipPlaneState.Translation)
-        {
-            clipPlaneQuadBbox.Deactivate();
-            HandTranslation.enabled = false;
-            ClippingPlaneState = ClipPlaneState.Active;
-            modelWithPlate.SetButtonState(ButtonClippingPlaneTranslation, false);
-        }
-        else
-        {
-            clipPlaneQuadBbox.Activate();
-            HandTranslation.enabled = true;
-            ClippingPlaneState = ClipPlaneState.Translation;
-            modelWithPlate.SetButtonState(ButtonClippingPlaneTranslation, true);
-        }
-    }
-
-    void ClickedClipPlaneRotation()
-    {
-        Debug.Log("Toggle rotation of clip plane");
-        HandTranslation.enabled = false;
-
-        ModelWithPlate modelWithPlate = ModelWithPlate.GetComponent<ModelWithPlate>();
-        modelWithPlate.SetButtonState(ButtonClippingPlaneTranslation, false);
-        if (ClippingPlaneState == ClipPlaneState.Rotation)
-        {
-            clipPlaneQuadBbox.Deactivate();
-            ClippingPlaneState = ClipPlaneState.Active;
-            modelWithPlate.SetButtonState(ButtonClippingPlaneRotation, false);
-        }
-        else 
-        {
-            clipPlaneQuadBbox.Activate();
-            ClippingPlaneState = ClipPlaneState.Rotation;
-            modelWithPlate.SetButtonState(ButtonClippingPlaneRotation, true);
-        }
     }
 
     void ClickedClipPlane()
@@ -130,6 +86,32 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
             modelWithPlate.SetButtonState(ButtonClippingPlane, false);
         }
     }
+
+    void ChangeButtonsState(ClipPlaneState newState)
+    {
+        ModelWithPlate modelWithPlate = ModelWithPlate.GetComponent<ModelWithPlate>();
+        if (newState == ClippingPlaneState)
+        {
+            // clicking again on the same sidebar button just toggles it off
+            newState = ClipPlaneState.Active;
+        }
+        ClippingPlaneState = newState;
+
+        modelWithPlate.SetButtonState(ButtonClippingPlaneTranslation, newState == ClipPlaneState.Translation);
+        modelWithPlate.SetButtonState(ButtonClippingPlaneRotation, newState == ClipPlaneState.Rotation);
+
+        HandTranslation.enabled = newState == ClipPlaneState.Translation;
+
+        if (newState == ClipPlaneState.Active || newState == ClipPlaneState.Disabled)
+        {
+            clipPlaneQuadBbox.Deactivate();
+        }
+        else
+        {
+            clipPlaneQuadBbox.Activate();
+        }        
+    }
+
 
     public void ResetState()
     {
