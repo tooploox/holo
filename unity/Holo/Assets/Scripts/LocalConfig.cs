@@ -10,6 +10,7 @@ class LocalConfig : ScriptableObject
 {
     // Disable warning: this field is never by code, but it set in Unity Editor and (de)serialized
     #pragma warning disable CS0649
+    // Directory with asset bundles (on non-Hololens)
     public string BundlesDirectory;
     #pragma warning restore CS0649
 
