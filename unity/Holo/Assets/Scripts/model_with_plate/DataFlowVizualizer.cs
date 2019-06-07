@@ -44,18 +44,28 @@ public class DataFlowVizualizer : MonoBehaviour
     private void CreateMesh()
     {
         Vector3[] vertices = new Vector3[points[0].Count + endPoints[0].Count];
-        Array.Copy(points[0].ToArray(), vertices, points[0].Count);
-        Array.Copy(endPoints[0].ToArray(), 0, vertices, points[0].Count, endPoints[0].Count);
+        for (int i = 0; i<vertices.Length; i++)
+            vertices[i] = Vector3.zero;
+
+        //if base mesh should looks like first blendShape, now vertices in base mesh are 0,0,0:
+        //Array.Copy(points[0].ToArray(), vertices, points[0].Count);
+        //Array.Copy(endPoints[0].ToArray(), 0, vertices, points[0].Count, endPoints[0].Count);
 
         Mesh mesh = new Mesh();
         mesh.vertices = vertices; // baseVertices;
+        mesh.normals = vertices;
 
         for (int frame = 0; frame < frameCount; frame++)
         {
             vertices = new Vector3[points[0].Count + endPoints[0].Count];
             Array.Copy(points[frame].ToArray(), vertices, points[frame].Count);
             Array.Copy(endPoints[frame].ToArray(), 0, vertices, points[frame].Count, endPoints[frame].Count);
-            mesh.AddBlendShapeFrame(frame.ToString(), 100f, vertices, null, null);
+            //put vector data inside normals data
+            Vector3[] vectorsAsNormals = new Vector3[vertices.Length];
+            Array.Copy(vectors[frame].ToArray(), vectorsAsNormals, vectors[frame].Count);
+            Array.Copy(vectors[frame].ToArray(), 0, vectorsAsNormals, vectors[frame].Count, vectors[frame].Count);
+            //add blendShape
+            mesh.AddBlendShapeFrame(frame.ToString(), 100f, vertices, vectorsAsNormals, null); //last null is tangentNormal, we can put there alpha and beta data
         }
 
         if (points[0].Count != endPoints[0].Count)
@@ -117,6 +127,8 @@ public class DataFlowVizualizer : MonoBehaviour
              * 1 when reading points
              * 2 in lines between points and vectors
              * 3 reading vectors
+             * 
+             * Important: In our new data structure this scenario doesn't work correctly, we need to read title lines of datasets
             */
 
             string[] split = l.Trim().Split(" ".ToCharArray());
