@@ -264,8 +264,13 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         instanceTransformation.transform.localPosition = -b.center * scale + instanceMove;
 
         // set proper BoxCollider bounds
-        rotationBoxRig.GetComponent<BoxCollider>().center = instanceMove;
-        rotationBoxRig.GetComponent<BoxCollider>().size = b.size * scale;
+        BoxCollider rotationBoxCollider = rotationBoxRig.GetComponent<BoxCollider>();
+        rotationBoxCollider.center = instanceMove;
+        rotationBoxCollider.size = b.size * scale;
+        // Disable the component, to not prevent mouse clicking on buttons.
+        // It will be taken into account to calculate bbox in BoundingBoxRig anyway,
+        // since inside BoundingBox.GetColliderBoundsPoints it looks at all GetComponentsInChildren<Collider>() .
+        rotationBoxCollider.enabled = false;
 
         instanceAnimation = instance.GetComponent<BlendShapeAnimation>();
         if (instanceAnimation == null) {
