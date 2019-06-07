@@ -10,12 +10,7 @@ public class DataFlowVizualizer : MonoBehaviour
     private List<Vector3>[] points;
     private List<Vector3>[] vectors;
     private List<Vector3>[] endPoints;
-    private LineRenderer[] lines;
     public string dirVtk;
-    public GameObject line;
-    public float scale = 1;
-    public float lengthScale = 3;
-    private float longestVector = 0;
     private int frameCount = 0;
 
     void Start()
@@ -43,7 +38,8 @@ public class DataFlowVizualizer : MonoBehaviour
 
     private void CreateMesh()
     {
-        Vector3[] vertices = new Vector3[points[0].Count + endPoints[0].Count];
+        int linesCount = points[0].Count;
+        Vector3[] vertices = new Vector3[linesCount * 4];
         for (int i = 0; i<vertices.Length; i++)
             vertices[i] = Vector3.zero;
 
@@ -57,15 +53,20 @@ public class DataFlowVizualizer : MonoBehaviour
 
         for (int frame = 0; frame < frameCount; frame++)
         {
-            vertices = new Vector3[points[0].Count + endPoints[0].Count];
-            Array.Copy(points[frame].ToArray(), vertices, points[frame].Count);
-            Array.Copy(endPoints[frame].ToArray(), 0, vertices, points[frame].Count, endPoints[frame].Count);
+            vertices = new Vector3[linesCount * 4];
+            Array.Copy(points[frame].ToArray(), vertices, linesCount);
+            Array.Copy(endPoints[frame].ToArray(), 0, vertices, linesCount * 1, linesCount);
+            Array.Copy(points[frame].ToArray(), 0, vertices, linesCount * 2, linesCount);
+            Array.Copy(endPoints[frame].ToArray(), 0, vertices, linesCount * 3, linesCount);
             //put vector data inside normals data
-            Vector3[] vectorsAsNormals = new Vector3[vertices.Length];
-            Array.Copy(vectors[frame].ToArray(), vectorsAsNormals, vectors[frame].Count);
-            Array.Copy(vectors[frame].ToArray(), 0, vectorsAsNormals, vectors[frame].Count, vectors[frame].Count);
+            Vector3[] vectorsAsNormals = new Vector3[linesCount * 4];
+            Array.Copy(vectors[frame].ToArray(), vectorsAsNormals, linesCount);
+            Array.Copy(vectors[frame].ToArray(), 0, vectorsAsNormals, linesCount * 1, linesCount);
+            Array.Copy(vectors[frame].ToArray(), 0, vectorsAsNormals, linesCount * 2, linesCount);
+            Array.Copy(vectors[frame].ToArray(), 0, vectorsAsNormals, linesCount * 3, linesCount);
+
             //add blendShape
-            mesh.AddBlendShapeFrame(frame.ToString(), 100f, vertices, vectorsAsNormals, null); //last null is tangentNormal, we can put there alpha and beta data
+            mesh.AddBlendShapeFrame(frame.ToString(), 100f, vertices, vectorsAsNormals, null); //last null is a tangentNormal, we can put there alpha and beta data
         }
 
         if (points[0].Count != endPoints[0].Count)
@@ -73,12 +74,22 @@ public class DataFlowVizualizer : MonoBehaviour
             Debug.LogWarning("points[0].Count != vectors[0].Count " + points[0].Count + " " + endPoints[0].Count);
         }
 
-        int[] indices = new int[points[0].Count + endPoints[0].Count];
-        for (int i = 0; i < indices.Length / 2; i++)
+        Vector2[] uvs = new Vector2[vertices.Length];
+        int[] indices = new int[linesCount * 4];
+
+        for (int i = 0; i < indices.Length / 4; i++)
         {
-            indices[2 * i] = i;
-            indices[2 * i + 1] = points[0].Count + i;
+            indices[4 * i] =     (linesCount * 0) + i; //start point
+            indices[4 * i + 1] = (linesCount * 2) + i; //end point
+            indices[4 * i + 2] = (linesCount * 1) + i; //start point
+            indices[4 * i + 3] = (linesCount * 3) + i; //end point
+            uvs[0 * linesCount + i] = new Vector2(0, 0);
+            uvs[1 * linesCount + i] = new Vector2(1, 0);
+            uvs[2 * linesCount + i] = new Vector2(1, 1);
+            uvs[3 * linesCount + i] = new Vector2(0, 1);            
         }
+
+        mesh.uv = uvs;
 
         // set bounds to middle and size of vertices1 (largest blend shape)
         mesh.bounds = new Bounds(new Vector3(0f, 0f, 0f), new Vector3(2f, 2f, 1f));
@@ -87,15 +98,9 @@ public class DataFlowVizualizer : MonoBehaviour
             // - Lines: Each two indices in the mesh index buffer form a line.
             // - LineStrip:  First two indices form a line, and then each new index connects a new vertex to the existing line strip.
             // - Points: In most of use cases, mesh index buffer should be "identity": 0, 1, 2, 3, 4, 5, ...
-            MeshTopology.Lines,
+            MeshTopology.Quads,
             // submesh
             0);
-
-        //UVs
-        Vector2[] uvs = new Vector2[vertices.Length];
-        for (int i = 0; i < uvs.Length; i++)
-            uvs[i] = (i < uvs.Length / 2) ? new Vector2(0, 0) : new Vector2(1, 1);
-        mesh.uv = uvs;
 
         // save Mesh to file
         AssetDatabase.DeleteAsset("Assets/test_lines.mesh");
