@@ -17,14 +17,14 @@ public class VTKImporter
         { "maxVertex", new Vector3()}
     };
 
-    private StreamReader streamReader;
+    
     private UnstructuredGridImporter unstructuredGridImporter = new UnstructuredGridImporter();
     private PolyDataImporter polyDataImporter = new PolyDataImporter();
 
     //Loads a mesh from the VTK file located in the given filepath.
     public void LoadFile(string filePath)
     {
-        using (streamReader = new StreamReader(filePath, Encoding.ASCII))
+        using (StreamReader streamReader = new StreamReader(filePath, Encoding.ASCII))
         {
             streamReader.ReadLine(); //DataFile version
             streamReader.ReadLine(); //vtk output

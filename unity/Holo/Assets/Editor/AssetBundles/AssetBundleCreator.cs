@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -6,43 +7,44 @@ using UnityEngine;
 class AssetBundleCreator
 {
     public GameObject ModelGameObject { get; set; }
-    public Mesh Mesh { get; set; }
+    public Mesh ModelMesh { get; set; }
 
-    private string rootAssetsDir;
+    private string modelName;
     private Dictionary<string, string> assetsPath = new Dictionary<string, string>();
     private AssetBundleBuild[] buildMapArray;
     
     //Creates AssetBundle
-    public void Create(GameObject modelGameObject, Mesh mesh)
+    public void Create(SingleModel importedModel)
     {
-        Mesh = mesh;
-        ModelGameObject = modelGameObject;
-
-        rootAssetsDir = @"Assets/" + ModelGameObject.name;
-        SaveFilesForExport();
+        modelName = importedModel.ModelName;
+        foreach (KeyValuePair<string, Tuple<Mesh, GameObject>> modelObject in importedModel.ModelObjects)
+        {
+            SaveFilesForExport(modelObject.Key, modelObject.Value);
+        }
         BuildMapABs();
         SaveAssetBundles();
     }
 
     // Exports finished GameObject to a .prefab
-    private void SaveFilesForExport()
+    private void SaveFilesForExport(string objectName, Tuple<Mesh, GameObject> gameObjectData)
     {
-        if (!AssetDatabase.IsValidFolder(@"Assets\" + ModelGameObject.name))
+        string rootAssetsDir = @"Assets/" + modelName;
+        if (!AssetDatabase.IsValidFolder(rootAssetsDir))
         {
-            AssetDatabase.CreateFolder("Assets", ModelGameObject.name);
+            AssetDatabase.CreateFolder("Assets", modelName);
         }
-        assetsPath.Add("mesh", rootAssetsDir + @"/" + ModelGameObject.name + ".mesh");
-        AssetDatabase.CreateAsset(Mesh, assetsPath["mesh"]);
+        assetsPath.Add("mesh", rootAssetsDir + @"/" + objectName + ".mesh");
+        AssetDatabase.CreateAsset(gameObjectData.Item1, assetsPath["mesh"]);
 
-        assetsPath.Add("GameObject", rootAssetsDir + @"/" + ModelGameObject.name + ".prefab");
-        PrefabUtility.SaveAsPrefabAsset(ModelGameObject, assetsPath["GameObject"]);       
+        assetsPath.Add("GameObject", rootAssetsDir + @"/" + objectName + ".prefab");
+        PrefabUtility.SaveAsPrefabAsset(gameObjectData.Item2, assetsPath["GameObject"]);
     }
 
     private void BuildMapABs()
     {
         // Create the array of bundle build details.
         AssetBundleBuild buildMap = new AssetBundleBuild();
-        buildMap.assetBundleName = ModelGameObject.name + "_bundle";
+        buildMap.assetBundleName = modelName + "_bundle";
         buildMap.assetNames = assetsPath.Values.ToArray();
 
         buildMapArray = new AssetBundleBuild[1] {buildMap};

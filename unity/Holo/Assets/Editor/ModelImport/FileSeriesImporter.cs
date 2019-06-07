@@ -5,10 +5,10 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-//A class for importing a STL series from a directory.
+//A class for importing a file series from a directory.
 public class FileSeriesImporter
 {
-    public GameObject ModelGameObject { get; private set; } = new GameObject();
+    public GameObject ModelGameObject { get; private set; }
     public Mesh ModelMesh { get; private set; } = new Mesh();
 
     private string[] filePaths;
@@ -18,10 +18,14 @@ public class FileSeriesImporter
     private Dictionary<string, Vector3> boundingVertices = new Dictionary<string, Vector3>();
     
     // Object constructor, initiates file series import.
-    public FileSeriesImporter(string rootDirectory)
+    public void ImportData(string rootDirectory, string gameObjectName)
     {
+        GameObject.DestroyImmediate(ModelGameObject);
+        ModelMesh.Clear();
+
+        ModelGameObject = new GameObject();
+        ModelGameObject.name = gameObjectName;
         GetFiles(rootDirectory);
-        GetGameObjectName(rootDirectory);
         LoadFiles();
         ConfigureMesh();
     }
@@ -31,13 +35,6 @@ public class FileSeriesImporter
     {
         filePaths = Directory.GetFiles(rootDirectory + @"\");
         extension = Path.GetExtension(filePaths[0]);
-    }
-
-    //Gets name of the model basing on the folder containing frames
-    private void GetGameObjectName(string rootFolder)
-    {
-        string rootdir = Path.GetFullPath(rootFolder).TrimEnd(Path.DirectorySeparatorChar);
-        ModelGameObject.name = rootdir.Split(Path.DirectorySeparatorChar).Last();
     }
 
     //Loads meshes from separate files into Mesh Object as BlendShapeFrames
