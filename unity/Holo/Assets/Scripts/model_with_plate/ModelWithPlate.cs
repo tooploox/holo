@@ -241,7 +241,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
         /* Instantiate BoundingBoxRig dynamically, as in the next frame (when BoundingBoxRig.Start is run)
          * it will assume that bounding box of children is not empty.
-         * So we cannot create BoundingBoxRig earlier.
+         * So we cannot create BoundingBoxRig (for rotations) earlier.
          * We also cannot create it later, right before calling Activate, as then BoundingBoxRig.Activate would
          * happen before BoundingBoxRig.Start.
          */
@@ -356,6 +356,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     private void ClickChangeTransformationState(TransformationState newState)
     {
         bool rotationBoxRigActiveOld = transformationState == TransformationState.Rotate;
+        bool scaleBoxRigActiveOld = transformationState == TransformationState.Scale;
 
         if (newState == transformationState) {
             // clicking again on the same sidebar button just toggles it off
@@ -388,6 +389,18 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
                 rotationBoxRig.GetComponent<BoundingBoxRig>().Activate();
             } else {
                 rotationBoxRig.GetComponent<BoundingBoxRig>().Deactivate();
+            }
+        }
+
+        /* As with rotationBoxRig, note that you cannot toggle enabled below.
+         * For now, GetComponent<BoundingBoxRig>() is just enabled all the time. */
+        bool scaleBoxRigActiveNew = newState == TransformationState.Scale;
+        if (scaleBoxRigActiveOld != scaleBoxRigActiveNew)
+        {
+            if (scaleBoxRigActiveNew) {
+                GetComponent<BoundingBoxRig>().Activate();
+            } else {
+                GetComponent<BoundingBoxRig>().Deactivate();
             }
         }
     }
