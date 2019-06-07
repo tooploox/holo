@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Collections;
 using System.Collections.Generic;
 
 using UnityEngine;
@@ -27,6 +28,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public Texture2D ButtonIconPause;
     // Drop here "Prefabs/ModelWithPlateRotationRig"
     public GameObject RotationBoxRigTemplate;
+    public GameObject Instance { get { return instance; } }
 
     private enum TransformationState
     {
@@ -40,11 +42,17 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     // Constant after Start()
     private HandDraggable handDraggable;
 
+    public GameObject ModelClipPlane;
+
+    ModelClippingPlaneControl ModelClipPlaneCtrl;
+
     private void Start()
     {
         /* Adding components using code, simply because it's more friendly to version control */
         handDraggable = gameObject.AddComponent<HandDraggable>();
         handDraggable.RotationMode = HandDraggable.RotationModeEnum.LockObjectRotation;
+
+        ModelClipPlaneCtrl = ModelClipPlane.GetComponentInChildren<ModelClippingPlaneControl>(); 
 
         RefreshUserInterface();
         InitializeAddButtons();
@@ -76,7 +84,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
         // set add buttons captions and existence, for the buttons that correspond to some bundles
         for (int i = 0; i < activeButtonsCount; i++)
-        {            
+        {
             string modelName = ModelsCollection.Singleton.BundleCaption(i);
             GameObject button = FindAddButton(i);
             button.GetComponent<CompoundButtonText>().Text = modelName;
@@ -104,6 +112,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             case "ButtonTranslate": ClickChangeTransformationState(TransformationState.Translate); break;
             case "ButtonRotate": ClickChangeTransformationState(TransformationState.Rotate); break;
             case "ButtonScale": ClickChangeTransformationState(TransformationState.Scale); break;
+
             default:
                 {
                     const string addPrefix = "Add";
@@ -152,13 +161,13 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     private void ClickAdd(int newInstanceIndex)
     {
         LoadInstance(newInstanceIndex, true);
+        ModelClipPlaneCtrl.ResetState();
     }
 
     private void ClickConfirmPreview()
     {
         LoadInstance(instanceIndex.Value, false);
     }
-
 
     /* All the variables below are non-null if and only if after 
      * LoadInstance call (and before UnloadInstance). */
@@ -317,7 +326,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         }
     }
 
-    private void SetButtonState(CompoundButton button, bool active)
+    public void SetButtonState(CompoundButton button, bool active)
     {
         CompoundButtonIcon icon = button.GetComponent<CompoundButtonIcon>();
         if (icon == null)

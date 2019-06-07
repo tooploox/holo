@@ -34,13 +34,13 @@ public class ModelsCollection : MonoBehaviour
         bundles = new AssetBundleLoader[] { };
 
         LocalConfig localConfig = Resources.Load<LocalConfig>("LocalConfig");
-        if (localConfig == null || string.IsNullOrEmpty(localConfig.BundlesDirectory))
+        if (localConfig == null || string.IsNullOrEmpty(localConfig.GetBundlesDirectory()))
         {
             Debug.LogWarning("No \"Assets/Resources/LocalConfig.asset\", or \"BundlesDirectory\" not set. Create LocalConfig.asset from Unity Editor by \"Holo -> Create Local Configuration\"");
             return;
         }
 
-        string dir = localConfig.BundlesDirectory;
+        string dir = localConfig.GetBundlesDirectory();
         try {
             bundlesFiles = Directory.GetFiles(dir, "*" + bundleFileSuffix);
         } catch (Exception e) {
