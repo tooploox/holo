@@ -16,31 +16,33 @@ public class FileSeriesImporter
 
     private FileImporter fileImporter;
     private Dictionary<string, Vector3> boundingVertices = new Dictionary<string, Vector3>();
-    
+    bool dataflow = false;
     // Object constructor, initiates file series import.
-    public void ImportData(string rootDirectory, string gameObjectName)
+    public void ImportData(string fileSeriesDirectory, string gameObjectName)
     {
         GameObject.DestroyImmediate(ModelGameObject);
         ModelMesh.Clear();
-
-        ModelGameObject = new GameObject();
-        ModelGameObject.name = gameObjectName;
-        GetFiles(rootDirectory);
-        LoadFiles();
+        ModelGameObject = new GameObject
+        {
+            name = gameObjectName
+        };
+        if (gameObjectName.Contains("dataflow")) dataflow = true;
+        GetFilepaths(fileSeriesDirectory);
+        ImportFiles();
         ConfigureMesh();
     }
 
-    //Loads file paths of particular frames and their extension
-    private void GetFiles(string rootDirectory)
+    //Gets filepaths of particular frames and their extension
+    private void GetFilepaths(string rootDirectory)
     {
         filePaths = Directory.GetFiles(rootDirectory + @"\");
         extension = Path.GetExtension(filePaths[0]);
     }
 
     //Loads meshes from separate files into Mesh Object as BlendShapeFrames
-    private void LoadFiles()
+    private void ImportFiles()
     {
-        fileImporter = new FileImporter(extension);
+        fileImporter = new FileImporter(extension, dataflow);
         ModelMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
 
         //Configuring progress bar
@@ -55,7 +57,7 @@ public class FileSeriesImporter
             {
                 AbortImport();
             }
-            fileImporter.LoadFile(filePaths[i], firstMesh);
+            fileImporter.ImportFile(filePaths[i], firstMesh);
 
             if (firstMesh)
             {

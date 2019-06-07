@@ -7,14 +7,27 @@ using System.Text.RegularExpressions;
 
 public static class VTKImportUtils
 {
+    public static Vector3 GetLineVertex(this StreamReader streamReader)
+    {
+        Vector3 vertex = new Vector3();
+
+        string LineVertices = streamReader.ReadLine();
+        string[] coordinatesStringArray = LineVertices.Split(' ');
+
+        vertex = GetVector3(coordinatesStringArray[0], coordinatesStringArray[1], coordinatesStringArray[2]);
+
+        return vertex;
+    }
+
+
     public static List<Vector3> GetLineVertices(this StreamReader streamReader)
     {
         List<Vector3> vertices = new List<Vector3>();
 
         string LineVertices = streamReader.ReadLine();
-        string[] CoordinatesStringArray = LineVertices.Split(' ');
+        string[] coordinatesStringArray = LineVertices.Split(' ');
 
-        foreach (IList<string> coordinate in CoordinatesStringArray.ChunksOf(3))
+        foreach (IList<string> coordinate in coordinatesStringArray.ChunksOf(3))
         {
             vertices.Add(GetVector3(coordinate[0], coordinate[1], coordinate[2]));
         }

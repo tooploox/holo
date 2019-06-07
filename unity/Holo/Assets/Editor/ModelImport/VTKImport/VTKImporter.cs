@@ -21,8 +21,15 @@ public class VTKImporter
     private UnstructuredGridImporter unstructuredGridImporter = new UnstructuredGridImporter();
     private PolyDataImporter polyDataImporter = new PolyDataImporter();
 
+    private bool dataflow = false;
+
+    public VTKImporter(bool IsDataflow)
+    {
+        dataflow = IsDataflow;
+    }
+
     //Loads a mesh from the VTK file located in the given filepath.
-    public void LoadFile(string filePath)
+    public void ImportFile(string filePath)
     {
         using (StreamReader streamReader = new StreamReader(filePath, Encoding.ASCII))
         {
@@ -45,7 +52,7 @@ public class VTKImporter
                     Normals = polyDataImporter.Normals;
                     break;
                 case "UNSTRUCTURED_GRID":
-                    unstructuredGridImporter.LoadFile(streamReader);
+                    unstructuredGridImporter.ImportFile(streamReader, dataflow);
                     Indices = unstructuredGridImporter.Indices;
                     Vertices = unstructuredGridImporter.Vertices;
                     Normals = unstructuredGridImporter.Normals;

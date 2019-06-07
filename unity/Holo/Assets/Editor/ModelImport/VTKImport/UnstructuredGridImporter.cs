@@ -8,28 +8,63 @@ class UnstructuredGridImporter
     private List<int> indices = new List<int>();
     public int[] Indices { get => indices.ToArray(); }
 
-    private List<Vector3> vertices = new List<Vector3>();
     public Vector3[] Vertices { get; private set; }
     public Vector3[] Normals { get; private set; }
     public int IndicesInFacet { get; private set; }
-
+    private bool dataflow = false;
     public Dictionary<string, Vector3> BoundingVertices { get; private set; } = new Dictionary<string, Vector3>()
     {
         { "minVertex", new Vector3()},
         { "maxVertex", new Vector3()}
     };
 
-    public void LoadFile(StreamReader streamReader)
+    public void ImportFile(StreamReader streamReader, bool IsDataflow)
     {
         vertices.Clear();
         indices.Clear();
+        dataflow = IsDataflow;
+        if (dataflow)
+        {
+            ImportDataFlow(streamReader);
+        }
+        else
+        {
+            ImportModelBody(streamReader);
+        }
 
+    }
+
+    private void ImportDataFlow(StreamReader streamReader)
+    {
         bool verticesFlag = false;
-        bool normalsFlag = false;
+        bool vectorsFlag = false;
+        var line = "";
+        while (!(line.IndexOf("CELL_DATA", StringComparison.CurrentCultureIgnoreCase) >= 0) || !streamReader.EndOfStream)
+        {
+            line = streamReader.ReadLine();
+            if (verticesFlag & vectorsFlag)
+            {
+                break;
+            }
+
+            if (line.IndexOf("POINTS", StringComparison.CurrentCultureIgnoreCase) >= 0)
+            {
+                string[] pointsData = line.Split(' ');
+                int numberOfVertices = int.Parse(pointsData[1]);
+                GetVertices(streamReader, numberOfVertices);
+                verticesFlag = true;
+            }
+
+        }
+    }
+    private void ImportModelBody(StreamReader streamReader)
+    {
+        bool verticesFlag = false;
+        bool indicesFlag = false;
         while (!streamReader.EndOfStream)
         {
             var line = streamReader.ReadLine();
-            if (verticesFlag & normalsFlag)
+            if (verticesFlag & indicesFlag)
             {
                 break;
             }
@@ -51,27 +86,47 @@ class UnstructuredGridImporter
                 string[] cellsData = line.Split(' ');
                 int numberOfLines = int.Parse(cellsData[1]);
                 GetIndicesAndNormals(streamReader, numberOfLines);
-                normalsFlag = true;
+                indicesFlag = true;
             }
         }
     }
 
     private void GetVertices(StreamReader streamReader, int numberOfVertices)
     {
-        List<Vector3> vertices = new List<Vector3>();
+        if (dataflow)
+        {
+            numberOfVertices *= 2;
+        }
+        Vertices = new Vector3[numberOfVertices];
         Normals = new Vector3[numberOfVertices];
         bool firstVertex = true;
         for (int i = 0; i < numberOfVertices; i++)
         {
-            List<Vector3> lineVertices = streamReader.GetLineVertices();
-            vertices.AddRange(lineVertices);
-            foreach (Vector3 vertex in lineVertices)
-            {
-                BoundingVertices.UpdateBoundingVertices(firstVertex, vertex);
-            }
+            Vector3 currentVertex = streamReader.GetLineVertex();
+            Vertices[i] = currentVertex;
+            BoundingVertices.UpdateBoundingVertices(firstVertex, currentVertex);
             firstVertex = false;
+            if(dataflow)
+            {
+                i++;
+                Vertices[i] = currentVertex;
+                i++;
+            }
         }
-        Vertices = vertices.ToArray();
+    }
+
+    private void GetDataflowVectors(StreamReader streamReader)
+    {
+        bool firstVertex = false;
+        for (int i = 1; i < Vertices.Length - 1; i += 2)
+        {
+            Vector3 currentVertex = streamReader.GetLineVertex();
+            Vertices[i] += currentVertex;
+            BoundingVertices.UpdateBoundingVertices(firstVertex, currentVertex);
+            Normals[i - 1] = currentVertex;
+            Normals[i] = currentVertex;
+            
+        }
     }
 
     private void GetIndicesAndNormals(StreamReader streamReader, int numberOfLines)

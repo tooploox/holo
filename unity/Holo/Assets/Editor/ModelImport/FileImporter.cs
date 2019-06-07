@@ -22,7 +22,7 @@ public class FileImporter
     };
 
     //A constructor ensuring FileImporter is format-specific (only STL and VTK for now)
-    public FileImporter(string extension)
+    public FileImporter(string extension, bool dataflow)
     {
         fileExtension = extension;
         if (extension == ".stl")
@@ -31,7 +31,7 @@ public class FileImporter
         }
         else if (extension == ".vtk")
         {
-            vtkImporter = new VTKImporter();
+            vtkImporter = new VTKImporter(dataflow);
         }
         else
         {
@@ -41,7 +41,7 @@ public class FileImporter
     }
 
     //Loads a mesh from the given filepath.
-    public void LoadFile(string filePath, bool firstMesh)
+    public void ImportFile(string filePath, bool firstMesh)
     {
         CheckExtension(filePath);
         switch (fileExtension)
@@ -80,7 +80,7 @@ public class FileImporter
     //Loads a mesh from the VTK file located in the given filepath.
     private void LoadVtkFile(string filePath)
     {
-        vtkImporter.LoadFile(filePath);
+        vtkImporter.ImportFile(filePath);
         Vertices = vtkImporter.Vertices;
         Indices = vtkImporter.Indices;
         IndicesInFacet = vtkImporter.IndicesInFacet;
