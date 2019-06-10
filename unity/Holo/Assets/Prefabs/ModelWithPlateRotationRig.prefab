@@ -49,7 +49,7 @@ MonoBehaviour:
   rotateHandleMaterial: {fileID: 2100000, guid: 4a9072a0d8623aa44abf31f02d209a09,
     type: 2}
   interactingMaterial: {fileID: 2100000, guid: b614a09bc429623478e946d8170b15ae, type: 2}
-  scaleRate: 4
+  scaleRate: 10
   appBarHoverOffsetZ: 0.05
   maxScale: 2
   rotationType: 0
