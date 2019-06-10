@@ -13,7 +13,7 @@ To see initial model please load **AnimatedModels** scene located in *Assets/Sce
     Application instalation: https://docs.microsoft.com/en-us/hololens/hololens-install-apps#use-the-windows-device-portal-to-install-apps-on-hololens
 
   **IMPORTANT**
-      If you got *.NET CoreRuntime* invalid or missing version error please install application with additional dependencies. To do this select option: *Allow me to select framework packages*, and in next step select the *Microsoft.NET.CoreRuntime.1.1.appx* file from release archive (Dependecies -> x86).
+      If you got *.NET CoreRuntime* invalid or missing version error please install application with additional dependencies. To do this select option: *Allow me to select framework packages*, and in next step select the *Microsoft.NET.CoreRuntime.1.1.appx* file from release archive (Dependencies -> x86).
 
   * Convert VTK model series into Asset Bundles
   * Upload AssetBundles with models into Hololens headset
