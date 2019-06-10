@@ -227,32 +227,67 @@ namespace HoloToolkit.Unity.UX
             ShowRig = false;
         }
 
+        private bool IsActiveRotationHandle(int i)
+        {
+            if (EnableRotation)
+            {
+                // rotateHandles 0-3 are for for Y axis,
+                // rotateHandles 4-7 are for for Z axis,
+                // rotateHandles 8-11 are for for X axis.
+                switch (i / 4)
+                {
+                    case 0:
+                        return EnableRotation &&
+                            ((RotationConstrainAxis == RotationConstrainAxisEnum.AllAxes) ||
+                             (RotationConstrainAxis == RotationConstrainAxisEnum.Y));
+                    case 1:
+                        return EnableRotation &&
+                            ((RotationConstrainAxis == RotationConstrainAxisEnum.AllAxes) ||
+                             (RotationConstrainAxis == RotationConstrainAxisEnum.Z));
+                    case 2:
+                        return EnableRotation &&
+                            ((RotationConstrainAxis == RotationConstrainAxisEnum.AllAxes) ||
+                             (RotationConstrainAxis == RotationConstrainAxisEnum.X));
+                    default:
+                        Debug.LogWarning("Unexpected rotation handle index " + i);
+                        return EnableRotation;
+                }
+            } else
+            {
+                return EnableRotation;
+            }
+        }
+
+        private bool IsActiveCornerHandle(int i)
+        {
+            return EnableScale;
+        }
+
         public void FocusOnHandle(GameObject handle)
         {
             if (handle != null)
             {
                 for (int i = 0; i < rotateHandles.Length; ++i)
                 {
-                    rotateHandles[i].SetActive(rotateHandles[i].gameObject == handle);
+                    rotateHandles[i].SetActive(rotateHandles[i].gameObject == handle && IsActiveRotationHandle(i));
                 }
                 for (int i = 0; i < cornerHandles.Length; ++i)
                 {
-                    cornerHandles[i].SetActive(cornerHandles[i].gameObject == handle);
+                    cornerHandles[i].SetActive(cornerHandles[i].gameObject == handle && IsActiveCornerHandle(i));
                 }
             }
             else
             {
                 for (int i = 0; i < rotateHandles.Length; ++i)
                 {
-                    rotateHandles[i].SetActive(true);
+                    rotateHandles[i].SetActive(IsActiveRotationHandle(i));
                 }
                 for (int i = 0; i < cornerHandles.Length; ++i)
                 {
-                    cornerHandles[i].SetActive(true);
+                    cornerHandles[i].SetActive(IsActiveCornerHandle(i));
                 }
             }
         }
-
 
         private void Start()
         {
@@ -312,6 +347,29 @@ namespace HoloToolkit.Unity.UX
             UpdateHandles();
         }
 
+        [Header("Constraints")]
+        [SerializeField]
+        // Whether to enable any Rotation. 
+        // Change this only when BoundingBoxRig is *not* activated.
+        public bool EnableRotation = true;
+
+        [SerializeField]
+        // Whether to enable any scaling. 
+        // Change this only when BoundingBoxRig is *not* activated.
+        public bool EnableScale = true;
+
+        public enum RotationConstrainAxisEnum
+        {
+            AllAxes,
+            X,
+            Y,
+            Z
+        }
+        [SerializeField]
+        // When to constrain Rotation to a specific axis.
+        // Change this only when BoundingBoxRig is *not* activated.
+        public RotationConstrainAxisEnum RotationConstrainAxis = RotationConstrainAxisEnum.AllAxes;
+
         private void UpdateCornerHandles()
         {
             if (handleCentroids != null)
@@ -329,6 +387,7 @@ namespace HoloToolkit.Unity.UX
                     cornerHandles[i].GetComponent<Renderer>().material = scaleHandleMaterial;
                     cornerHandles[i].transform.localScale = scaleHandleSize;
                     cornerHandles[i].name = "Corner " + i.ToString();
+                    cornerHandles[i].SetActive(IsActiveCornerHandle(i));
                     rigScaleGizmoHandles[i] = cornerHandles[i].AddComponent<BoundingBoxGizmoHandle>();
                     rigScaleGizmoHandles[i].Rig = this;
                     rigScaleGizmoHandles[i].ScaleRate = scaleRate;
@@ -363,6 +422,7 @@ namespace HoloToolkit.Unity.UX
                     rotateHandles[i].GetComponent<Renderer>().material = rotateHandleMaterial;
                     rotateHandles[i].transform.localScale = rotateHandleSize;
                     rotateHandles[i].name = "Middle " + i.ToString();
+                    rotateHandles[i].SetActive(IsActiveRotationHandle(i));
                     rigRotateGizmoHandles[i] = rotateHandles[i].AddComponent<BoundingBoxGizmoHandle>();
                     rigRotateGizmoHandles[i].RotateAroundPivot = rotateAroundPivot;
                     rigRotateGizmoHandles[i].Rig = this;
@@ -561,13 +621,13 @@ namespace HoloToolkit.Unity.UX
 
                     if (cornerHandles != null && rotateHandles != null)
                     {
-                        foreach (GameObject handle in cornerHandles)
+                        for (int i = 0; i < cornerHandles.Length; ++i)
                         {
-                            handle.SetActive(value);
+                            cornerHandles[i].SetActive(value && IsActiveCornerHandle(i));
                         }
-                        foreach (GameObject handle in rotateHandles)
+                        for (int i = 0; i < rotateHandles.Length; ++i)
                         {
-                            handle.SetActive(value);
+                            rotateHandles[i].SetActive(value && IsActiveRotationHandle(i));
                         }
                     }
 

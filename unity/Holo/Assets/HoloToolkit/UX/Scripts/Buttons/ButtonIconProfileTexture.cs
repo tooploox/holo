@@ -135,6 +135,15 @@ namespace HoloToolkit.Unity.Buttons
             // These icons will override the common icons if they exist, so do them last
             foreach (Texture2D icon in CustomIcons)
             {
+                if (icon == null)
+                {
+                    // This happens with HoloToolkit-Examples scene BoundingBoxGizmoExample .
+                    // TODO: We could probably fix it cleaner, looks like we detached something in HoloToolkit prefabs?
+                    // Not important for now, this doesn't occur in actual application,
+                    // so this hack is only to allow testing BoundingBoxGizmoExample .
+                    Debug.LogWarning("icon in CustomIcons of ButtonIconProfileTexture is null.");
+                    continue;
+                }
                 if (iconLookup.ContainsKey(icon.name))
                 {
                     iconLookup[icon.name] = icon;
