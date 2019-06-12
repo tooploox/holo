@@ -1,79 +1,158 @@
-﻿/* Shader for Holo model,
-   using Unity "shader variants" https://docs.unity3d.com/Manual/SL-MultipleProgramVariants.html
+﻿/* Shader for Holo model.
+
+   Using Unity "shader variants" https://docs.unity3d.com/Manual/SL-MultipleProgramVariants.html
    to have optional clipping plane in the shader.
+
+   Note that we cannot use surface shaders
+   ( https://docs.unity3d.com/Manual/SL-SurfaceShaders.html ) for this.
+   There are 2 approaches to two-sided lighting:
+
+   - Separate logic for 2 passes (1st pass renders front faces,
+     2nd pass renders back faces with inverted normals).
+     This cannot work with surface shader, as surface shader generates multiple
+     passes for us (trying to use "Pass" with surface shader will not compile).
+
+     This is the approach we use now.
+
+   - Conditionally invert normals in fragment shader (where we know whether
+     the face is front or back facing).
+
+     We don't use this approach now, but this may change in the future.
+     TODO: try it.
+
+     You cannot do this with surface shaders,
+     since you can only revert normal in surface shader vertex function,
+     but it's too soon,
+     at this point you don't know whether it's front or back face.
 */
 
-Shader "Holo/Model" {
-    //show values to edit in inspector
-    Properties{
+Shader "Holo/Model"
+{
+    // Show values to edit in inspector
+    Properties
+    {
         _Color("Tint", Color) = (0, 0, 0, 1)
-        _MainTex("Texture", 2D) = "white" {}
-        _Smoothness("Smoothness", Range(0, 1)) = 0
-        _Metallic("Metalness", Range(0, 1)) = 0
-        [HDR]_Emission("Emission", color) = (0,0,0)
-        [HDR]_CutoffColor("Cutoff Color", Color) = (1,0,0,0)
+        // Uncomment this and define MODEL_TEXTURED if necessary
+        // _MainTex("Texture", 2D) = "white" {}
+        _Emission("Emission", color) = (0,0,0, 1)
     }
 
-    SubShader{
+    CGINCLUDE
+    // Shared shader code,
+    // for both front and back faces rendering (used in both passes).
+
+    #include "UnityCG.cginc"
+    #include "UnityLightingCommon.cginc"
+
+    // Forward declaration, will be implemented differently in each pass
+    void flipNormal(inout float3 normal);
+
+    struct v2f
+    {
+        float4 vertex : SV_POSITION;
+        // MODEL_TEXTURED is not defined for now, but in the future we may want to render textured model
+        #ifdef MODEL_TEXTURED
+        float2 uv : TEXCOORD0;
+        #endif
+        float4 vertexWorld : TEXCOORD1;
+        half3 normalWorld : TEXCOORD2;
+    };
+
+    v2f vert (appdata_base v)
+    {
+        v2f o;
+        o.vertex = UnityObjectToClipPos(v.vertex);
+        o.vertexWorld = mul(unity_ObjectToWorld, v.vertex);
+        #ifdef MODEL_TEXTURED
+        o.uv = v.texcoord;
+        #endif
+        // flip normal, depending on whether we render front or back faces
+        flipNormal(v.normal);
+        o.normalWorld = UnityObjectToWorldNormal(v.normal);
+        return o;
+    }
+
+    #ifdef CLIPPING_ON
+    float4 _Plane;
+    #endif
+
+    fixed4 _Color;
+    fixed4 _Emission;
+
+    fixed4 frag (v2f i) : SV_Target
+    {
+        #ifdef CLIPPING_ON
+        //calculate signed distance to plane
+        float distance = dot(i.vertexWorld, _Plane.xyz);
+        distance = distance + _Plane.w;
+        //discard surface above plane
+        clip(-distance);
+        #endif
+
+        // TODO: add specular, add other lights, use any Unity built-in functions as possible
+
+        // dot product between normal and light direction for
+        // standard diffuse (Lambert) lighting
+        half nl = max(0, dot(i.normalWorld, _WorldSpaceLightPos0.xyz));
+        fixed4 diffuse = nl * _Color * _LightColor0;
+
+        fixed4 col = _Emission + diffuse;
+
+        #ifdef MODEL_TEXTURED
+        col *= tex2D(_MainTex, i.uv);
+        #endif
+        return col;
+    }
+    ENDCG
+
+    SubShader
+    {
         //the material is completely non-transparent and is rendered at the same time as the other opaque geometry
-        Tags{ "RenderType" = "Opaque" "Queue" = "Geometry"}
-
-        // render faces regardless if they point towards the camera or away from it
-        Cull Off
-
-        CGPROGRAM
-        // See https://docs.unity3d.com/Manual/SL-MultipleProgramVariants.html
-        // about Unity "shader variants".
-        #pragma shader_feature CLIPPING_OFF CLIPPING_ON
-
-        //the shader is a surface shader, meaning that it will be extended by unity in the background
-        //to have fancy lighting and other features
-        //our surface shader function is called surf and we use our custom lighting model
-        //fullforwardshadows makes sure unity adds the shadow passes the shader might need
-        //vertex:vert makes the shader use vert as a vertex shader function
-        #pragma surface surf Standard fullforwardshadows
-        #pragma target 3.0
-
-        sampler2D _MainTex;
-        fixed4 _Color;
-
-        half _Smoothness;
-        half _Metallic;
-        half3 _Emission;
-
-        float4 _Plane;
-
-        float4 _CutoffColor;
-
-        //input struct which is automatically filled by unity
-        struct Input {
-            float2 uv_MainTex;
-            float3 worldPos;
-            float facing : VFACE;
-        };
-
-        //the surface shader function which sets parameters the lighting function then uses
-        void surf(Input i, inout SurfaceOutputStandard o)
-        {
-            #ifdef CLIPPING_ON
-            //calculate signed distance to plane
-            float distance = dot(i.worldPos, _Plane.xyz);
-            distance = distance + _Plane.w;
-            //discard surface above plane
-            clip(-distance);
-            #endif
-
-            float facing = i.facing * 0.5 + 0.5;
-
-            //normal color stuff
-            fixed4 col = tex2D(_MainTex, i.uv_MainTex);
-            col *= _Color;
-            o.Albedo = col.rgb * facing;
-            o.Metallic = _Metallic * facing;
-            o.Smoothness = _Smoothness * facing;
-            //o.Emission = lerp(_CutoffColor, _Emission, facing);
+        Tags {
+            "RenderType" = "Opaque"
+            "Queue" = "Geometry"
         }
-        ENDCG
+
+        // Render front faces with default normal
+        Pass {
+            Name "Front Facing"
+
+            Cull Back
+
+            CGPROGRAM
+            // See https://docs.unity3d.com/Manual/SL-MultipleProgramVariants.html
+            // about Unity "shader variants".
+            #pragma shader_feature CLIPPING_OFF CLIPPING_ON
+            #pragma vertex vert
+            #pragma fragment frag
+
+            void flipNormal(inout float3 normal)
+            {
+                // Nothing needs to be done here
+            }
+            ENDCG
+        }
+
+        // Render back faces with inverted normal
+        Pass {
+            Name "Back Facing"
+
+            Cull Front
+
+            CGPROGRAM
+            // See https://docs.unity3d.com/Manual/SL-MultipleProgramVariants.html
+            // about Unity "shader variants".
+            #pragma shader_feature CLIPPING_OFF CLIPPING_ON
+            #pragma vertex vert
+            #pragma fragment frag
+
+            void flipNormal(inout float3 normal)
+            {
+                normal = -normal;
+            }
+            ENDCG
+        }
     }
+
     FallBack "Standard" //fallback adds a shadow pass so we get shadows on other objects
 }
