@@ -10,7 +10,6 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
     public CompoundButton ButtonClippingPlane;
     public CompoundButton ButtonClippingPlaneTranslation;
     public CompoundButton ButtonClippingPlaneRotation;
-    public Material ClippingMaterial;
     public GameObject ModelWithPlate;
 
     BoundingBoxRig clipPlaneQuadBbox;
@@ -71,7 +70,7 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
 
         if (ClippingPlaneState == ClipPlaneState.Active)
         {
-            modelRenderer.material = ClippingMaterial;
+            modelRenderer.sharedMaterial.EnableKeyword("CLIPPING_ON");
             
             ButtonClippingPlaneTranslation.gameObject.SetActive(true);
             ButtonClippingPlaneRotation.gameObject.SetActive(true);
@@ -79,7 +78,8 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
         }
         else
         {
-            modelRenderer.material = modelWithPlate.MaterialNonPreview;
+            modelRenderer.sharedMaterial.DisableKeyword("CLIPPING_ON");
+
             clipPlaneQuadBbox.Deactivate();
             ButtonClippingPlaneTranslation.gameObject.SetActive(false);
             ButtonClippingPlaneRotation.gameObject.SetActive(false);
