@@ -1,4 +1,9 @@
-﻿Shader "Collection_Clipping_Plane"{
+﻿/* Shader for Holo model,
+   using Unity "shader variants" https://docs.unity3d.com/Manual/SL-MultipleProgramVariants.html
+   to have optional clipping plane in the shader.
+*/
+
+Shader "Holo/Model" {
 	//show values to edit in inspector
 	Properties{
 		_Color("Tint", Color) = (0, 0, 0, 1)
@@ -6,7 +11,6 @@
 		_Smoothness("Smoothness", Range(0, 1)) = 0
 		_Metallic("Metalness", Range(0, 1)) = 0
 		[HDR]_Emission("Emission", color) = (0,0,0)
-
 		[HDR]_CutoffColor("Cutoff Color", Color) = (1,0,0,0)
 	}
 
@@ -18,7 +22,11 @@
 			Cull Off
 
 			CGPROGRAM
-			//the shader is a surface shader, meaning that it will be extended by unity in the background 
+            // See https://docs.unity3d.com/Manual/SL-MultipleProgramVariants.html
+			// about Unity "shader variants".
+			#pragma shader_feature CLIPPING_OFF CLIPPING_ON
+
+			//the shader is a surface shader, meaning that it will be extended by unity in the background
 			//to have fancy lighting and other features
 			//our surface shader function is called surf and we use our custom lighting model
 			//fullforwardshadows makes sure unity adds the shadow passes the shader might need
@@ -45,12 +53,15 @@
 			};
 
 			//the surface shader function which sets parameters the lighting function then uses
-			void surf(Input i, inout SurfaceOutputStandard o) {
+			void surf(Input i, inout SurfaceOutputStandard o)
+			{
+				#ifdef CLIPPING_ON
 				//calculate signed distance to plane
 				float distance = dot(i.worldPos, _Plane.xyz);
 				distance = distance + _Plane.w;
 				//discard surface above plane
 				clip(-distance);
+				#endif
 
 				float facing = i.facing * 0.5 + 0.5;
 

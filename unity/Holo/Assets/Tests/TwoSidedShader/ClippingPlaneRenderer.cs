@@ -7,8 +7,13 @@ public class ClippingPlaneRenderer : MonoBehaviour
     // mesh we pass the values to
     public MeshRenderer meshRenderer;
 
+    private void Start()
+    {
+        meshRenderer.sharedMaterial.EnableKeyword("CLIPPING_ON");
+    }
+
     //execute every frame
-    void Update()
+    private void Update()
     {
         //create plane
         Plane plane = new Plane(transform.up, transform.position);
