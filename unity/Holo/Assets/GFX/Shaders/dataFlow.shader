@@ -3,8 +3,8 @@
 	Properties
 	{
 		_MainTex("FX (RGB)", 2D) = "black" {}
-		_LengthFactor("Length", Range(.01,.1)) = 0.015
-		_WeightFactor("Weight", Range(.001,.02)) = 0.004	
+		_LengthFactor("Length", Range(.0,5.0)) = 2.0
+		_WeightFactor("Weight", Range(.0,2.0)) = 0.3
 	}
 		SubShader
 	{
@@ -23,6 +23,7 @@
 			{
 				float4 vertex : POSITION;
 				float3 normal : NORMAL;
+				float3 tangent : TANGENT;
 				float2 uv : TEXCOORD0;
 			};
 
@@ -58,11 +59,15 @@
 				float3 normalFace = normalize(cross(nNormal, directionToCamera));
 				
 				float3 crossNormalFace = normalize(cross(normalFace, nNormal));
-				
 				float2 offset = -float2(0., _Time.z);
 				
-				float4 endColor = (fixed4(nNormal, 1) + fixed4(1,1,1,0)) * fixed4(.5,.5,.5,1);
+				fixed4 endColor = (fixed4(nNormal, 1) + fixed4(1,1,1,0)) * fixed4(.5,.5,.5,1);
 				fixed4 startColor = endColor * fixed4(.8, .8, .8, 1.);
+				/*
+				if(IN[0].tangent.x == 0){
+					startColor = endColor * fixed4(1., 0., 0., 1.);
+					endColor = startColor;
+				}*/
 				
 			//-----
 				o.pos = UnityObjectToClipPos(IN[0].vertex - float4(normalFace, 0) * _WeightFactor); //1
