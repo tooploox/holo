@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 
 class UnstructuredGridImporter
 {
-    private List<int> indices = new List<int>();
-    public int[] Indices { get => indices.ToArray(); }
-
     public Vector3[] Vertices { get; private set; }
     public Vector3[] Normals { get; private set; }
+    public Vector3[] DeltaTangents { get; private set; }
+    public int[] Indices { get; private set; }
     public int IndicesInFacet { get; private set; }
     private bool dataflow = false;
     public Dictionary<string, Vector3> BoundingVertices { get; private set; } = new Dictionary<string, Vector3>()
@@ -18,12 +18,11 @@ class UnstructuredGridImporter
         { "maxVertex", new Vector3()}
     };
 
+    //Imports a single file. Checks if it's a body mesh or dataflow object.
     public void ImportFile(StreamReader streamReader, bool IsDataflow)
     {
-        vertices.Clear();
-        indices.Clear();
         dataflow = IsDataflow;
-        if (dataflow)
+        if (IsDataflow)
         {
             ImportDataFlow(streamReader);
         }
@@ -33,19 +32,22 @@ class UnstructuredGridImporter
         }
 
     }
-
+    //Imports a single dataflow mesh file.
     private void ImportDataFlow(StreamReader streamReader)
     {
         bool verticesFlag = false;
         bool vectorsFlag = false;
+        bool tangentsAlpha = false;
+        bool tangentsBeta = false;
+        bool tangentsFlag = false;
         var line = "";
-        while (!(line.IndexOf("CELL_DATA", StringComparison.CurrentCultureIgnoreCase) >= 0) || !streamReader.EndOfStream)
+        while (!streamReader.EndOfStream)
         {
-            line = streamReader.ReadLine();
-            if (verticesFlag & vectorsFlag)
+            if (verticesFlag & vectorsFlag & tangentsFlag)
             {
                 break;
             }
+            line = streamReader.ReadLine();
 
             if (line.IndexOf("POINTS", StringComparison.CurrentCultureIgnoreCase) >= 0)
             {
@@ -54,9 +56,31 @@ class UnstructuredGridImporter
                 GetVertices(streamReader, numberOfVertices);
                 verticesFlag = true;
             }
-
+            if (line.IndexOf("Vectors fn float", StringComparison.CurrentCultureIgnoreCase) >= 0)
+            {
+                GetDataflowVectors(streamReader);
+                vectorsFlag = true;
+            }
+            if (line.IndexOf("LOOKUP_TABLE alpha", StringComparison.CurrentCultureIgnoreCase) >= 0)
+            {
+                GetDataflowTangents(streamReader, "alpha");
+                tangentsAlpha = true;
+            }
+            if (line.IndexOf("LOOKUP_TABLE beta", StringComparison.CurrentCultureIgnoreCase) >= 0)
+            {
+                GetDataflowTangents(streamReader, "beta");
+                tangentsBeta = true;
+            }
+            tangentsFlag = tangentsAlpha & tangentsBeta;
         }
+        if (!verticesFlag | !vectorsFlag | !tangentsFlag)
+        {
+            throw new Exception("Insufficent data in a file!");
+        }
+        SetDataflowIndices();
     }
+
+    ////Imports a single body mesh file.
     private void ImportModelBody(StreamReader streamReader)
     {
         bool verticesFlag = false;
@@ -67,10 +91,6 @@ class UnstructuredGridImporter
             if (verticesFlag & indicesFlag)
             {
                 break;
-            }
-            if (string.IsNullOrEmpty(line))
-            {
-                continue;
             }
 
             if (line.IndexOf("POINTS", StringComparison.CurrentCultureIgnoreCase) >= 0)
@@ -85,20 +105,16 @@ class UnstructuredGridImporter
             {
                 string[] cellsData = line.Split(' ');
                 int numberOfLines = int.Parse(cellsData[1]);
-                GetIndicesAndNormals(streamReader, numberOfLines);
+                GetBodyIndicesAndNormals(streamReader, numberOfLines);
                 indicesFlag = true;
             }
         }
     }
-
+    
+    //Get meshes' verices. 
     private void GetVertices(StreamReader streamReader, int numberOfVertices)
     {
-        if (dataflow)
-        {
-            numberOfVertices *= 2;
-        }
         Vertices = new Vector3[numberOfVertices];
-        Normals = new Vector3[numberOfVertices];
         bool firstVertex = true;
         for (int i = 0; i < numberOfVertices; i++)
         {
@@ -106,35 +122,16 @@ class UnstructuredGridImporter
             Vertices[i] = currentVertex;
             BoundingVertices.UpdateBoundingVertices(firstVertex, currentVertex);
             firstVertex = false;
-            if(dataflow)
-            {
-                i++;
-                Vertices[i] = currentVertex;
-                i++;
-            }
         }
     }
-
-    private void GetDataflowVectors(StreamReader streamReader)
+    
+    //Gets body indices in the file and calculates its normals.
+    private void GetBodyIndicesAndNormals(StreamReader streamReader, int numberOfLines)
     {
-        bool firstVertex = false;
-        for (int i = 1; i < Vertices.Length - 1; i += 2)
-        {
-            Vector3 currentVertex = streamReader.GetLineVertex();
-            Vertices[i] += currentVertex;
-            BoundingVertices.UpdateBoundingVertices(firstVertex, currentVertex);
-            Normals[i - 1] = currentVertex;
-            Normals[i] = currentVertex;
-            
-        }
-    }
-
-    private void GetIndicesAndNormals(StreamReader streamReader, int numberOfLines)
-    {
+        List<int> indices = new List<int>();
         List<int> facetIndices = new List<int>();
 
         bool firstVertex = true;
-
         for (int i = 0; i < numberOfLines; i++)
         {
             facetIndices = streamReader.GetLineIndices();
@@ -155,8 +152,10 @@ class UnstructuredGridImporter
                 normal.Normalize();
             }
         }
+        Indices = indices.ToArray();
     }
-    //Updates facet normals
+    
+    //Updates facet normals.
     private void UpdateFacetNormals(List<int> facetIndices)
     {
         Vector3 currentNormal = new Vector3();
@@ -179,5 +178,44 @@ class UnstructuredGridImporter
         normal = Vector3.Cross(facetVertices[0] - facetVertices[2], facetVertices[1] - facetVertices[0]);
         normal.Normalize();
         return normal;
+    }
+
+    //Gets dataflow vectors.
+    private void GetDataflowVectors(StreamReader streamReader)
+    {
+        Normals = new Vector3[Vertices.Length];
+        for (int i = 0; i < Normals.Length; i++)
+        {
+            Vector3 currentVertex = streamReader.GetLineVertex();
+            Normals[i] = currentVertex;
+        }
+    }
+    
+    //Gets angles for dataflow visualisation and stores them in deltaTangents for blendshapeanimation.
+    private void GetDataflowTangents(StreamReader streamReader, string angleName)
+    {
+        DeltaTangents = new Vector3[Vertices.Length];
+        if (angleName.Equals("alpha"))
+        {
+            for (int i = 0; i < Vertices.Length; i++)
+            {
+                DeltaTangents[i].x = streamReader.GetLineFloat();
+            }
+        }
+
+        if (angleName.Equals("beta"))
+        {
+            for (int i = 0; i < Vertices.Length; i++)
+            {
+                DeltaTangents[i].y = streamReader.GetLineFloat();
+            }
+        }
+    }
+
+    // Sets dataflow indices. We use single points for dataflow so it's an array of incrementing numbers range 0, Vertices.Length.
+    private void SetDataflowIndices()
+    {
+        IndicesInFacet = 1;
+        Indices = Enumerable.Range(0, Vertices.Length).ToArray();
     }
 }

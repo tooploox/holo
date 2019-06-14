@@ -47,12 +47,11 @@ public class FileSeriesImporter
 
         //Configuring progress bar
         float progressChunk = (float) 1 / filePaths.Length;
-        bool cancelImport = false;
+        bool cancelImport = EditorUtility.DisplayCancelableProgressBar("Conversion in progress", "Converting file nr: " + 0.ToString(), 0);
 
         bool firstMesh = true;
         for(int i = 0; i < filePaths.Length; i++)
         {
-            cancelImport = EditorUtility.DisplayCancelableProgressBar("Converting meshes", "Conversion in progress", (i + 1) * progressChunk);
             if (cancelImport)
             {
                 AbortImport();
@@ -64,9 +63,17 @@ public class FileSeriesImporter
                 InitiateMesh();
             }
             CheckTopology(i);
-            UpdateBounds(firstMesh);   
-            ModelMesh.AddBlendShapeFrame(Path.GetFileName(filePaths[i]), 100f, fileImporter.Vertices, fileImporter.Normals, null);
+            UpdateBounds(firstMesh);
+            if (fileImporter.IndicesInFacet == 1)
+            {
+                ModelMesh.AddBlendShapeFrame(Path.GetFileName(filePaths[i]), 100f, fileImporter.Vertices, fileImporter.Normals, fileImporter.DeltaTangents);
+            }
+            else
+            {
+                ModelMesh.AddBlendShapeFrame(Path.GetFileName(filePaths[i]), 100f, fileImporter.Vertices, fileImporter.Normals, null);
+            }
             firstMesh = false;
+            cancelImport = EditorUtility.DisplayCancelableProgressBar("Conversion in progress", "Converting file nr: " + (i + 1).ToString(), (i + 1) * progressChunk);
         }
     }
 
@@ -82,15 +89,25 @@ public class FileSeriesImporter
     private void InitiateMesh()
     {
         ModelMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-        if (fileImporter.IndicesInFacet == 2)
+        if (fileImporter.IndicesInFacet == 1)
+        {
+            ModelMesh.vertices = fileImporter.BaseVertices;
+            ModelMesh.SetIndices(fileImporter.Indices, MeshTopology.Points, 0);
+            ModelMesh.uv = new Vector2[fileImporter.Vertices.Length];
+        }
+        else if (fileImporter.IndicesInFacet == 2)
         {
             ModelMesh.vertices = fileImporter.BaseVertices;
             ModelMesh.SetIndices(fileImporter.Indices, MeshTopology.Lines, 0);
         }
-        else
+        else if (fileImporter.IndicesInFacet == 3)
         {
             ModelMesh.vertices = fileImporter.BaseVertices;
             ModelMesh.triangles = fileImporter.Indices;
+        }
+        else
+        {
+            throw new Exception("Wrong number of indices in a facet!");
         }
     }
 

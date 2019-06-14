@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using UnityEngine;
@@ -24,8 +25,8 @@ public static class VTKImportUtils
     {
         List<Vector3> vertices = new List<Vector3>();
 
-        string LineVertices = streamReader.ReadLine();
-        string[] coordinatesStringArray = LineVertices.Split(' ');
+        string lineVertices = streamReader.ReadLine();
+        string[] coordinatesStringArray = lineVertices.Split(' ');
 
         foreach (IList<string> coordinate in coordinatesStringArray.ChunksOf(3))
         {
@@ -34,16 +35,30 @@ public static class VTKImportUtils
         return vertices;
     }
 
+    public static float GetLineFloat(this StreamReader streamReader)
+    {
+        float currentFloat = 0.0f;
+
+        string lineFloat = streamReader.ReadLine();
+        try
+        {
+            currentFloat = float.Parse(lineFloat, CultureInfo.InvariantCulture.NumberFormat);
+        }
+        catch (FormatException)
+        {
+            Debug.Log("aaaaa");
+        }
+        return currentFloat;
+    }
+
     private static Vector3 GetVector3(string x, string y, string z)
     { 
         Vector3 vector3 = new Vector3();
-
         vector3.x = float.Parse(x, CultureInfo.InvariantCulture.NumberFormat);
         vector3.y = float.Parse(y, CultureInfo.InvariantCulture.NumberFormat);
-        
+
         //maintaining Unity counter-clockwise orientation
         vector3.z = -float.Parse(z, CultureInfo.InvariantCulture.NumberFormat);
-        
         return vector3;
     }
 
@@ -77,11 +92,11 @@ public static class VTKImportUtils
     }
 
     public static Dictionary<string, Vector3> UpdateBoundingVertices(this Dictionary<string, Vector3> currentBoundingVertices, 
-                                                                     bool firstVertex, Vector3 currentVertex)
+                                                                     bool IsFirstVertex, Vector3 currentVertex)
     {
         Vector3 minVertex = currentBoundingVertices["minVertex"];
         Vector3 maxVertex = currentBoundingVertices["maxVertex"];
-        if (firstVertex)
+        if (IsFirstVertex)
         {
             currentBoundingVertices["minVertex"] = currentVertex;
             currentBoundingVertices["maxVertex"] = currentVertex;
