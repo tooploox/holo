@@ -2,9 +2,9 @@
 {
 	Properties
 	{
-		_MainTex("Ground (RGB)", 2D) = "white" {}
-		_LengthFactor("Line length", Range(.01,.1)) = 0.01
-		_WeightFactor("Line weight", Range(.001,.02)) = 0.01		
+		_MainTex("FX (RGB)", 2D) = "black" {}
+		_LengthFactor("Length", Range(.01,.1)) = 0.015
+		_WeightFactor("Weight", Range(.001,.02)) = 0.004	
 	}
 		SubShader
 	{
@@ -52,8 +52,6 @@
 			{
 				g2f o;
 				
-				//float3 normalFace = normalize(cross(normalize(IN[0].normal), _WorldSpaceCameraPos));
-				
 				float3 nNormal = normalize(IN[0].normal); //normalized normal
 				float3 eyePosition = UnityObjectToViewPos(IN[0].vertex.xyz);
 				float directionToCamera = -normalize(eyePosition);
@@ -61,77 +59,79 @@
 				
 				float3 crossNormalFace = normalize(cross(normalFace, nNormal));
 				
-				float4 cNormal = (fixed4(nNormal, 1) + fixed4(1,1,1,0)) * fixed4(.5,.5,.5,1);				
 				float2 offset = -float2(0., _Time.z);
 				
-			//o.uv = IN[0].uv;
+				float4 endColor = (fixed4(nNormal, 1) + fixed4(1,1,1,0)) * fixed4(.5,.5,.5,1);
+				fixed4 startColor = endColor * fixed4(.8, .8, .8, 1.);
+				
+			//-----
 				o.pos = UnityObjectToClipPos(IN[0].vertex - float4(normalFace, 0) * _WeightFactor); //1
 				o.uv = float2(0.,0.) + offset;
-				o.col = fixed4(.8, .8, .8, 0.) * cNormal;
+				o.col = startColor;
 				tristream.Append(o);
 				
 				o.pos = UnityObjectToClipPos(IN[0].vertex - float4(crossNormalFace, 0) * _WeightFactor); //2
 				o.uv = float2(1.,0.) + offset;
-				o.col = fixed4(.8, .8, .8, 0.) * cNormal;
+				o.col = startColor;
 				tristream.Append(o);
 
 				o.pos = UnityObjectToClipPos(IN[0].vertex + float4(normalize(IN[0].normal) * _LengthFactor, 1));
-				o.uv = float2(.5,3.) + offset;
-				o.col = fixed4(1., 1., 1., 1.);
+				o.uv = float2(.5,2.) + offset;
+				o.col = endColor;
 				tristream.Append(o);
 				
 				tristream.RestartStrip();
 				
-			//o.uv = IN[0].uv;
+			//-----
 				o.pos = UnityObjectToClipPos(IN[0].vertex - float4(crossNormalFace, 0) * _WeightFactor); //2
 				o.uv = float2(0.,0.) + offset;
-				o.col = fixed4(.8, .8, .8, 0.) * cNormal;
+				o.col = startColor;
 				tristream.Append(o);
 
 				o.pos = UnityObjectToClipPos(IN[0].vertex + float4(normalFace, 0) * _WeightFactor); //3
 				o.uv = float2(1.,0.) + offset;
-				o.col = fixed4(.8, .8, .8, 0.) * cNormal;
+				o.col = startColor;
 				tristream.Append(o);
 
 				o.pos = UnityObjectToClipPos(IN[0].vertex + float4(normalize(IN[0].normal) * _LengthFactor, 1));
-				o.uv = float2(.5,3.) + offset;
-				o.col = fixed4(1., 1., 1., 1.);
+				o.uv = float2(.5,2.) + offset;
+				o.col = endColor;
 				tristream.Append(o);
 				
 				tristream.RestartStrip();
 				
-			//o.uv = IN[0].uv;
+			//-----
 				o.pos = UnityObjectToClipPos(IN[0].vertex + float4(normalFace, 0) * _WeightFactor); //3
 				o.uv = float2(0.,0.) + offset;
-				o.col = fixed4(.8, .8, .8, 0.) * cNormal;
+				o.col = startColor;
 				tristream.Append(o);
 
 				o.pos = UnityObjectToClipPos(IN[0].vertex + float4(crossNormalFace, 0) * _WeightFactor); //4
 				o.uv = float2(1.,0.) + offset;
-				o.col = fixed4(.8, .8, .8, 0.) * cNormal;
+				o.col = startColor;
 				tristream.Append(o);
 
 				o.pos = UnityObjectToClipPos(IN[0].vertex + float4(normalize(IN[0].normal) * _LengthFactor, 1));
-				o.uv = float2(.5,3.) + offset;
-				o.col = fixed4(1., 1., 1., 1.);
+				o.uv = float2(.5,2.) + offset;
+				o.col = endColor;
 				tristream.Append(o);
 				
 				tristream.RestartStrip();
 				
-			//o.uv = IN[0].uv;
+			//-----
 				o.pos = UnityObjectToClipPos(IN[0].vertex + float4(crossNormalFace, 0) * _WeightFactor); //4
 				o.uv = float2(0.,0.) + offset;
-				o.col = fixed4(.1, .1, .1, 0.) * cNormal;
+				o.col = startColor;
 				tristream.Append(o);
 				
 				o.pos = UnityObjectToClipPos(IN[0].vertex - float4(normalFace, 0) * _WeightFactor); //1
 				o.uv = float2(1.,0.) + offset;
-				o.col = fixed4(1.8, 1.8, 1.8, 0.) * cNormal;
+				o.col = startColor;
 				tristream.Append(o);
 
 				o.pos = UnityObjectToClipPos(IN[0].vertex + float4(normalize(IN[0].normal) * _LengthFactor, 1));
-				o.uv = float2(.5,3.) + offset;
-				o.col = fixed4(1., 1., 1., 1.);
+				o.uv = float2(.5,2.) + offset;
+				o.col = endColor;
 				tristream.Append(o);
 				
 				tristream.RestartStrip();
