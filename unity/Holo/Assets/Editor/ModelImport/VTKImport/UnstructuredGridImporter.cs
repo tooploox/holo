@@ -75,7 +75,7 @@ class UnstructuredGridImporter
         }
         if (!verticesFlag | !vectorsFlag | !tangentsFlag)
         {
-            throw new Exception("Insufficent data in a file!");
+            throw new Exception("Insufficient data in a file!");
         }
         SetDataflowIndices();
     }

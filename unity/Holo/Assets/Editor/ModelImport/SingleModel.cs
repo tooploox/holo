@@ -13,9 +13,11 @@ class SingleModel
     public string ModelName { get; private set; } = "";
     public string ThumbnailDirectory { get; private set; } = "";
     
-
-    public void GetModelData(string rootDirectory)
+    //Loads a single model, with its body and/or dataflow.
+    public void GetModelData()
     {
+        string rootDirectory = GetRootDirectory();
+
         ModelObjects.Clear();
         ThumbnailDirectory = "";
         List<string> directoriesList = ReadInfoFile(rootDirectory);
@@ -25,6 +27,32 @@ class SingleModel
         }
     }
 
+    // Gets root directory of the model.
+    private string GetRootDirectory()
+    {
+        string rootDirectory = "";
+        if (Application.isBatchMode)
+        {
+            Debug.Log("It's Batchmode!");
+            string[] args = Environment.GetCommandLineArgs();
+            int directoryFlagIndex = Array.FindIndex(args, a => a.Equals("-rootDirectory"));
+            Debug.Log("rootDirectoryIndex:" + directoryFlagIndex.ToString());
+            rootDirectory = args[directoryFlagIndex + 1];
+            if (String.IsNullOrEmpty(rootDirectory)) throw new Exception("Model's root directory has not been assigned!");
+        }
+        else
+        {
+            Debug.Log("It's not Batchmode!");
+            rootDirectory = EditorUtility.OpenFolderPanel("Select STL series root folder", Application.dataPath, "");
+        }
+        if (String.IsNullOrEmpty(rootDirectory))
+        {
+            throw new ArgumentException("Path cannot be null!");
+        }
+        return rootDirectory;
+    }
+
+    //Reads info file and gets a list of files to load into assetbundle.
     private List<string> ReadInfoFile(string rootDirectory)
     {
         List<string> directoriesList = new List<string>();
@@ -50,7 +78,7 @@ class SingleModel
         }
         return directoriesList;
     }
-
+    //Imports data for body or dataflow blendshape.
     private void ImportData(string dataDirectory)
     {
         string dictionaryKey = ModelName + "_" + Path.GetFileName(dataDirectory);

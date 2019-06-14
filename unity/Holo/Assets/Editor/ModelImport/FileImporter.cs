@@ -60,6 +60,7 @@ public class FileImporter
         }
     }
 
+    //Checks if file extensions are consistent throughout the folder.
     private void CheckExtension(string filePath)
     {
         string currentExtension = Path.GetExtension(filePath);

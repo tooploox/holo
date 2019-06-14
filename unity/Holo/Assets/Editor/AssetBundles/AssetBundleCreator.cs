@@ -6,27 +6,21 @@ using UnityEngine;
 
 class AssetBundleCreator
 {
-    public GameObject ModelGameObject { get; set; }
-    public Mesh ModelMesh { get; set; }
-
-    private string modelName;
     private Dictionary<string, string> assetsPath = new Dictionary<string, string>();
-    private AssetBundleBuild[] buildMapArray;
     
     //Creates AssetBundle
     public void Create(SingleModel importedModel)
     {
-        modelName = importedModel.ModelName;
         foreach (KeyValuePair<string, Tuple<Mesh, GameObject>> modelObject in importedModel.ModelObjects)
         {
-            SaveFilesForExport(modelObject.Key, modelObject.Value);
+            SaveFilesForExport(modelObject.Key, modelObject.Value, importedModel.ModelName);
         }
-        BuildMapABs();
-        SaveAssetBundles();
+        AssetBundleBuild[] buildMapArray = BuildMapABs(importedModel.ModelName);
+        CreateAssetBundle(buildMapArray);
     }
 
     // Exports finished GameObject to a .prefab
-    private void SaveFilesForExport(string objectName, Tuple<Mesh, GameObject> gameObjectData)
+    private void SaveFilesForExport(string objectName, Tuple<Mesh, GameObject> gameObjectData, string modelName)
     {
         string rootAssetsDir = @"Assets/" + modelName;
         if (!AssetDatabase.IsValidFolder(rootAssetsDir))
@@ -39,18 +33,19 @@ class AssetBundleCreator
         assetsPath.Add("GameObject", rootAssetsDir + @"/" + objectName + ".prefab");
         PrefabUtility.SaveAsPrefabAsset(gameObjectData.Item2, assetsPath["GameObject"]);
     }
-
-    private void BuildMapABs()
+    
+    // Create the array of bundle build details.
+    private AssetBundleBuild[] BuildMapABs(string modelName)
     {
-        // Create the array of bundle build details.
+        
         AssetBundleBuild buildMap = new AssetBundleBuild();
         buildMap.assetBundleName = modelName + "_bundle";
         buildMap.assetNames = assetsPath.Values.ToArray();
 
-        buildMapArray = new AssetBundleBuild[1] {buildMap};
+        return new AssetBundleBuild[1] {buildMap};
     }
-
-    private void SaveAssetBundles()
+    //Creates appropriate AssetBundle for the model.
+    private void CreateAssetBundle(AssetBundleBuild[] buildMapArray)
     {
         if (!AssetDatabase.IsValidFolder(@"Assets\StreamingAssets"))
         {
@@ -59,5 +54,6 @@ class AssetBundleCreator
         BuildPipeline.BuildAssetBundles(Application.dataPath + "/StreamingAssets", buildMapArray, BuildAssetBundleOptions.None, BuildTarget.WSAPlayer);
         AssetDatabase.DeleteAsset("Assets/StreamingAssets/StreamingAssets");
         AssetDatabase.DeleteAsset("Assets/StreamingAssets/StreamingAssets.manifest");
+        //TODO: The .mesh and .prefab files are left for debugging purposes but should be removed in the final version.
     }
 }
