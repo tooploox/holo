@@ -4,7 +4,9 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-class AssetBundleCreator
+using ModelImport;
+
+public class AssetBundleCreator
 {
     private Dictionary<string, string> assetsPath = new Dictionary<string, string>();
     

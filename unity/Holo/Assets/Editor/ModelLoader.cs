@@ -1,8 +1,9 @@
-﻿using System;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 
-class ModelLoader
+using ModelImport;
+
+public class ModelLoader
 {
     /* Loads a model in batchmode or multiple models in Editor and converts them into an AssetBundle.
      * To use in batchmode: "<Path to Unity.exe>" -quit -batchmode -logFile "<Path to the logfile>"  

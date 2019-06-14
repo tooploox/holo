@@ -5,65 +5,68 @@ using System.Text;
 using UnityEngine;
 
 
-public class VTKImporter
+namespace ModelImport.VTKImport
 {
-    public Vector3[] Vertices { get; private set; }
-    public Vector3[] Normals { get; private set; }
-    public Vector3[] DeltaTangents { get; private set; }
-    public int[] Indices { get; private set; }
-    public int IndicesInFacet { get; private set; }
-    public Dictionary<string, Vector3> BoundingVertices { get; private set; } = new Dictionary<string, Vector3>()
+    public class VTKImporter
     {
-        { "minVertex", new Vector3()},
-        { "maxVertex", new Vector3()}
-    };
-
-    
-    private UnstructuredGridImporter unstructuredGridImporter = new UnstructuredGridImporter();
-    private PolyDataImporter polyDataImporter = new PolyDataImporter();
-
-    private bool dataflow = false;
-
-    public VTKImporter(bool IsDataflow)
-    {
-        dataflow = IsDataflow;
-    }
-
-    //Loads a mesh from the VTK file located in the given filepath.
-    public void ImportFile(string filePath)
-    {
-        using (StreamReader streamReader = new StreamReader(filePath, Encoding.ASCII))
+        public Vector3[] Vertices { get; private set; }
+        public Vector3[] Normals { get; private set; }
+        public Vector3[] DeltaTangents { get; private set; }
+        public int[] Indices { get; private set; }
+        public int IndicesInFacet { get; private set; }
+        public Dictionary<string, Vector3> BoundingVertices { get; private set; } = new Dictionary<string, Vector3>()
         {
-            streamReader.ReadLine(); //DataFile version
-            streamReader.ReadLine(); //vtk output
+            { "minVertex", new Vector3()},
+            { "maxVertex", new Vector3()}
+        };
 
-            string encoding = streamReader.ReadLine();
-            if (!encoding.Equals("ASCII"))
+
+        private UnstructuredGridImporter unstructuredGridImporter = new UnstructuredGridImporter();
+        private PolyDataImporter polyDataImporter = new PolyDataImporter();
+
+        private bool dataflow = false;
+
+        public VTKImporter(bool IsDataflow)
+        {
+            dataflow = IsDataflow;
+        }
+
+        //Loads a mesh from the VTK file located in the given filepath.
+        public void ImportFile(string filePath)
+        {
+            using (StreamReader streamReader = new StreamReader(filePath, Encoding.ASCII))
             {
-                throw new Exception("Wrong file encoding!");
-            }
+                streamReader.ReadLine(); //DataFile version
+                streamReader.ReadLine(); //vtk output
 
-            string[] datatype = streamReader.ReadLine().Split(' ');
-            switch (datatype[1])
-            {
-                case "POLYDATA":
-                    polyDataImporter.LoadFile(streamReader);
-                    Indices = polyDataImporter.Indices;
-                    Vertices = polyDataImporter.Vertices;
-                    Normals = polyDataImporter.Normals;
-                    break;
-                case "UNSTRUCTURED_GRID":
-                    unstructuredGridImporter.ImportFile(streamReader, dataflow);
-                    Indices = unstructuredGridImporter.Indices;
-                    Vertices = unstructuredGridImporter.Vertices;
-                    Normals = unstructuredGridImporter.Normals;
-                    DeltaTangents = unstructuredGridImporter.DeltaTangents;
-                    IndicesInFacet = unstructuredGridImporter.IndicesInFacet;
-                    BoundingVertices = unstructuredGridImporter.BoundingVertices;
+                string encoding = streamReader.ReadLine();
+                if (!encoding.Equals("ASCII"))
+                {
+                    throw new Exception("Wrong file encoding!");
+                }
 
-                    break;
-                default:
-                    throw new Exception("Wrong file datatype!");
+                string[] datatype = streamReader.ReadLine().Split(' ');
+                switch (datatype[1])
+                {
+                    case "POLYDATA":
+                        polyDataImporter.LoadFile(streamReader);
+                        Indices = polyDataImporter.Indices;
+                        Vertices = polyDataImporter.Vertices;
+                        Normals = polyDataImporter.Normals;
+                        break;
+                    case "UNSTRUCTURED_GRID":
+                        unstructuredGridImporter.ImportFile(streamReader, dataflow);
+                        Indices = unstructuredGridImporter.Indices;
+                        Vertices = unstructuredGridImporter.Vertices;
+                        Normals = unstructuredGridImporter.Normals;
+                        DeltaTangents = unstructuredGridImporter.DeltaTangents;
+                        IndicesInFacet = unstructuredGridImporter.IndicesInFacet;
+                        BoundingVertices = unstructuredGridImporter.BoundingVertices;
+
+                        break;
+                    default:
+                        throw new Exception("Wrong file datatype!");
+                }
             }
         }
     }
