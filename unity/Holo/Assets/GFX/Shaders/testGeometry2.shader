@@ -21,7 +21,6 @@
 			struct v2g
 			{
 				float4 vertex : POSITION;
-				float3 normal : NORMAL;
 				float2 uv : TEXCOORD0;
 			};
 
@@ -41,7 +40,6 @@
 				v2g o;
 				o.vertex = v.vertex;
 				o.uv = TRANSFORM_TEX(v.texcoord, _MainTex);
-				o.normal = v.normal;
 				return o;
 			}
 
@@ -56,7 +54,7 @@
 				float3 normalFace = normalize(cross(normalize(IN[0].vertex), directionToCamera));				
 				float3 crossNormalFace = normalize(cross(normalFace, normalize(IN[0].vertex)));
 
-				fixed4 color = fixed4((normalize(IN[0].normal) + float3(1,1,1)) / 2, 1);
+				fixed4 color = fixed4(1,1,1,1);
 
 				
 			//-----
@@ -99,7 +97,7 @@
 			
 			fixed4 frag(g2f i) : SV_Target
 			{
-				fixed4 col = i.col;//tex2D(_MainTex, i.uv) * i.col;
+				fixed4 col = tex2D(_MainTex, i.uv) * i.col;
 				col.a = i.col.a;
 				return col;
 			}
