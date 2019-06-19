@@ -29,22 +29,31 @@ public class ModelsCollection : MonoBehaviour
 
     private void LoadBundlesFiles()
     {
+        // Set empty, but valid, state. This way we work OK even when indicated directory is not valid.
         bundlesFiles = new string[] { };
+        bundles = new AssetBundleLoader[] { };
+
         LocalConfig localConfig = Resources.Load<LocalConfig>("LocalConfig");
         if (localConfig == null || string.IsNullOrEmpty(localConfig.GetBundlesDirectory()))
         {
-            Debug.LogWarning("No Assets/Resources/LocalConfig.asset. Create it from Unity Editor by \"Holo -> Create Local Configuration\"");
+            Debug.LogWarning("No \"Assets/Resources/LocalConfig.asset\", or \"BundlesDirectory\" not set. Create LocalConfig.asset from Unity Editor by \"Holo -> Create Local Configuration\"");
             return;
         }
 
         string dir = localConfig.GetBundlesDirectory();
-        bundlesFiles = Directory.GetFiles(dir, "*" + bundleFileSuffix);
+        try {
+            bundlesFiles = Directory.GetFiles(dir, "*" + bundleFileSuffix);
+        } catch (Exception e) {
+            Debug.LogWarning("Cannot read directory \"" + dir + "\":" + e.Message);
+            return;
+        }
         if (bundlesFiles.Length == 0) {
             Debug.LogWarning("No asset bundles found in directory \"" + dir + "\". Make sure to set correct BundlesDirectory in LocalConfig in Assets/Resources/LocalConfig.asset.");
-        } else {
-            Debug.Log("Found " + bundlesFiles.Length.ToString() + " asset bundles in \"" + dir + "\".");                
+            return;
         }
 
+        // success, we found asset bundles
+        Debug.Log("Found " + bundlesFiles.Length.ToString() + " asset bundles in \"" + dir + "\".");                
         bundles = new AssetBundleLoader[bundlesFiles.Length];
     }
 
