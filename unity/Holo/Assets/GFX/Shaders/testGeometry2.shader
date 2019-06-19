@@ -56,7 +56,7 @@
 				float3 normalFace = normalize(cross(normalize(IN[0].vertex), directionToCamera));				
 				float3 crossNormalFace = normalize(cross(normalFace, normalize(IN[0].vertex)));
 
-				fixed4 color = fixed4(normalize(IN[0].normal), 1);
+				fixed4 color = fixed4((normalize(IN[0].normal) + float3(1,1,1)) / 2, 1);
 
 				
 			//-----
@@ -99,7 +99,7 @@
 			
 			fixed4 frag(g2f i) : SV_Target
 			{
-				fixed4 col = tex2D(_MainTex, i.uv) * i.col;
+				fixed4 col = i.col;//tex2D(_MainTex, i.uv) * i.col;
 				col.a = i.col.a;
 				return col;
 			}
