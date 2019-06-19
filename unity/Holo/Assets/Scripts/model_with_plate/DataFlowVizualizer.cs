@@ -50,18 +50,6 @@ public class DataFlowVizualizer : MonoBehaviour
 
         for (int frame = 0; frame < frameCount; frame++)
         {
-            /*
-            vertices = new Vector3[pointsCount * 3];
-            Array.Copy(points[frame].ToArray(), vertices, pointsCount);
-            Array.Copy(endPoints[frame].ToArray(), 0, vertices, pointsCount * 1, pointsCount);
-            Array.Copy(points[frame].ToArray(), 0, vertices, pointsCount * 2, pointsCount);
-            //put vector data inside normals data
-            Vector3[] vectorsAsNormals = new Vector3[pointsCount * 3];
-            Array.Copy(vectors[frame].ToArray(), vectorsAsNormals, pointsCount);
-            Array.Copy(vectors[frame].ToArray(), 0, vectorsAsNormals, pointsCount * 1, pointsCount);
-            Array.Copy(vectors[frame].ToArray(), 0, vectorsAsNormals, pointsCount * 2, pointsCount);
-            */
-
             vertices = points[frame].ToArray();
             vectorsAsNormals = vectors[frame].ToArray();
 
