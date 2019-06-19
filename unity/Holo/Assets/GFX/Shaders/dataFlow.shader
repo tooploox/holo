@@ -61,7 +61,7 @@
 				float3 crossNormalFace = normalize(cross(normalFace, nNormal));
 				float2 offset = -float2(0., _Time.z);
 				
-				fixed4 endColor = (fixed4(nNormal, 1) + fixed4(1,1,1,0)) * fixed4(.5,.5,.5,1);
+				fixed4 endColor = fixed4(fixed3(nNormal + fixed3(1,1,1)) / 2, 1);
 				fixed4 startColor = endColor * fixed4(.8, .8, .8, 1.);
 				/*
 				if(IN[0].tangent.x == 0){
