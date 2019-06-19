@@ -48,8 +48,8 @@ public class DataFlowVizualizer : MonoBehaviour
             vectorsAsNormals[i] = Vector3.zero;
         }
         //if base mesh should looks like first blendShape, now vertices in base mesh are 0,0,0:
-        //Array.Copy(points[0].ToArray(), vertices, points[0].Count);
-        //Array.Copy(endPoints[0].ToArray(), 0, vertices, points[0].Count, endPoints[0].Count);
+        //vertices = points[0].ToArray();
+        //vectorsAsNormals = vectors[0].ToArray();
 
         Mesh mesh = new Mesh();
         mesh.vertices = vertices; // baseVertices;
@@ -59,9 +59,7 @@ public class DataFlowVizualizer : MonoBehaviour
         {
             vertices = points[frame].ToArray();
             vectorsAsNormals = vectors[frame].ToArray(); //put vector data inside normals data
-
-            //add blendShape
-            mesh.AddBlendShapeFrame(frame.ToString(), 100f, vertices, vectorsAsNormals, null); //last null is a tangentNormal, we can put there alpha and beta data
+            mesh.AddBlendShapeFrame(frame.ToString(), 100f, vertices, vectorsAsNormals, null); //add blendShape; last null is a tangentNormal, we can put there alpha and beta data
         }
 
         if (points[0].Count != endPoints[0].Count)
