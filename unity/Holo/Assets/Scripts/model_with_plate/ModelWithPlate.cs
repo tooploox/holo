@@ -15,8 +15,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public GameObject ButtonsModel;
     public GameObject ButtonsModelPreview;
     public GameObject PlateAnimated;
-    public Material MaterialPreview;
-    public Material MaterialNonPreview;
+    public Material DefaultModelMaterial;
     public Transform InstanceParent;
     public CompoundButton ButtonTogglePlay;
     public CompoundButton ButtonTranslate;
@@ -297,9 +296,8 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             Destroy(animator);
         }
 
-        // Assign material, designating preview / not preview
-        // TODO: in the actual application, the "preview" flag should load a simpler mesh
-        skinnedMesh.sharedMaterial = newIsPreview ? MaterialPreview : MaterialNonPreview;
+        // Assign material
+        skinnedMesh.sharedMaterial = DefaultModelMaterial;
 
         //// Add Direction indicator for loaded model
         //instance.AddComponent<DirectionIndicator>();
