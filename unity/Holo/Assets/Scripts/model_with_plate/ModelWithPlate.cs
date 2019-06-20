@@ -51,7 +51,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         handDraggable = gameObject.AddComponent<HandDraggable>();
         handDraggable.RotationMode = HandDraggable.RotationModeEnum.LockObjectRotation;
 
-        ModelClipPlaneCtrl = ModelClipPlane.GetComponentInChildren<ModelClippingPlaneControl>(); 
+        ModelClipPlaneCtrl = ModelClipPlane.GetComponentInChildren<ModelClippingPlaneControl>();
+        // Turn off the clipping plane on start
+        DefaultModelMaterial.DisableKeyword("CLIPPING_ON");
 
         RefreshUserInterface();
         InitializeAddButtons();
