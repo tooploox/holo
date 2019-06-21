@@ -13,12 +13,12 @@ namespace ModelImport.VTKImport
         public Vector3[] DeltaTangents { get; private set; }
         public int[] Indices { get; private set; }
         public int IndicesInFacet { get; private set; }
-        private bool dataflow = false;
         public Dictionary<string, Vector3> BoundingVertices { get; private set; } = new Dictionary<string, Vector3>()
         {
             { "minVertex", new Vector3()},
             { "maxVertex", new Vector3()}
         };
+        private bool dataflow = false;
 
         //Imports a single file. Checks if it's a body mesh or dataflow object.
         public void ImportFile(StreamReader streamReader, bool IsDataflow)
@@ -214,11 +214,21 @@ namespace ModelImport.VTKImport
             }
         }
 
-        // Sets dataflow indices. We use single points for dataflow so it's an array of incrementing numbers range 0, Vertices.Length.
+        // Sets dataflow indices. We use single vertices for dataflow so it's an array of incrementing numbers ranged from 0, Vertices.Length. 
+        // Each point is a triangle so indices array is three times longer, each triangle pointing to only one vertex.
         private void SetDataflowIndices()
         {
-            IndicesInFacet = 1;
-            Indices = Enumerable.Range(0, Vertices.Length).ToArray();
+            IndicesInFacet = 3;
+            Indices = new int[Vertices.Length * 3];
+            int currentVertexNumber = 0;
+            for (int i = 0; i < Indices.Length; i += 3)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    Indices[i+j] = currentVertexNumber;
+                }
+                currentVertexNumber++;
+            }
         }
     }
 }

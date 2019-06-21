@@ -29,11 +29,11 @@ public class AssetBundleCreator
         {
             AssetDatabase.CreateFolder("Assets", modelName);
         }
-        assetsPath.Add("mesh", rootAssetsDir + @"/" + objectName + ".mesh");
-        AssetDatabase.CreateAsset(gameObjectData.Item1, assetsPath["mesh"]);
+        assetsPath.Add(objectName + "_mesh", rootAssetsDir + @"/" + objectName + ".asset");
+        AssetDatabase.CreateAsset(gameObjectData.Item1, assetsPath[objectName + "_mesh"]);
 
-        assetsPath.Add("GameObject", rootAssetsDir + @"/" + objectName + ".prefab");
-        PrefabUtility.SaveAsPrefabAsset(gameObjectData.Item2, assetsPath["GameObject"]);
+        assetsPath.Add(objectName + "_GameObject", rootAssetsDir + @"/" + objectName + ".prefab");
+        PrefabUtility.SaveAsPrefabAsset(gameObjectData.Item2, assetsPath[objectName + "_GameObject"]);
     }
     
     // Create the array of bundle build details.

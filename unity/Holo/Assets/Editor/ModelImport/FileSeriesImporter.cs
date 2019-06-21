@@ -11,24 +11,28 @@ namespace ModelImport
     public class FileSeriesImporter
     {
         public GameObject ModelGameObject { get; private set; }
-        public Mesh ModelMesh { get; private set; } = new Mesh();
+        public Mesh ModelMesh { get; private set; }
 
+        public GameObject[] gameObjectArray;
+        public Mesh[] meshArray;
         private string[] filePaths;
         private string extension;
-
         private FileImporter fileImporter;
         private Dictionary<string, Vector3> boundingVertices = new Dictionary<string, Vector3>();
-        bool dataflow = false;
+        private bool dataflow = false;
+        
         // Object constructor, initiates file series import.
         public void ImportData(string fileSeriesDirectory, string gameObjectName)
         {
-            GameObject.DestroyImmediate(ModelGameObject);
-            ModelMesh.Clear();
             ModelGameObject = new GameObject
             {
                 name = gameObjectName
             };
-            if (gameObjectName.Contains("dataflow")) dataflow = true;
+            ModelMesh = new Mesh();
+            if (gameObjectName.Contains("dataflow"))
+            {
+                dataflow = true;
+            }
             GetFilepaths(fileSeriesDirectory);
             ImportFiles();
             ConfigureMesh();
@@ -45,7 +49,6 @@ namespace ModelImport
         private void ImportFiles()
         {
             fileImporter = new FileImporter(extension, dataflow);
-            ModelMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
 
             //Configuring progress bar
             float progressChunk = (float) 1 / filePaths.Length;
@@ -66,7 +69,7 @@ namespace ModelImport
                 }
                 CheckTopology(i);
                 UpdateBounds(firstMesh);
-                if (fileImporter.IndicesInFacet == 1)
+                if (dataflow)
                 {
                     ModelMesh.AddBlendShapeFrame(Path.GetFileName(filePaths[i]), 100f, fileImporter.Vertices, fileImporter.Normals, fileImporter.DeltaTangents);
                 }
@@ -91,15 +94,7 @@ namespace ModelImport
         private void InitiateMesh()
         {
             ModelMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-            if (fileImporter.IndicesInFacet == 1)
-            {
-                ModelMesh.vertices = fileImporter.BaseVertices;
-                ModelMesh.normals = fileImporter.BaseVertices;
-                ModelMesh.tangents = fileImporter.BaseTangents;
-                ModelMesh.SetIndices(fileImporter.Indices, MeshTopology.Points, 0);
-                ModelMesh.uv = new Vector2[fileImporter.Vertices.Length];
-            }
-            else if (fileImporter.IndicesInFacet == 2)
+            if (fileImporter.IndicesInFacet == 2)
             {
                 ModelMesh.vertices = fileImporter.BaseVertices;
                 ModelMesh.SetIndices(fileImporter.Indices, MeshTopology.Lines, 0);
@@ -108,10 +103,16 @@ namespace ModelImport
             {
                 ModelMesh.vertices = fileImporter.BaseVertices;
                 ModelMesh.triangles = fileImporter.Indices;
+                ModelMesh.normals = fileImporter.BaseVertices;
             }
             else
             {
                 throw new Exception("Wrong number of indices in a facet!");
+            }
+            if (dataflow)
+            {
+                ModelMesh.tangents = fileImporter.BaseTangents;
+                ModelMesh.uv = new Vector2[fileImporter.Vertices.Length];
             }
         }
 
@@ -145,8 +146,7 @@ namespace ModelImport
         {
             SkinnedMeshRenderer skinnedMesh = ModelGameObject.AddComponent<SkinnedMeshRenderer>();
             skinnedMesh.sharedMesh = ModelMesh;
-            skinnedMesh.sharedMaterial = Resources.Load<Material>("MRTK_Standard_Gray");
-            if (fileImporter.IndicesInFacet == 3)
+            if (fileImporter.IndicesInFacet == 3 & !dataflow)
             {
                 skinnedMesh.sharedMesh.RecalculateNormals();
             }
