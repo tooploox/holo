@@ -8,6 +8,7 @@ using HoloToolkit.Unity;
 using HoloToolkit.Unity.UX;
 using HoloToolkit.Unity.Buttons;
 using HoloToolkit.Unity.InputModule;
+using HoloToolkit.Unity.InputModule.Utilities.Interactions;
 
 public class ModelWithPlate : MonoBehaviour, IClickHandler
 {
@@ -398,9 +399,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         if (scaleBoxRigActiveOld != scaleBoxRigActiveNew)
         {
             if (scaleBoxRigActiveNew) {
-                GetComponent<BoundingBoxRig>().Activate();
+                GetComponent<TwoHandManipulatable>().enabled = true;
             } else {
-                GetComponent<BoundingBoxRig>().Deactivate();
+                GetComponent<TwoHandManipulatable>().enabled = false;
             }
         }
     }
