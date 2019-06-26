@@ -19,6 +19,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public GameObject ButtonsModel;
     public GameObject ButtonsModelPreview;
     public GameObject PlateAnimated;
+    public GameObject LayersSection;
     public Material DefaultModelMaterial;
     public Material DataVisualizationMaterial;
     public Transform InstanceParent;
@@ -59,6 +60,8 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         ModelClipPlaneCtrl = ModelClipPlane.GetComponentInChildren<ModelClippingPlaneControl>();
         // Turn off the clipping plane on start
         DefaultModelMaterial.DisableKeyword("CLIPPING_ON");
+
+        LayersSection.SetActive(false);
 
         RefreshUserInterface();
         InitializeAddButtons();
@@ -118,7 +121,8 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             case "ButtonTranslate": ClickChangeTransformationState(TransformationState.Translate); break;
             case "ButtonRotate": ClickChangeTransformationState(TransformationState.Rotate); break;
             case "ButtonScale": ClickChangeTransformationState(TransformationState.Scale); break;
-            case "ButtonLayers": ClickChangeLayerState(); break;
+            case "ButtonLayers": ClickToggleLayersState(); break;
+            case "Layer1": ClickChangeLayerState(); break;
 
             default:
                 {
@@ -183,13 +187,57 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         LoadInstance(instanceIndex.Value, false);
     }
 
+    public void ClickToggleLayersState()
+    {
+        LayersSection.SetActive(!LayersSection.activeSelf);
+        if (!LayersSection.activeSelf) {
+            UnloadDataLayerInstance();
+        }
+
+        CompoundButtonText text = LayersSection.GetComponentInChildren<CompoundButtonText>();
+        if (text == null)
+        {
+            Debug.LogWarning("Missing CompoundButtonText");
+            return;
+        }
+        TextMesh textMesh = text.TextMesh;
+        if (textMesh == null)
+        {
+            Debug.LogWarning("Missing TextMesh");
+            return;
+        }
+        // using material, not sharedMaterial, deliberately: we only change color of this material instance
+        Color newColor = dataLayerInstance != null ? ButtonActiveColor : ButtonInactiveColor;
+        //Debug.Log("changing color of " + button.name + " to " + newColor.ToString());
+        // both _EmissiveColor and _Color (Albedo in editor) should be set to make proper effect.
+        textMesh.color = newColor;
+    }
+
     private void ClickChangeLayerState()
     {
         //TODO: "dataflow" should be extracted from internal state / data / index of instance
         if (dataLayerInstance != null)
             UnloadDataLayerInstance();
         else
-            LoadDataLayerInstance(instanceIndex.Value, "dataflow"); 
+            LoadDataLayerInstance(instanceIndex.Value, "dataflow");
+
+        CompoundButtonText text = LayersSection.GetComponentInChildren<CompoundButtonText>();
+        if (text == null)
+        {
+            Debug.LogWarning("Missing CompoundButtonText");
+            return;
+        }
+        TextMesh textMesh = text.TextMesh;
+        if (textMesh == null)
+        {
+            Debug.LogWarning("Missing TextMesh");
+            return;
+        }
+        // using material, not sharedMaterial, deliberately: we only change color of this material instance
+        Color newColor = dataLayerInstance != null ? ButtonActiveColor : ButtonInactiveColor;
+        //Debug.Log("changing color of " + button.name + " to " + newColor.ToString());
+        // both _EmissiveColor and _Color (Albedo in editor) should be set to make proper effect.
+        textMesh.color = newColor;
     }
 
     /* All the variables below are non-null if and only if after 

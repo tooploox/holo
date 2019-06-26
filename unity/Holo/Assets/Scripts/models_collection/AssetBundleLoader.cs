@@ -8,8 +8,7 @@ public class AssetBundleLoader
     private AssetBundle assetBundle;
     private string bundlePath;
 
-    private GameObject gameObject;
-    private Mesh mesh;
+    private List<string> dataLayers;
 
     public void LoadBundle(string bundlePath)
     {
@@ -20,6 +19,16 @@ public class AssetBundleLoader
             return;
         }
         assetBundle = loadedAssetBundle;
+        dataLayers = GetDataLayers();
+    }
+
+    private List<string> GetDataLayers()
+    {
+        var selectedNames = assetBundle.GetAllAssetNames()
+                                .Where(name => name.EndsWith(".prefab"))
+                                .Where(name => !name.EndsWith("_body.prefab"));
+        
+        return new List<string>(selectedNames);
     }
 
     public GameObject LoadGameObject(string sufix)
@@ -28,8 +37,7 @@ public class AssetBundleLoader
 
         string endPattern = "_" + sufix + ".prefab";
         string gameObjectPath = assetPathList.Single(path => path.EndsWith(endPattern));
-        gameObject = assetBundle.LoadAsset<GameObject>(gameObjectPath);
-        return gameObject;
+        return assetBundle.LoadAsset<GameObject>(gameObjectPath);
     }
 
     public GameObject LoadMainGameObject()
