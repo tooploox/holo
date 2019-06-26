@@ -22,13 +22,19 @@ public class AssetBundleLoader
         assetBundle = loadedAssetBundle;
     }
 
-    public GameObject LoadMainGameObject()
+    public GameObject LoadGameObject(string sufix)
     {
         List<string> assetPathList = assetBundle.GetAllAssetNames().ToList();
 
-        string gameObjectPath = assetPathList.Single(path => path.EndsWith(".prefab"));
+        string endPattern = "_" + sufix + ".prefab";
+        string gameObjectPath = assetPathList.Single(path => path.EndsWith(endPattern));
         gameObject = assetBundle.LoadAsset<GameObject>(gameObjectPath);
         return gameObject;
+    }
+
+    public GameObject LoadMainGameObject()
+    {
+        return LoadGameObject("body");
     }
 
     public GameObject InstantiateMainGameObject()

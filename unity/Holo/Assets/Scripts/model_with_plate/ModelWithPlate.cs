@@ -4,6 +4,8 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
+using HoloToolkit.Examples.InteractiveElements;
+
 using HoloToolkit.Unity;
 using HoloToolkit.Unity.UX;
 using HoloToolkit.Unity.Buttons;
@@ -13,10 +15,12 @@ using HoloToolkit.Unity.InputModule.Utilities.Interactions;
 public class ModelWithPlate : MonoBehaviour, IClickHandler
 {
     /* Public fields that should be set in Unity Editor */
+    public GameObject AnimationSpeedSlider;
     public GameObject ButtonsModel;
     public GameObject ButtonsModelPreview;
     public GameObject PlateAnimated;
     public Material DefaultModelMaterial;
+    public Material DataVisualizationMaterial;
     public Transform InstanceParent;
     public CompoundButton ButtonTogglePlay;
     public CompoundButton ButtonTranslate;
@@ -114,6 +118,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             case "ButtonTranslate": ClickChangeTransformationState(TransformationState.Translate); break;
             case "ButtonRotate": ClickChangeTransformationState(TransformationState.Rotate); break;
             case "ButtonScale": ClickChangeTransformationState(TransformationState.Scale); break;
+            case "ButtonLayers": ClickChangeLayerState(); break;
 
             default:
                 {
@@ -134,6 +139,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     {
         if (instanceAnimation != null) {
             instanceAnimation.TogglePlay();
+            if(dataLayerInstanceAnimation != null) {
+                dataLayerInstanceAnimation.TogglePlay();
+            }
             RefreshUserInterface();
         }
         else {
@@ -145,6 +153,10 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     {
         if (instanceAnimation != null) {
             instanceAnimation.CurrentTime = 0f;
+            if(dataLayerInstanceAnimation != null)
+            {
+                dataLayerInstanceAnimation.CurrentTime = 0f;
+            }
         } else {
             Debug.LogWarning("Rewind button clicked, but no model loaded");
         }
@@ -171,11 +183,22 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         LoadInstance(instanceIndex.Value, false);
     }
 
+    private void ClickChangeLayerState()
+    {
+        //TODO: "dataflow" should be extracted from internal state / data / index of instance
+        if (dataLayerInstance != null)
+            UnloadDataLayerInstance();
+        else
+            LoadDataLayerInstance(instanceIndex.Value, "dataflow"); 
+    }
+
     /* All the variables below are non-null if and only if after 
      * LoadInstance call (and before UnloadInstance). */
     private int? instanceIndex; // index to ModelsCollection
     private BlendShapeAnimation instanceAnimation;
+    private BlendShapeAnimation dataLayerInstanceAnimation;
     private GameObject instance;
+    private GameObject dataLayerInstance;
     private GameObject instanceTransformation;
     private bool instanceIsPreview = false;
 
@@ -207,12 +230,15 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     private void UnloadInstance(bool refreshUi = true)
     {
         // First release previous instance
+        UnloadDataLayerInstance();
+
         if (instance != null) {
             Destroy(instance);
             Destroy(instanceTransformation);
             Destroy(rotationBoxRig);
 
             instanceIndex = null;
+            dataLayerInstance = null;
             instance = null;
             instanceTransformation = null;
             instanceAnimation = null;
@@ -225,6 +251,15 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         }
     }
 
+    private void UnloadDataLayerInstance()
+    {
+        if (dataLayerInstance != null)
+            Destroy(dataLayerInstance);
+
+        dataLayerInstance = null;
+        dataLayerInstanceAnimation = null;
+    }
+
     /* Resulting instance will be in box of max size instanceMaxSize, 
      * with center in instanceMove above plate origin.
      * This should match the plate designed sizes.
@@ -232,6 +267,68 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     const float instanceMaxSize = 1.3f;
     const float expandedPlateHeight = 0.4f;
     Vector3 instanceMove = new Vector3(0f, expandedPlateHeight + instanceMaxSize / 2f, 0f); // constant
+
+    private void LoadDataLayerInstance(int currentInstanceIndex, string dataLayerSufix)
+    {
+        UnloadDataLayerInstance();
+
+        GameObject template = ModelsCollection.Singleton.BundleLoadDataLayer(currentInstanceIndex, dataLayerSufix);
+
+        dataLayerInstance = Instantiate<GameObject>(template, instance.transform);
+
+        dataLayerInstanceAnimation = dataLayerInstance.GetComponent<BlendShapeAnimation>();
+        if (dataLayerInstanceAnimation == null)
+        {
+            // TODO: this should be changed into "throw new...", not a warning.
+            // We should settle whether the stored object has or has not BlendShapeAnimation (I vote not,
+            // but any decision is fine, just stick to it).
+            // After new import STL->GameObject is ready.
+            Debug.LogWarning("BlendShapeAnimation component not found inside " + currentInstanceIndex + ", adding");
+            dataLayerInstanceAnimation = dataLayerInstance.AddComponent<BlendShapeAnimation>();
+        }
+
+        SkinnedMeshRenderer skinnedMesh = dataLayerInstance.GetComponent<SkinnedMeshRenderer>();
+        SkinnedMeshRenderer mainInstanceSkinnedMesh = instance.GetComponent<SkinnedMeshRenderer>();
+
+
+        int blendShapesCount = skinnedMesh.sharedMesh.blendShapeCount;
+        int mainBlendShapesCount = mainInstanceSkinnedMesh.sharedMesh.blendShapeCount;
+        if (blendShapesCount != mainBlendShapesCount)
+        {
+            Debug.LogWarningFormat("Data layer has different number of BlendShapes [{0}] than main model [{1}]",
+                blendShapesCount, mainBlendShapesCount);
+        }
+
+        if (blendShapesCount != 0)
+        {
+            dataLayerInstanceAnimation.Speed = instanceAnimation.Speed;
+        }
+        else
+        {
+            Debug.LogWarning("Model has no blend shapes " + currentInstanceIndex);
+        }
+
+        Animator animator = instance.GetComponent<Animator>();
+        if (animator != null)
+        {
+            Debug.LogWarning("Animator component found but not wanted inside " + currentInstanceIndex + ", removing");
+            Destroy(animator);
+        }
+
+        // Assign material
+        skinnedMesh.sharedMaterial = DataVisualizationMaterial;
+
+        bool playingState = instanceAnimation.Playing;
+
+        dataLayerInstanceAnimation.Playing = false;
+        instanceAnimation.Playing = false;
+
+        instanceAnimation.CurrentTime = 0.0f;
+        dataLayerInstanceAnimation.CurrentTime = instanceAnimation.CurrentTime;
+        instanceAnimation.Playing = playingState;
+        dataLayerInstanceAnimation.Playing = playingState;
+        RefreshUserInterface();
+    }
 
     // Load new animated shape.
     // newInstanceIndex is an index to ModelsCollection.
@@ -301,19 +398,6 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
         // Assign material
         skinnedMesh.sharedMaterial = DefaultModelMaterial;
-
-        //// Add Direction indicator for loaded model
-        //instance.AddComponent<DirectionIndicator>();
-        //DirectionIndicator directionInd = instance.GetComponent<DirectionIndicator>();
-        //directionInd.Cursor = GameObject.Find("DefaultCursor");
-        //directionInd.DirectionIndicatorObject = Resources.Load(
-        //    "Assets/GFX/UI/HandDetectedFeedbackMod.prefab", typeof(GameObject)) as GameObject;
-        //directionInd.DirectionIndicatorColor.r = 61.0f;
-        //directionInd.DirectionIndicatorColor.g = 206.0f;
-        //directionInd.DirectionIndicatorColor.b = 200.0f;
-        //directionInd.VisibilitySafeFactor = -0.5f;
-        //directionInd.MetersFromCursor = 0.1f;
-        //directionInd.Awake();
 
         instanceIndex = newInstanceIndex;
         instanceIsPreview = newIsPreview;
@@ -407,14 +491,12 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     }
 
     // TODO update time slider now
-    /*
-    private void Update()
-    {
-        if (playing && blendShapeAnimation != null) {
-            timeSlider.value = blendShapeAnimation.CurrentTime;
-        }
-    }
-    */
+    //private void Update()
+    //{
+    //    if (instanceAnimation.Playing) {
+    //        instance.GetComponent<BlendShapeAnimation>().Speed = AnimationSpeedSlider.GetComponent<SliderGestureControl>().SliderValue;
+    //    }
+    //}
 
     // TODO: read time slider now
     /*
