@@ -14,7 +14,7 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
 
     BoundingBoxRig clipPlaneQuadBbox;
     HandDraggable HandTranslation;
-    
+
     private enum ClipPlaneState
     {
         Disabled,
@@ -70,15 +70,17 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
 
         if (ClippingPlaneState == ClipPlaneState.Active)
         {
-            modelRenderer.sharedMaterial.EnableKeyword("CLIPPING_ON");
-            
+            modelWithPlate.DefaultModelMaterial.EnableKeyword("CLIPPING_ON");
+            modelWithPlate.DataVisualizationMaterial.EnableKeyword("CLIPPING_ON");
+
             ButtonClippingPlaneTranslation.gameObject.SetActive(true);
             ButtonClippingPlaneRotation.gameObject.SetActive(true);
-            modelWithPlate.SetButtonState(ButtonClippingPlane, true); 
+            modelWithPlate.SetButtonState(ButtonClippingPlane, true);
         }
         else
         {
-            modelRenderer.sharedMaterial.DisableKeyword("CLIPPING_ON");
+            modelWithPlate.DefaultModelMaterial.DisableKeyword("CLIPPING_ON");
+            modelWithPlate.DataVisualizationMaterial.DisableKeyword("CLIPPING_ON");
 
             clipPlaneQuadBbox.Deactivate();
             ButtonClippingPlaneTranslation.gameObject.SetActive(false);
@@ -109,7 +111,7 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
         else
         {
             clipPlaneQuadBbox.Activate();
-        }        
+        }
     }
 
 
