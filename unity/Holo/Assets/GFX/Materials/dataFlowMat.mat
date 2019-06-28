@@ -9,7 +9,7 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: dataFlowMat
   m_Shader: {fileID: 4800000, guid: 44e85b36c6b520441b4042b277e13fe9, type: 3}
-  m_ShaderKeywords: 
+  m_ShaderKeywords: CLIPPING_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
