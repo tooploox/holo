@@ -1,32 +1,7 @@
-﻿/* Shader for Holo model.
-
-   Using Unity "shader variants" https://docs.unity3d.com/Manual/SL-MultipleProgramVariants.html
-   to have optional clipping plane in the shader.
-
-   Note that we cannot use surface shaders
-   ( https://docs.unity3d.com/Manual/SL-SurfaceShaders.html ) for this.
-   There are 2 approaches to two-sided lighting:
-
-   - Separate logic for 2 passes (1st pass renders front faces,
-     2nd pass renders back faces with inverted normals).
-     This cannot work with surface shader, as surface shader generates multiple
-     passes for us (trying to use "Pass" with surface shader will not compile).
-
-     This is the approach we use now.
-
-   - Conditionally invert normals in fragment shader (where we know whether
-     the face is front or back facing).
-
-     We don't use this approach now, but this may change in the future.
-     TODO: try it.
-
-     You cannot do this with surface shaders,
-     since you can only revert normal in surface shader vertex function,
-     but it's too soon,
-     at this point you don't know whether it's front or back face.
+﻿/* Copy of HoloModel.shader .
 */
 
-Shader "Holo/Model (Opaque)"
+Shader "Holo/Model (Transparent)"
 {
     // Show values to edit in inspector
     Properties
@@ -41,8 +16,12 @@ Shader "Holo/Model (Opaque)"
     {
         //the material is completely non-transparent and is rendered at the same time as the other opaque geometry
         Tags {
-            "RenderType" = "Opaque"
-            "Queue" = "Geometry"
+            // "RenderType" = "Opaque"
+            // "Queue" = "Geometry"
+            "Queue" = "Transparent"
+            "RenderType" = "Transparent"
+            "IgnoreProjector" = "True"
+
             // LightMode Vertex defines proper unity_LightColor[] uniforms
             "LightMode" = "Vertex"
         }
@@ -52,6 +31,8 @@ Shader "Holo/Model (Opaque)"
             Name "Front Facing"
 
             Cull Back
+            ZWrite Off
+            Blend SrcAlpha OneMinusSrcAlpha
 
             CGPROGRAM
             // See https://docs.unity3d.com/Manual/SL-MultipleProgramVariants.html
@@ -74,6 +55,8 @@ Shader "Holo/Model (Opaque)"
             Name "Back Facing"
 
             Cull Front
+            ZWrite Off
+            Blend SrcAlpha OneMinusSrcAlpha
 
             CGPROGRAM
             // See https://docs.unity3d.com/Manual/SL-MultipleProgramVariants.html
