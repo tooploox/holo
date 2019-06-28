@@ -123,6 +123,12 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             case "ButtonScale": ClickChangeTransformationState(TransformationState.Scale); break;
             case "ButtonLayers": ClickToggleLayersState(); break;
             case "Layer1": ClickChangeLayerState(); break;
+            case "ButtonColorMapJet": SetColorMap("jet"); break;
+            case "ButtonColorMapViridis": SetColorMap("viridis"); break;
+            case "ButtonColorMapMagma": SetColorMap("magma"); break;
+            case "ButtonColorMapCividis": SetColorMap("cividis"); break;
+            case "ButtonColorMapPlasma": SetColorMap("plasma"); break;
+            case "ButtonColorMapInferno": SetColorMap("inferno"); break;
 
             default:
                 {
@@ -238,6 +244,14 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         //Debug.Log("changing color of " + button.name + " to " + newColor.ToString());
         // both _EmissiveColor and _Color (Albedo in editor) should be set to make proper effect.
         textMesh.color = newColor;
+    }
+
+    private void SetColorMap(string colorMapName)
+    {
+        //Texture2D t = (Texture2D)AssetDatabase.LoadAssetAtPath("Assets/Textures/texture.jpg", typeof(Texture2D));
+        Texture2D colorMap;
+        colorMap = Resources.Load<Texture2D>("Colormaps/" + colorMapName);
+        DataVisualizationMaterial.SetTexture("_ColorMap", colorMap);
     }
 
     /* All the variables below are non-null if and only if after 
