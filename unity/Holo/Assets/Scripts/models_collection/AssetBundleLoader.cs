@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System;
 using System.IO;
 using System.Linq;
 using UnityEngine;
@@ -10,8 +11,9 @@ public class AssetBundleLoader
 
     private List<string> dataLayers;
 
-    public void LoadBundle(string bundlePath)
+    public void LoadBundle(string aBundlePath)
     {
+        bundlePath = aBundlePath;
         var loadedAssetBundle = AssetBundle.LoadFromFile(bundlePath);
         if (loadedAssetBundle == null)
         {
@@ -36,7 +38,17 @@ public class AssetBundleLoader
         List<string> assetPathList = assetBundle.GetAllAssetNames().ToList();
 
         string endPattern = "_" + sufix + ".prefab";
-        string gameObjectPath = assetPathList.Single(path => path.EndsWith(endPattern));
+        string gameObjectPath;
+        try
+        {
+            gameObjectPath = assetPathList.Single(path => path.EndsWith(endPattern));
+        } catch (InvalidOperationException e)
+        {
+            Debug.LogError("Probably no path with suffix " + endPattern + " in the asset bundle " + bundlePath + ", exception " + e.Message);
+            // Since the caller probably doesn't except null result, above makes LogError instead of LogWarning
+            return null;
+        }
+
         return assetBundle.LoadAsset<GameObject>(gameObjectPath);
     }
 
