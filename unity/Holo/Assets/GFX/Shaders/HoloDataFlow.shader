@@ -1,4 +1,4 @@
-﻿Shader "Holo/dataflow"
+﻿Shader "Holo/DataFlow"
 {
 	Properties
 	{
