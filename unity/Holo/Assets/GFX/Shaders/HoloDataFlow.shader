@@ -15,10 +15,18 @@
 		Pass
 		{
 			CGPROGRAM
+			// See https://docs.unity3d.com/Manual/SL-MultipleProgramVariants.html
+			// about Unity "shader variants".
+			#pragma shader_feature CLIPPING_OFF CLIPPING_ON
+
 			#pragma vertex vert
 			#pragma fragment frag
 			#pragma geometry geom
 			#include "UnityCG.cginc"
+
+			#ifdef CLIPPING_ON
+			float4 _Plane;
+			#endif
 
 			struct v2g
 			{
@@ -34,6 +42,8 @@
 				float2 uv : TEXCOORD0;
 				float4 col : COLOR;
 				float4 tan : TEXCOORD1;
+				// Used by clip plane in fragment shader
+				float4 vertexWorld : TEXCOORD2;
 			};
 
 			sampler2D _MainTex;
@@ -57,106 +67,140 @@
 			void geom(triangle v2g IN[3], inout TriangleStream<g2f> tristream)
 			{
 				g2f o;
-				
+
 				float3 nNormal = normalize(IN[0].normal); //normalized normal
 				float3 eyePosition = UnityObjectToViewPos(IN[0].vertex.xyz);
 				float directionToCamera = -normalize(eyePosition);
 				float3 normalFace = normalize(cross(nNormal, directionToCamera));
-				
+
 				float3 crossNormalFace = normalize(cross(normalFace, nNormal));
 				float2 offset = -float2(0., _Time.z);
-				
+
 				fixed4 endColor = fixed4(1,1,1,1);
 				fixed4 startColor = fixed4(.8, .8, .8, 1.);
-				
+
 				float _WeightFactor = _ScaleFactor * 0.45;
 				
+				float4 vertexObject;
+
 			//-----
-				o.pos = UnityObjectToClipPos(IN[0].vertex - float4(normalFace, 0) * _WeightFactor); //1
+				vertexObject = IN[0].vertex - float4(normalFace, 0) * _WeightFactor;
+				o.pos = UnityObjectToClipPos(vertexObject); //1
 				o.uv = float2(0.,0.) + offset;
 				o.col = startColor;
 				o.tan = IN[0].tangent;
-				tristream.Append(o);
-				
-				o.pos = UnityObjectToClipPos(IN[0].vertex - float4(crossNormalFace, 0) * _WeightFactor); //2
-				o.uv = float2(1.,0.) + offset;
-				o.col = startColor;
+				o.vertexWorld = mul(unity_ObjectToWorld, vertexObject);
 				tristream.Append(o);
 
-				o.pos = UnityObjectToClipPos(IN[0].vertex + float4(normalize(IN[0].normal) * _ScaleFactor, 1));
+				vertexObject = IN[0].vertex - float4(crossNormalFace, 0) * _WeightFactor;
+				o.pos = UnityObjectToClipPos(vertexObject); //2
+				o.uv = float2(1.,0.) + offset;
+				o.col = startColor;
+				o.vertexWorld = mul(unity_ObjectToWorld, vertexObject);
+				tristream.Append(o);
+
+				vertexObject = IN[0].vertex + float4(normalize(IN[0].normal) * _ScaleFactor, 1);
+				o.pos = UnityObjectToClipPos(vertexObject);
 				o.uv = float2(.5,2.) + offset;
 				o.col = endColor;
+				o.vertexWorld = mul(unity_ObjectToWorld, vertexObject);
 				tristream.Append(o);
-				
+
 				tristream.RestartStrip();
-				
+
 			//-----
-				o.pos = UnityObjectToClipPos(IN[0].vertex - float4(crossNormalFace, 0) * _WeightFactor); //2
+				vertexObject = IN[0].vertex - float4(crossNormalFace, 0) * _WeightFactor;
+				o.pos = UnityObjectToClipPos(vertexObject); //2
 				o.uv = float2(0.,0.) + offset;
 				o.col = startColor;
+				o.vertexWorld = mul(unity_ObjectToWorld, vertexObject);
 				tristream.Append(o);
 
-				o.pos = UnityObjectToClipPos(IN[0].vertex + float4(normalFace, 0) * _WeightFactor); //3
+				vertexObject = IN[0].vertex + float4(normalFace, 0) * _WeightFactor;
+				o.pos = UnityObjectToClipPos(vertexObject); //3
 				o.uv = float2(1.,0.) + offset;
 				o.col = startColor;
+				o.vertexWorld = mul(unity_ObjectToWorld, vertexObject);
 				tristream.Append(o);
 
-				o.pos = UnityObjectToClipPos(IN[0].vertex + float4(normalize(IN[0].normal) * _ScaleFactor, 1));
+				vertexObject = IN[0].vertex + float4(normalize(IN[0].normal) * _ScaleFactor, 1);
+				o.pos = UnityObjectToClipPos(vertexObject);
 				o.uv = float2(.5,2.) + offset;
 				o.col = endColor;
+				o.vertexWorld = mul(unity_ObjectToWorld, vertexObject);
 				tristream.Append(o);
-				
+
 				tristream.RestartStrip();
-				
+
 			//-----
-				o.pos = UnityObjectToClipPos(IN[0].vertex + float4(normalFace, 0) * _WeightFactor); //3
+				vertexObject = IN[0].vertex + float4(normalFace, 0) * _WeightFactor;
+				o.pos = UnityObjectToClipPos(vertexObject); //3
 				o.uv = float2(0.,0.) + offset;
 				o.col = startColor;
+				o.vertexWorld = mul(unity_ObjectToWorld, vertexObject);
 				tristream.Append(o);
 
-				o.pos = UnityObjectToClipPos(IN[0].vertex + float4(crossNormalFace, 0) * _WeightFactor); //4
+				vertexObject = IN[0].vertex + float4(crossNormalFace, 0) * _WeightFactor;
+				o.pos = UnityObjectToClipPos(vertexObject); //4
 				o.uv = float2(1.,0.) + offset;
 				o.col = startColor;
+				o.vertexWorld = mul(unity_ObjectToWorld, vertexObject);
 				tristream.Append(o);
 
-				o.pos = UnityObjectToClipPos(IN[0].vertex + float4(normalize(IN[0].normal) * _ScaleFactor, 1));
+				vertexObject = IN[0].vertex + float4(normalize(IN[0].normal) * _ScaleFactor, 1);
+				o.pos = UnityObjectToClipPos(vertexObject);
 				o.uv = float2(.5,2.) + offset;
 				o.col = endColor;
+				o.vertexWorld = mul(unity_ObjectToWorld, vertexObject);
 				tristream.Append(o);
-				
+
 				tristream.RestartStrip();
-				
+
 			//-----
-				o.pos = UnityObjectToClipPos(IN[0].vertex + float4(crossNormalFace, 0) * _WeightFactor); //4
+				vertexObject = IN[0].vertex + float4(crossNormalFace, 0) * _WeightFactor;
+				o.pos = UnityObjectToClipPos(vertexObject); //4
 				o.uv = float2(0.,0.) + offset;
 				o.col = startColor;
-				tristream.Append(o);
-				
-				o.pos = UnityObjectToClipPos(IN[0].vertex - float4(normalFace, 0) * _WeightFactor); //1
-				o.uv = float2(1.,0.) + offset;
-				o.col = startColor;
+				o.vertexWorld = mul(unity_ObjectToWorld, vertexObject);
 				tristream.Append(o);
 
-				o.pos = UnityObjectToClipPos(IN[0].vertex + float4(normalize(IN[0].normal) * _ScaleFactor, 1));
+				vertexObject = IN[0].vertex - float4(normalFace, 0) * _WeightFactor;
+				o.pos = UnityObjectToClipPos(vertexObject); //1
+				o.uv = float2(1.,0.) + offset;
+				o.col = startColor;
+				o.vertexWorld = mul(unity_ObjectToWorld, vertexObject);
+				tristream.Append(o);
+
+				vertexObject = IN[0].vertex + float4(normalize(IN[0].normal) * _ScaleFactor, 1);
+				o.pos = UnityObjectToClipPos(vertexObject);
 				o.uv = float2(.5,2.) + offset;
 				o.col = endColor;
+				o.vertexWorld = mul(unity_ObjectToWorld, vertexObject);
 				tristream.Append(o);
-				
+
 				tristream.RestartStrip();
 			}
-			
+
 			fixed4 frag(g2f i) : SV_Target
 			{
+				#ifdef CLIPPING_ON
+				//calculate signed distance to plane
+				float distance = dot(i.vertexWorld, _Plane.xyz);
+				distance = distance + _Plane.w;
+				// discard surface above plane
+				clip(-distance);
+				#endif
+
 				fixed4 col = i.col;
 				col.a = i.col.a;
-				
+
 				if(_DisplayMode == 1)
 					col = tex2D(_ColorMap, float2((i.tan.x + 1) / 2,0)) * i.col;
 				else if (_DisplayMode == 2)
 					col = tex2D(_ColorMap, float2((i.tan.y + 1) / 2,0)) * i.col;
-				
+
 				col += tex2D(_MainTex, i.uv);
-				
+
 				return col;
 			}
 			ENDCG
