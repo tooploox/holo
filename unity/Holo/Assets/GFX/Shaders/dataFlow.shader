@@ -3,10 +3,11 @@
 	Properties
 	{
 		_MainTex("FX (RGB)", 2D) = "black" {}
-		_LengthFactor("Length", Range(.0,5.0)) = 2.0
-		_WeightFactor("Weight", Range(.0,2.0)) = 0.3
+		_ColorMap("Color Map (RGB)", 2D) = "black" {}
+		_ScaleFactor("Scale Factor", Range(.0,5.0)) = 2.0
+		_DisplayMode("Display Mode", Int) = 0
 	}
-		SubShader
+	SubShader
 	{
 		Tags { "RenderType" = "Opaque" }
 		Cull Off
@@ -23,7 +24,7 @@
 			{
 				float4 vertex : POSITION;
 				float3 normal : NORMAL;
-				float3 tangent : TANGENT;
+				float4 tangent : TANGENT;
 				float2 uv : TEXCOORD0;
 			};
 
@@ -32,19 +33,23 @@
 				float4 pos : SV_POSITION;
 				float2 uv : TEXCOORD0;
 				float4 col : COLOR;
+				float4 tan : TEXCOORD1;
 			};
 
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
-			float _WeightFactor;
-			float _LengthFactor;
+			sampler2D _ColorMap;
+			float4 _ColorMap_ST;
+			float _ScaleFactor;
+			float _DisplayMode;
 
-			v2g vert(appdata_base v)
+			v2g vert(appdata_tan v)
 			{
 				v2g o;
 				o.vertex = v.vertex;
 				o.uv = TRANSFORM_TEX(v.texcoord, _MainTex);
 				o.normal = v.normal;
+				o.tangent = v.tangent;
 				return o;
 			}
 
@@ -61,18 +66,16 @@
 				float3 crossNormalFace = normalize(cross(normalFace, nNormal));
 				float2 offset = -float2(0., _Time.z);
 				
-				fixed4 endColor = fixed4(fixed3(nNormal + fixed3(1,1,1)) / 2, 1);
-				fixed4 startColor = endColor * fixed4(.8, .8, .8, 1.);
-				/*
-				if(IN[0].tangent.x == 0){
-					startColor = endColor * fixed4(1., 0., 0., 1.);
-					endColor = startColor;
-				}*/
+				fixed4 endColor = fixed4(1,1,1,1);
+				fixed4 startColor = fixed4(.8, .8, .8, 1.);
+				
+				float _WeightFactor = _ScaleFactor * 0.45;
 				
 			//-----
 				o.pos = UnityObjectToClipPos(IN[0].vertex - float4(normalFace, 0) * _WeightFactor); //1
 				o.uv = float2(0.,0.) + offset;
 				o.col = startColor;
+				o.tan = IN[0].tangent;
 				tristream.Append(o);
 				
 				o.pos = UnityObjectToClipPos(IN[0].vertex - float4(crossNormalFace, 0) * _WeightFactor); //2
@@ -80,7 +83,7 @@
 				o.col = startColor;
 				tristream.Append(o);
 
-				o.pos = UnityObjectToClipPos(IN[0].vertex + float4(normalize(IN[0].normal) * _LengthFactor, 1));
+				o.pos = UnityObjectToClipPos(IN[0].vertex + float4(normalize(IN[0].normal) * _ScaleFactor, 1));
 				o.uv = float2(.5,2.) + offset;
 				o.col = endColor;
 				tristream.Append(o);
@@ -98,7 +101,7 @@
 				o.col = startColor;
 				tristream.Append(o);
 
-				o.pos = UnityObjectToClipPos(IN[0].vertex + float4(normalize(IN[0].normal) * _LengthFactor, 1));
+				o.pos = UnityObjectToClipPos(IN[0].vertex + float4(normalize(IN[0].normal) * _ScaleFactor, 1));
 				o.uv = float2(.5,2.) + offset;
 				o.col = endColor;
 				tristream.Append(o);
@@ -116,7 +119,7 @@
 				o.col = startColor;
 				tristream.Append(o);
 
-				o.pos = UnityObjectToClipPos(IN[0].vertex + float4(normalize(IN[0].normal) * _LengthFactor, 1));
+				o.pos = UnityObjectToClipPos(IN[0].vertex + float4(normalize(IN[0].normal) * _ScaleFactor, 1));
 				o.uv = float2(.5,2.) + offset;
 				o.col = endColor;
 				tristream.Append(o);
@@ -134,7 +137,7 @@
 				o.col = startColor;
 				tristream.Append(o);
 
-				o.pos = UnityObjectToClipPos(IN[0].vertex + float4(normalize(IN[0].normal) * _LengthFactor, 1));
+				o.pos = UnityObjectToClipPos(IN[0].vertex + float4(normalize(IN[0].normal) * _ScaleFactor, 1));
 				o.uv = float2(.5,2.) + offset;
 				o.col = endColor;
 				tristream.Append(o);
@@ -144,8 +147,16 @@
 			
 			fixed4 frag(g2f i) : SV_Target
 			{
-				fixed4 col = tex2D(_MainTex, i.uv) + i.col;
+				fixed4 col = i.col;
 				col.a = i.col.a;
+				
+				if(_DisplayMode == 1)
+					col = tex2D(_ColorMap, float2((i.tan.x + 1) / 2,0)) * i.col;
+				else if (_DisplayMode == 2)
+					col = tex2D(_ColorMap, float2((i.tan.y + 1) / 2,0)) * i.col;
+				
+				col += tex2D(_MainTex, i.uv);
+				
 				return col;
 			}
 			ENDCG
