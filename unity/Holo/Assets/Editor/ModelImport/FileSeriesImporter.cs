@@ -21,18 +21,17 @@ namespace ModelImport
         private Dictionary<string, Vector3> boundingVertices = new Dictionary<string, Vector3>();
         private bool dataflow = false;
         
-        // Object constructor, initiates file series import.
+        //Imports data from file series.
         public void ImportData(string fileSeriesDirectory, string gameObjectName)
         {
-            ModelGameObject = new GameObject
-            {
-                name = gameObjectName
-            };
+            ModelGameObject = new GameObject(gameObjectName);
             ModelMesh = new Mesh();
             if (gameObjectName.Contains("dataflow"))
             {
                 dataflow = true;
             }
+            bool cancelImport = EditorUtility.DisplayCancelableProgressBar("Conversion in progress: " + ModelGameObject.name, "Converting file nr: " + 0.ToString(), 0);
+            //TODO: Progress bar
             GetFilepaths(fileSeriesDirectory);
             ImportFiles();
             ConfigureMesh();
@@ -42,7 +41,12 @@ namespace ModelImport
         private void GetFilepaths(string rootDirectory)
         {
             filePaths = Directory.GetFiles(rootDirectory + @"\");
+            if (filePaths == null)
+            {
+                throw new Exception("No files found in: " + ModelGameObject.name);
+            }
             extension = Path.GetExtension(filePaths[0]);
+
         }
 
         //Loads meshes from separate files into Mesh Object as BlendShapeFrames
@@ -52,11 +56,12 @@ namespace ModelImport
 
             //Configuring progress bar
             float progressChunk = (float) 1 / filePaths.Length;
-            bool cancelImport = EditorUtility.DisplayCancelableProgressBar("Conversion in progress", "Converting file nr: " + 0.ToString(), 0);
+           
 
             bool firstMesh = true;
             for(int i = 0; i < filePaths.Length; i++)
             {
+                bool cancelImport = EditorUtility.DisplayCancelableProgressBar("Conversion in progress: " + ModelGameObject.name, "Converting file nr: " + i.ToString(), i * progressChunk);
                 if (cancelImport)
                 {
                     AbortImport();
@@ -80,6 +85,7 @@ namespace ModelImport
                 firstMesh = false;
                 cancelImport = EditorUtility.DisplayCancelableProgressBar("Conversion in progress", "Converting file nr: " + (i + 1).ToString(), (i + 1) * progressChunk);
             }
+            EditorUtility.ClearProgressBar();
         }
 
         //Function for aborting the import of a model
@@ -94,16 +100,16 @@ namespace ModelImport
         private void InitiateMesh()
         {
             ModelMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-            if (fileImporter.IndicesInFacet == 2)
+            if (fileImporter.VerticesInFacet == 2)
             {
-                ModelMesh.vertices = fileImporter.BaseVertices;
+                ModelMesh.vertices = new Vector3[fileImporter.Vertices.Length];
                 ModelMesh.SetIndices(fileImporter.Indices, MeshTopology.Lines, 0);
             }
-            else if (fileImporter.IndicesInFacet == 3)
+            else if (fileImporter.VerticesInFacet == 3)
             {
-                ModelMesh.vertices = fileImporter.BaseVertices;
+                ModelMesh.vertices = new Vector3[fileImporter.Vertices.Length];
                 ModelMesh.triangles = fileImporter.Indices;
-                ModelMesh.normals = fileImporter.BaseVertices;
+                ModelMesh.normals = new Vector3[fileImporter.Vertices.Length];
             }
             else
             {
@@ -111,7 +117,13 @@ namespace ModelImport
             }
             if (dataflow)
             {
-                ModelMesh.tangents = fileImporter.BaseTangents;
+                Vector4[] tangents = new Vector4[fileImporter.Vertices.Length];
+                
+                for (int i = 0; i < tangents.Length; i++)
+                {
+                    tangents[i].w = 1;
+                }
+                ModelMesh.tangents = tangents;
                 ModelMesh.uv = new Vector2[fileImporter.Vertices.Length];
             }
         }
@@ -146,12 +158,11 @@ namespace ModelImport
         {
             SkinnedMeshRenderer skinnedMesh = ModelGameObject.AddComponent<SkinnedMeshRenderer>();
             skinnedMesh.sharedMesh = ModelMesh;
-            if (fileImporter.IndicesInFacet == 3 & !dataflow)
+            if (fileImporter.VerticesInFacet == 3 & !dataflow)
             {
                 skinnedMesh.sharedMesh.RecalculateNormals();
             }
             skinnedMesh.sharedMesh.bounds = CalculateBounds();
-            EditorUtility.ClearProgressBar();
             ModelGameObject.AddComponent<BlendShapeAnimation>();
         }
 

@@ -6,25 +6,24 @@ using UnityEngine;
 
 namespace ModelImport.VTKImport
 {
+    // A class for reading VTK files of UNSTRUCTURED_GRID datatype.
     public class UnstructuredGridImporter
     {
         public Vector3[] Vertices { get; private set; }
         public Vector3[] Normals { get; private set; }
         public Vector3[] DeltaTangents { get; private set; }
         public int[] Indices { get; private set; }
-        public int IndicesInFacet { get; private set; }
+        public int VerticesInFacet { get; private set; }
         public Dictionary<string, Vector3> BoundingVertices { get; private set; } = new Dictionary<string, Vector3>()
         {
             { "minVertex", new Vector3()},
             { "maxVertex", new Vector3()}
         };
-        private bool dataflow = false;
 
         //Imports a single file. Checks if it's a body mesh or dataflow object.
-        public void ImportFile(StreamReader streamReader, bool IsDataflow)
+        public void ImportFile(StreamReader streamReader, bool dataflow)
         {
-            dataflow = IsDataflow;
-            if (IsDataflow)
+            if (dataflow)
             {
                 ImportDataFlow(streamReader);
             }
@@ -56,6 +55,7 @@ namespace ModelImport.VTKImport
                     string[] pointsData = line.Split(' ');
                     int numberOfVertices = int.Parse(pointsData[1]);
                     GetVertices(streamReader, numberOfVertices);
+                    DeltaTangents = new Vector3[Vertices.Length];
                     verticesFlag = true;
                 }
                 if (line.IndexOf("Vectors fn float", StringComparison.CurrentCultureIgnoreCase) >= 0)
@@ -107,13 +107,17 @@ namespace ModelImport.VTKImport
                 {
                     string[] cellsData = line.Split(' ');
                     int numberOfLines = int.Parse(cellsData[1]);
-                    GetBodyIndicesAndNormals(streamReader, numberOfLines);
+                    GetBodyIndices(streamReader, numberOfLines);
+                    if (VerticesInFacet == 3)
+                    {
+                        GetBodyNormals();
+                    }
                     indicesFlag = true;
                 }
             }
         }
 
-        //Get meshes' verices. 
+        //Get meshes' vertices of the body. 
         private void GetVertices(StreamReader streamReader, int numberOfVertices)
         {
             Vertices = new Vector3[numberOfVertices];
@@ -127,38 +131,46 @@ namespace ModelImport.VTKImport
             }
         }
 
-        //Gets body indices in the file and calculates its normals.
-        private void GetBodyIndicesAndNormals(StreamReader streamReader, int numberOfLines)
+        //Gets body indices in the file.
+        private void GetBodyIndices(StreamReader streamReader, int numberOfLines)
         {
             List<int> indices = new List<int>();
-            List<int> facetIndices = new List<int>();
+            List<int> facetIndices = new List<int>(3);
 
             bool firstVertex = true;
             for (int i = 0; i < numberOfLines; i++)
             {
                 facetIndices = streamReader.GetLineIndices();
+                indices.AddRange(facetIndices);
                 if (firstVertex)
                 {
-                    IndicesInFacet = facetIndices.Count;
-                }
-                if (facetIndices.Count > 2)
-                {
-                    UpdateFacetNormals(facetIndices);
-                }
-                indices.AddRange(facetIndices);
-            }
-            if (facetIndices.Count > 2)
-            {
-                foreach (Vector3 normal in Normals)
-                {
-                    normal.Normalize();
+                    VerticesInFacet = facetIndices.Count;
+                    firstVertex = false;
                 }
             }
+
             Indices = indices.ToArray();
         }
-
-        //Updates facet normals.
-        private void UpdateFacetNormals(List<int> facetIndices)
+        //Derives vertice's normals from their facets.
+        private void GetBodyNormals()
+        {
+            Normals = new Vector3[Vertices.Length];
+            int[] facetIndices = new int[3];
+            for (int i = 0; i < Indices.Length; i += VerticesInFacet)
+            {
+                for (int j = 0; j < VerticesInFacet; j++)
+                {
+                    facetIndices[j] = Indices[i + j];
+                }
+                UpdateNormals(facetIndices);
+            }
+            foreach (Vector3 normal in Normals)
+            {
+                normal.Normalize();
+            }
+        }
+        //Updates normals of the vertices belonging to the input facet.
+        private void UpdateNormals(int[] facetIndices)
         {
             Vector3 currentNormal = new Vector3();
             currentNormal = CalculateFacetNormal(facetIndices);
@@ -169,15 +181,14 @@ namespace ModelImport.VTKImport
         }
 
         //Calculates a normal of a facet.
-        private Vector3 CalculateFacetNormal(List<int> facetIndices)
+        private Vector3 CalculateFacetNormal(int[] facetIndices)
         {
-            Vector3 normal = new Vector3();
-            List<Vector3> facetVertices = new List<Vector3>();
-            foreach (int index in facetIndices)
+            Vector3[] facetVertices = new Vector3[3];
+            for (int i = 0; i < 3; i++)
             {
-                facetVertices.Add(Vertices[index]);
+                facetVertices[i] = Vertices[facetIndices[i]];
             }
-            normal = Vector3.Cross(facetVertices[0] - facetVertices[2], facetVertices[1] - facetVertices[0]);
+            Vector3 normal = Vector3.Cross(facetVertices[0] - facetVertices[2], facetVertices[1] - facetVertices[0]);
             normal.Normalize();
             return normal;
         }
@@ -196,7 +207,6 @@ namespace ModelImport.VTKImport
         //Gets angles for dataflow visualisation and stores them in deltaTangents for blendshapeanimation.
         private void GetDataflowTangents(StreamReader streamReader, string angleName)
         {
-            DeltaTangents = new Vector3[Vertices.Length];
             if (angleName.Equals("alpha"))
             {
                 for (int i = 0; i < Vertices.Length; i++)
@@ -218,7 +228,7 @@ namespace ModelImport.VTKImport
         // Each point is a triangle so indices array is three times longer, each triangle pointing to only one vertex.
         private void SetDataflowIndices()
         {
-            IndicesInFacet = 3;
+            VerticesInFacet = 3;
             Indices = new int[Vertices.Length * 3];
             int currentVertexNumber = 0;
             for (int i = 0; i < Indices.Length; i += 3)

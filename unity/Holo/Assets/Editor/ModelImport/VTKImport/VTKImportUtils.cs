@@ -42,7 +42,7 @@ namespace ModelImport.VTKImport
             float currentFloat = 0.0f;
 
             string lineFloat = streamReader.ReadLine();
-                currentFloat = float.Parse(lineFloat, CultureInfo.InvariantCulture.NumberFormat);
+            currentFloat = float.Parse(lineFloat, CultureInfo.InvariantCulture.NumberFormat);
             return currentFloat;
         }
 

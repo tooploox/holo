@@ -13,7 +13,7 @@ namespace ModelImport.VTKImport
         public Vector3[] Normals { get; private set; }
         public Vector3[] DeltaTangents { get; private set; }
         public int[] Indices { get; private set; }
-        public int IndicesInFacet { get; private set; }
+        public int VerticesInFacet { get; private set; }
         public Dictionary<string, Vector3> BoundingVertices { get; private set; } = new Dictionary<string, Vector3>()
         {
             { "minVertex", new Vector3()},
@@ -60,7 +60,7 @@ namespace ModelImport.VTKImport
                         Vertices = unstructuredGridImporter.Vertices;
                         Normals = unstructuredGridImporter.Normals;
                         DeltaTangents = unstructuredGridImporter.DeltaTangents;
-                        IndicesInFacet = unstructuredGridImporter.IndicesInFacet;
+                        VerticesInFacet = unstructuredGridImporter.VerticesInFacet;
                         BoundingVertices = unstructuredGridImporter.BoundingVertices;
 
                         break;

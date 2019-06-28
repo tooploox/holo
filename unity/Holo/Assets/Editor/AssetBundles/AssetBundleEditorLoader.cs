@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using UnityEngine;
-using UnityEditor;
+﻿using UnityEditor;
 
 public class AssetBundleEditorLoader
 {
@@ -12,7 +8,6 @@ public class AssetBundleEditorLoader
         AssetBundleLoader assetBundleLoader = new AssetBundleLoader();
         string bundlePath = EditorUtility.OpenFilePanel("Get The Bundle","","");
         assetBundleLoader.LoadBundle(bundlePath);
-        assetBundleLoader.LoadMainGameObject();
-        assetBundleLoader.InstantiateMainGameObject();
+        assetBundleLoader.InstantiateMultipleGameObjects();
     }
 }

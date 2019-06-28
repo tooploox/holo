@@ -11,31 +11,27 @@ namespace ModelImport
     //A class for loading a specific file. Currently STL and specific VTK formats are supported.
     public class FileImporter
     {
-        private STLImporter sTLImporter;
+        private STLImporter stlImporter;
         private VTKImporter vtkImporter;
         private string fileExtension;
 
-        public Vector3[] BaseVertices { get; private set; }
         public Vector3[] Vertices { get; private set; }
         public Vector3[] Normals { get; private set; }
         public Vector3[] DeltaTangents { get; private set; }
-        public Vector4[] BaseTangents { get; private set; }
         public int[] Indices { get; private set; }
-        public int IndicesInFacet { get; private set; }
+        public int VerticesInFacet { get; private set; }
         public Dictionary<string, Vector3> BoundingVertices { get; private set; } = new Dictionary<string, Vector3>()
         { { "minVertex", new Vector3()},
           { "maxVertex", new Vector3()}
         };
-        private bool dataflow = false;
 
         //A constructor ensuring FileImporter is format-specific (only STL and VTK for now)
-        public FileImporter(string extension, bool Isdataflow)
+        public FileImporter(string extension, bool dataflow)
         {
-            dataflow = Isdataflow;
             fileExtension = extension;
             if (extension == ".stl")
             {
-                sTLImporter = new STLImporter();
+                stlImporter = new STLImporter();
             }
             else if (extension == ".vtk")
             {
@@ -61,18 +57,6 @@ namespace ModelImport
                     LoadVtkFile(filePath);
                     break;
             }
-            if (firstMesh)
-            {
-                BaseVertices = new Vector3[Vertices.Length];
-                if (dataflow)
-                {
-                    BaseTangents = new Vector4[Vertices.Length];
-                    for (int i = 0; i < BaseTangents.Length; i++)
-                    {
-                        BaseTangents[i].w = 1;
-                    }
-                }
-            }
         }
 
         //Checks if file extensions are consistent throughout the folder.
@@ -88,10 +72,10 @@ namespace ModelImport
         //Loads a mesh from the STL file located in the given filepath.
         private void LoadStlFile(string filePath)
         {
-            sTLImporter.LoadFile(filePath);
-            Vertices = sTLImporter.Vertices;
-            Indices = sTLImporter.Indices;
-            Normals = sTLImporter.Normals;
+            stlImporter.LoadFile(filePath);
+            Vertices = stlImporter.Vertices;
+            Indices = stlImporter.Indices;
+            Normals = stlImporter.Normals;
         }
 
         //Loads a mesh from the VTK file located in the given filepath.
@@ -100,7 +84,7 @@ namespace ModelImport
             vtkImporter.ImportFile(filePath);
             Vertices = vtkImporter.Vertices;
             Indices = vtkImporter.Indices;
-            IndicesInFacet = vtkImporter.IndicesInFacet;
+            VerticesInFacet = vtkImporter.VerticesInFacet;
             Normals = vtkImporter.Normals;
             BoundingVertices = vtkImporter.BoundingVertices;
             DeltaTangents = vtkImporter.DeltaTangents;
