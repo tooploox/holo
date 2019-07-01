@@ -37,4 +37,27 @@ public class AssetBundleLoader
         GameObject instance = UnityEngine.Object.Instantiate<GameObject>(template);
         return instance;
     }
+
+    public List<GameObject> LoadMultipleGameObjects()
+    {
+        List<string> assetPathList = assetBundle.GetAllAssetNames().ToList();
+        List<GameObject> modelGameObjects = new List<GameObject>();
+        List<string> gameObjectPaths = assetPathList.FindAll(path => path.EndsWith(".prefab"));
+        foreach (string path in gameObjectPaths)
+        {
+            modelGameObjects.Add(assetBundle.LoadAsset<GameObject>(path));
+        }
+        return modelGameObjects;
+    }
+
+    public void InstantiateMultipleGameObjects()
+    {
+        List<GameObject> template = LoadMultipleGameObjects();
+
+        foreach (GameObject gameObject in template)
+        {
+            Object.Instantiate(gameObject);
+        }
+
+    }
 }
