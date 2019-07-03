@@ -61,6 +61,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         ModelClipPlaneCtrl = ModelClipPlane.GetComponentInChildren<ModelClippingPlaneControl>();
         // Turn off the clipping plane on start
         DefaultModelMaterial.DisableKeyword("CLIPPING_ON");
+		DataVisualizationMaterial.DisableKeyword("CLIPPING_ON");
 
         LayersSection.SetActive(false);
         AnimationSubmenu.SetActive(false);
