@@ -21,18 +21,21 @@ public class ButtonsClickReceiver : InteractionReceiver
 
     protected override void FocusEnter(GameObject obj, PointerSpecificEventData eventData)
     {
-		//Debug.Log(obj.name + " : FocusEnter");
-	}
+        //Debug.Log(obj.name + " : FocusEnter");
+        ShowToolTip(obj, true);
+    }
 
 	protected override void FocusExit(GameObject obj, PointerSpecificEventData eventData)
     {
         //Debug.Log(obj.name + " : FocusExit");
+        ShowToolTip(obj, false);
     }
     
 	protected override void InputDown(GameObject obj, InputEventData eventData)
     {
 		//Debug.Log(obj.name + " : InputDown");
         clicking = obj;
+        ShowToolTip(obj, false);
     }
 
 	protected override void InputUp(GameObject obj, InputEventData eventData)
@@ -45,4 +48,10 @@ public class ButtonsClickReceiver : InteractionReceiver
         }
         clicking = null;
 	}
+
+    private void ShowToolTip(GameObject obj, bool show)
+    {
+        Transform tooltip = obj.transform.GetChild(obj.transform.childCount - 1);
+        if (tooltip.name == "ToolTip") tooltip.gameObject.SetActive(show);
+    }
 }

@@ -20,6 +20,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public GameObject ButtonsModelPreview;
     public GameObject PlateAnimated;
     public GameObject LayersSection;
+    public GameObject AnimationSubmenu;
     public Material DefaultModelMaterial;
     public Material DataVisualizationMaterial;
     public Transform InstanceParent;
@@ -62,9 +63,10 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         DefaultModelMaterial.DisableKeyword("CLIPPING_ON");
 
         LayersSection.SetActive(false);
+        AnimationSubmenu.SetActive(false);
 
         RefreshUserInterface();
-        InitializeAddButtons();
+        InitializeAddButtons();        
 
         // This sets proper state of buttons and components like handDraggable
         ClickChangeTransformationState(TransformationState.None);
@@ -123,12 +125,13 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             case "ButtonScale": ClickChangeTransformationState(TransformationState.Scale); break;
             case "ButtonLayers": ClickToggleLayersState(); break;
             case "Layer1": ClickChangeLayerState(); break;
-            case "ButtonColorMapJet": SetColorMap("jet"); break;
-            case "ButtonColorMapViridis": SetColorMap("viridis"); break;
-            case "ButtonColorMapMagma": SetColorMap("magma"); break;
-            case "ButtonColorMapCividis": SetColorMap("cividis"); break;
-            case "ButtonColorMapPlasma": SetColorMap("plasma"); break;
-            case "ButtonColorMapInferno": SetColorMap("inferno"); break;
+            case "ButtonColorMapJet": ClickSetColorMap("jet"); break;
+            case "ButtonColorMapViridis": ClickSetColorMap("viridis"); break;
+            case "ButtonColorMapMagma": ClickSetColorMap("magma"); break;
+            case "ButtonColorMapCividis": ClickSetColorMap("cividis"); break;
+            case "ButtonColorMapPlasma": ClickSetColorMap("plasma"); break;
+            case "ButtonColorMapInferno": ClickSetColorMap("inferno"); break;
+            case "ButtonAnimationSpeed": AnimationSubmenu.SetActive(!AnimationSubmenu.activeSelf); break;
 
             default:
                 {
@@ -246,7 +249,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         textMesh.color = newColor;
     }
 
-    private void SetColorMap(string colorMapName)
+    private void ClickSetColorMap(string colorMapName)
     {
         Texture2D colorMap;
         colorMap = Resources.Load<Texture2D>("Colormaps/" + colorMapName);
