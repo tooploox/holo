@@ -226,7 +226,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             UnloadDataLayerInstance();
         else
             LoadDataLayerInstance(instanceIndex.Value, "dataflow");
-
+        
         CompoundButtonText text = LayersSection.GetComponentInChildren<CompoundButtonText>();
         if (text == null)
         {
@@ -248,7 +248,6 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
     private void SetColorMap(string colorMapName)
     {
-        //Texture2D t = (Texture2D)AssetDatabase.LoadAssetAtPath("Assets/Textures/texture.jpg", typeof(Texture2D));
         Texture2D colorMap;
         colorMap = Resources.Load<Texture2D>("Colormaps/" + colorMapName);
         DataVisualizationMaterial.SetTexture("_ColorMap", colorMap);
