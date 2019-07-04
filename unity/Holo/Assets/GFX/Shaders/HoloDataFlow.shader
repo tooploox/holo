@@ -42,8 +42,6 @@
 				float2 uv : TEXCOORD0;
 				float4 col : COLOR;
 				float4 tan : TEXCOORD1;
-				// Used by clip plane in fragment shader
-				float4 vertexWorld : TEXCOORD2;
 			};
 
 			sampler2D _MainTex;
@@ -80,7 +78,32 @@
 				fixed4 startColor = fixed4(.8, .8, .8, 1.);
 
 				float _WeightFactor = _ScaleFactor * 0.45;
-				
+
+				/* We perform clipping in the geometry shader,
+				   using the "main vertex" from IN[0].vertex as the position that
+				   determines whether to clip.
+				   This works sensibly for small _ScaleFactor values.
+
+				   Why not do this in fragment shader (which would be more correct?):
+
+				   - Because calling clip() or discard in fragment shader causes
+				     a bug: instead of filled, the generated geometry is displayed
+				     as wireframe.
+				     Is it a bug of Unity, or Direct3D? Unknown.
+
+				   - As a side effect, this is also faster. No need to calculate vertexWorld
+				     for each generated vertex, no need to do clip in fragment shader.
+				*/
+				#ifdef CLIPPING_ON
+				float4 mainVertexWorld = mul(unity_ObjectToWorld, IN[0].vertex);
+				float distance = dot(mainVertexWorld, _Plane.xyz);
+				distance = distance + _Plane.w;
+				// discard surface above plane
+				if (-distance < 0) {
+					return;
+				}
+				#endif
+
 				float4 vertexObject;
 
 			//-----
@@ -89,21 +112,18 @@
 				o.uv = float2(0.,0.) + offset;
 				o.col = startColor;
 				o.tan = IN[0].tangent;
-				o.vertexWorld = mul(unity_ObjectToWorld, vertexObject);
 				tristream.Append(o);
 
 				vertexObject = IN[0].vertex - float4(crossNormalFace, 0) * _WeightFactor;
 				o.pos = UnityObjectToClipPos(vertexObject); //2
 				o.uv = float2(1.,0.) + offset;
 				o.col = startColor;
-				o.vertexWorld = mul(unity_ObjectToWorld, vertexObject);
 				tristream.Append(o);
 
 				vertexObject = IN[0].vertex + float4(normalize(IN[0].normal) * _ScaleFactor, 1);
 				o.pos = UnityObjectToClipPos(vertexObject);
 				o.uv = float2(.5,2.) + offset;
 				o.col = endColor;
-				o.vertexWorld = mul(unity_ObjectToWorld, vertexObject);
 				tristream.Append(o);
 
 				tristream.RestartStrip();
@@ -113,21 +133,18 @@
 				o.pos = UnityObjectToClipPos(vertexObject); //2
 				o.uv = float2(0.,0.) + offset;
 				o.col = startColor;
-				o.vertexWorld = mul(unity_ObjectToWorld, vertexObject);
 				tristream.Append(o);
 
 				vertexObject = IN[0].vertex + float4(normalFace, 0) * _WeightFactor;
 				o.pos = UnityObjectToClipPos(vertexObject); //3
 				o.uv = float2(1.,0.) + offset;
 				o.col = startColor;
-				o.vertexWorld = mul(unity_ObjectToWorld, vertexObject);
 				tristream.Append(o);
 
 				vertexObject = IN[0].vertex + float4(normalize(IN[0].normal) * _ScaleFactor, 1);
 				o.pos = UnityObjectToClipPos(vertexObject);
 				o.uv = float2(.5,2.) + offset;
 				o.col = endColor;
-				o.vertexWorld = mul(unity_ObjectToWorld, vertexObject);
 				tristream.Append(o);
 
 				tristream.RestartStrip();
@@ -137,21 +154,18 @@
 				o.pos = UnityObjectToClipPos(vertexObject); //3
 				o.uv = float2(0.,0.) + offset;
 				o.col = startColor;
-				o.vertexWorld = mul(unity_ObjectToWorld, vertexObject);
 				tristream.Append(o);
 
 				vertexObject = IN[0].vertex + float4(crossNormalFace, 0) * _WeightFactor;
 				o.pos = UnityObjectToClipPos(vertexObject); //4
 				o.uv = float2(1.,0.) + offset;
 				o.col = startColor;
-				o.vertexWorld = mul(unity_ObjectToWorld, vertexObject);
 				tristream.Append(o);
 
 				vertexObject = IN[0].vertex + float4(normalize(IN[0].normal) * _ScaleFactor, 1);
 				o.pos = UnityObjectToClipPos(vertexObject);
 				o.uv = float2(.5,2.) + offset;
 				o.col = endColor;
-				o.vertexWorld = mul(unity_ObjectToWorld, vertexObject);
 				tristream.Append(o);
 
 				tristream.RestartStrip();
@@ -161,21 +175,18 @@
 				o.pos = UnityObjectToClipPos(vertexObject); //4
 				o.uv = float2(0.,0.) + offset;
 				o.col = startColor;
-				o.vertexWorld = mul(unity_ObjectToWorld, vertexObject);
 				tristream.Append(o);
 
 				vertexObject = IN[0].vertex - float4(normalFace, 0) * _WeightFactor;
 				o.pos = UnityObjectToClipPos(vertexObject); //1
 				o.uv = float2(1.,0.) + offset;
 				o.col = startColor;
-				o.vertexWorld = mul(unity_ObjectToWorld, vertexObject);
 				tristream.Append(o);
 
 				vertexObject = IN[0].vertex + float4(normalize(IN[0].normal) * _ScaleFactor, 1);
 				o.pos = UnityObjectToClipPos(vertexObject);
 				o.uv = float2(.5,2.) + offset;
 				o.col = endColor;
-				o.vertexWorld = mul(unity_ObjectToWorld, vertexObject);
 				tristream.Append(o);
 
 				tristream.RestartStrip();
@@ -183,14 +194,6 @@
 
 			fixed4 frag(g2f i) : SV_Target
 			{
-				#ifdef CLIPPING_ON
-				//calculate signed distance to plane
-				float distance = dot(i.vertexWorld, _Plane.xyz);
-				distance = distance + _Plane.w;
-				// discard surface above plane
-				clip(-distance);
-				#endif
-
 				fixed4 col = i.col;
 				col.a = i.col.a;
 
