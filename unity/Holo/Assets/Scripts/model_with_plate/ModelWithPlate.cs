@@ -156,15 +156,17 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     }
 
 
-    private bool StoreTwoHandManipulatableActive, StoreHandDraggableActive;
+    private bool StoreTwoHandManipulatableModelActiveState, StoreHandDraggableModelActiveState, StoreHandDraggableClipPlaneActiveState;
     public void FocusEnter(GameObject focusObject)
     {
         if (focusObject.name == "Slider")
         {
-            StoreTwoHandManipulatableActive = GetComponent<TwoHandManipulatable>().enabled;
-            StoreHandDraggableActive = GetComponent<HandDraggable>().enabled;
+            StoreTwoHandManipulatableModelActiveState = GetComponent<TwoHandManipulatable>().enabled;
+            StoreHandDraggableModelActiveState = GetComponent<HandDraggable>().enabled;
+            StoreHandDraggableClipPlaneActiveState = ModelClipPlane.GetComponent<HandDraggable>().enabled;
             GetComponent<TwoHandManipulatable>().enabled = false;
             GetComponent<HandDraggable>().enabled = false;
+            ModelClipPlane.GetComponent<HandDraggable>().enabled = false;
         }
     }
 
@@ -172,8 +174,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     {
         if (focusObject.name == "Slider")
         {
-            GetComponent<TwoHandManipulatable>().enabled = StoreTwoHandManipulatableActive;
-            GetComponent<HandDraggable>().enabled = StoreHandDraggableActive;
+            GetComponent<TwoHandManipulatable>().enabled = StoreTwoHandManipulatableModelActiveState;
+            GetComponent<HandDraggable>().enabled = StoreHandDraggableModelActiveState;
+            ModelClipPlane.GetComponent<HandDraggable>().enabled = StoreHandDraggableClipPlaneActiveState;
         }
     }
 
