@@ -57,12 +57,13 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         /* Adding components using code, simply because it's more friendly to version control */
         handDraggable = gameObject.AddComponent<HandDraggable>();
         handDraggable.RotationMode = HandDraggable.RotationModeEnum.LockObjectRotation;
+        GetComponent<TwoHandManipulatable>().enabled = false;
 
         ModelClipPlaneCtrl = ModelClipPlane.GetComponentInChildren<ModelClippingPlaneControl>();
         // Turn off the clipping plane on start
         DefaultModelMaterial.DisableKeyword("CLIPPING_ON");
 		DataVisualizationMaterial.DisableKeyword("CLIPPING_ON");
-
+                
         LayersSection.SetActive(false);
         AnimationSubmenu.SetActive(false);
 
@@ -71,6 +72,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
         // This sets proper state of buttons and components like handDraggable
         ClickChangeTransformationState(TransformationState.None);
+
+        // Animation speed slider
+        AnimationSpeedSlider.GetComponent<SliderGestureControl>().OnUpdateEvent.AddListener(delegate { UpdateAnimationSpeed(); });
     }
 
     /* Number of "add" buttons we have in the scene. */
@@ -555,21 +559,10 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         }
     }
 
-    // TODO update time slider now
-    //private void Update()
-    //{
-    //    if (instanceAnimation.Playing) {
-    //        instance.GetComponent<BlendShapeAnimation>().Speed = AnimationSpeedSlider.GetComponent<SliderGestureControl>().SliderValue;
-    //    }
-    //}
-
-    // TODO: read time slider now
-    /*
-    private void TimeSliderValueChanged(float newPosition)
+    private void UpdateAnimationSpeed()
     {
-        if (blendShapeAnimation != null) {
-            blendShapeAnimation.CurrentTime = newPosition;
-        }
+        float value = AnimationSpeedSlider.GetComponent<SliderGestureControl>().SliderValue;
+        instanceAnimation.Speed = value * instance.GetComponent<SkinnedMeshRenderer>().sharedMesh.blendShapeCount;
+        dataLayerInstanceAnimation.Speed = instanceAnimation.Speed;
     }
-    */
 }
