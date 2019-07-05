@@ -15,7 +15,7 @@ using HoloToolkit.Unity.InputModule.Utilities.Interactions;
 public class ModelWithPlate : MonoBehaviour, IClickHandler
 {
     /* Public fields that should be set in Unity Editor */
-    public GameObject AnimationSpeedSlider;
+    public GameObject SliderAnimationSpeed;
     public GameObject ButtonsModel;
     public GameObject ButtonsModelPreview;
     public GameObject PlateAnimated;
@@ -74,8 +74,10 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         ClickChangeTransformationState(TransformationState.None);
 
         // Animation speed slider
-        AnimationSpeedSlider.GetComponent<SliderGestureControl>().OnUpdateEvent.AddListener(delegate { UpdateAnimationSpeed(); });
-        AnimationSpeedSlider.GetComponent<GestureInteractive>().OnFocusEnter();
+        SliderAnimationSpeed.GetComponent<SliderGestureControl>().OnUpdateEvent.AddListener(delegate { UpdateAnimationSpeed(); });
+
+        // Load Player Settings
+        ClickSetColorMap(PlayerPrefs.GetString("ColorMap", "jet")); // color map
     }
 
     /* Number of "add" buttons we have in the scene. */
@@ -286,6 +288,8 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         Texture2D colorMap;
         colorMap = Resources.Load<Texture2D>("Colormaps/" + colorMapName);
         DataVisualizationMaterial.SetTexture("_ColorMap", colorMap);
+        PlayerPrefs.SetString("ColorMap", colorMapName);
+        PlayerPrefs.Save();
     }
 
     /* All the variables below are non-null if and only if after 
@@ -588,7 +592,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
     private void UpdateAnimationSpeed()
     {
-        float value = AnimationSpeedSlider.GetComponent<SliderGestureControl>().SliderValue;
+        float value = SliderAnimationSpeed.GetComponent<SliderGestureControl>().SliderValue;
         if (instanceAnimation != null)
             instanceAnimation.Speed = value * instance.GetComponent<SkinnedMeshRenderer>().sharedMesh.blendShapeCount;
         if (dataLayerInstanceAnimation != null)
