@@ -23,12 +23,16 @@ public class ButtonsClickReceiver : InteractionReceiver
     {
         //Debug.Log(obj.name + " : FocusEnter");
         ShowToolTip(obj, true);
+        IClickHandler clickHandler = GetComponent<IClickHandler>();
+        clickHandler.FocusEnter(obj);
     }
 
 	protected override void FocusExit(GameObject obj, PointerSpecificEventData eventData)
     {
         //Debug.Log(obj.name + " : FocusExit");
         ShowToolTip(obj, false);
+        IClickHandler clickHandler = GetComponent<IClickHandler>();
+        clickHandler.FocusExit(obj);
     }
     
 	protected override void InputDown(GameObject obj, InputEventData eventData)

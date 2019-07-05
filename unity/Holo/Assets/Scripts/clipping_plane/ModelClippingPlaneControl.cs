@@ -23,6 +23,9 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
         Rotation
     }
 
+    public void FocusEnter(GameObject focusObject) { }
+    public void FocusExit(GameObject focusObject) { }
+
     ClipPlaneState ClippingPlaneState = ClipPlaneState.Disabled;
 
     void Start()

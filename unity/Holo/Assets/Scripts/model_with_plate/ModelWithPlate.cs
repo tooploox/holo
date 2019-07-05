@@ -62,19 +62,20 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         ModelClipPlaneCtrl = ModelClipPlane.GetComponentInChildren<ModelClippingPlaneControl>();
         // Turn off the clipping plane on start
         DefaultModelMaterial.DisableKeyword("CLIPPING_ON");
-		DataVisualizationMaterial.DisableKeyword("CLIPPING_ON");
-                
+        DataVisualizationMaterial.DisableKeyword("CLIPPING_ON");
+
         LayersSection.SetActive(false);
         AnimationSubmenu.SetActive(false);
 
         RefreshUserInterface();
-        InitializeAddButtons();        
+        InitializeAddButtons();
 
         // This sets proper state of buttons and components like handDraggable
         ClickChangeTransformationState(TransformationState.None);
 
         // Animation speed slider
         AnimationSpeedSlider.GetComponent<SliderGestureControl>().OnUpdateEvent.AddListener(delegate { UpdateAnimationSpeed(); });
+        AnimationSpeedSlider.GetComponent<GestureInteractive>().OnFocusEnter();
     }
 
     /* Number of "add" buttons we have in the scene. */
@@ -137,6 +138,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             case "ButtonColorMapPlasma": ClickSetColorMap("plasma"); break;
             case "ButtonColorMapInferno": ClickSetColorMap("inferno"); break;
             case "ButtonAnimationSpeed": AnimationSubmenu.SetActive(!AnimationSubmenu.activeSelf); break;
+            case "Slider": break;
 
             default:
                 {
@@ -150,6 +152,28 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
                     }
                     break;
                 }
+        }
+    }
+
+
+    private bool StoreTwoHandManipulatableActive, StoreHandDraggableActive;
+    public void FocusEnter(GameObject focusObject)
+    {
+        if (focusObject.name == "Slider")
+        {
+            StoreTwoHandManipulatableActive = GetComponent<TwoHandManipulatable>().enabled;
+            StoreHandDraggableActive = GetComponent<HandDraggable>().enabled;
+            GetComponent<TwoHandManipulatable>().enabled = false;
+            GetComponent<HandDraggable>().enabled = false;
+        }
+    }
+
+    public void FocusExit(GameObject focusObject)
+    {
+        if (focusObject.name == "Slider")
+        {
+            GetComponent<TwoHandManipulatable>().enabled = StoreTwoHandManipulatableActive;
+            GetComponent<HandDraggable>().enabled = StoreHandDraggableActive;
         }
     }
 
@@ -562,7 +586,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     private void UpdateAnimationSpeed()
     {
         float value = AnimationSpeedSlider.GetComponent<SliderGestureControl>().SliderValue;
-        instanceAnimation.Speed = value * instance.GetComponent<SkinnedMeshRenderer>().sharedMesh.blendShapeCount;
-        dataLayerInstanceAnimation.Speed = instanceAnimation.Speed;
+        if (instanceAnimation != null)
+            instanceAnimation.Speed = value * instance.GetComponent<SkinnedMeshRenderer>().sharedMesh.blendShapeCount;
+        if (dataLayerInstanceAnimation != null)
+            dataLayerInstanceAnimation.Speed = instanceAnimation.Speed;
     }
 }
