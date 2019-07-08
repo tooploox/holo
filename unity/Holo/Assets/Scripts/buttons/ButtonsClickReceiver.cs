@@ -6,9 +6,10 @@ using HoloToolkit.Unity.InputModule;
  * that implements IClickHandler interface.
  * It will detect clicks on buttons (on Interactables list, inherited from InteractionReceiver),
  * and call IClickHandler.Click when necessary.
+ * 
+ * There may be multiple siblings implementing IClickHandler, all will be notified
+ * about events. This allows to split code across multiple scripts.
  */
-
-
 public class ButtonsClickReceiver : InteractionReceiver
 {
 	void Start()
@@ -23,16 +24,18 @@ public class ButtonsClickReceiver : InteractionReceiver
     {
         //Debug.Log(obj.name + " : FocusEnter");
         ShowToolTip(obj, true);
-        IClickHandler clickHandler = GetComponent<IClickHandler>();
-        clickHandler.FocusEnter(obj);
+        foreach (IClickHandler clickHandler in GetComponents<IClickHandler>()) {
+            clickHandler.FocusEnter(obj);
+        }
     }
 
-	protected override void FocusExit(GameObject obj, PointerSpecificEventData eventData)
+    protected override void FocusExit(GameObject obj, PointerSpecificEventData eventData)
     {
         //Debug.Log(obj.name + " : FocusExit");
         ShowToolTip(obj, false);
-        IClickHandler clickHandler = GetComponent<IClickHandler>();
-        clickHandler.FocusExit(obj);
+        foreach (IClickHandler clickHandler in GetComponents<IClickHandler>()) { 
+            clickHandler.FocusExit(obj);
+        }
     }
     
 	protected override void InputDown(GameObject obj, InputEventData eventData)
@@ -45,10 +48,10 @@ public class ButtonsClickReceiver : InteractionReceiver
 	protected override void InputUp(GameObject obj, InputEventData eventData)
     {
 		//Debug.Log(obj.name + " : InputUp");
-        if (clicking == obj)
-        {
-            IClickHandler clickHandler = GetComponent<IClickHandler>();
-            clickHandler.Click(obj);
+        if (clicking == obj) {
+            foreach (IClickHandler clickHandler in GetComponents<IClickHandler>()) {
+                clickHandler.Click(obj);
+            }
         }
         clicking = null;
 	}

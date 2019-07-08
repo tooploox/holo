@@ -75,9 +75,6 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
         // Animation speed slider
         SliderAnimationSpeed.GetComponent<SliderGestureControl>().OnUpdateEvent.AddListener(delegate { UpdateAnimationSpeed(); });
-
-        // Load Player Settings
-        ClickSetColorMap(PlayerPrefs.GetString("ColorMap", "jet")); // color map
     }
 
     /* Number of "add" buttons we have in the scene. */
@@ -133,14 +130,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             case "ButtonScale": ClickChangeTransformationState(TransformationState.Scale); break;
             case "ButtonLayers": ClickToggleLayersState(); break;
             case "Layer1": ClickChangeLayerState(); break;
-            case "ButtonColorMapJet": ClickSetColorMap("jet"); break;
-            case "ButtonColorMapViridis": ClickSetColorMap("viridis"); break;
-            case "ButtonColorMapMagma": ClickSetColorMap("magma"); break;
-            case "ButtonColorMapCividis": ClickSetColorMap("cividis"); break;
-            case "ButtonColorMapPlasma": ClickSetColorMap("plasma"); break;
-            case "ButtonColorMapInferno": ClickSetColorMap("inferno"); break;
             case "ButtonAnimationSpeed": AnimationSubmenu.SetActive(!AnimationSubmenu.activeSelf); break;
-            case "Slider": break;
 
             default:
                 {
@@ -149,14 +139,11 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
                     if (clickObject.name.StartsWith(addPrefix) &&
                         int.TryParse(clickObject.name.Substring(addPrefix.Length), out addInstanceIndex)) {
                         ClickAdd(addInstanceIndex);
-                    } else {
-                        Debug.LogWarning("Click on unknown object " + clickObject.name);
                     }
                     break;
                 }
         }
     }
-
 
     private bool StoreTwoHandManipulatableModelActiveState, StoreHandDraggableModelActiveState, StoreHandDraggableClipPlaneActiveState;
     public void FocusEnter(GameObject focusObject)
@@ -288,15 +275,6 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         //Debug.Log("changing color of " + button.name + " to " + newColor.ToString());
         // both _EmissiveColor and _Color (Albedo in editor) should be set to make proper effect.
         textMesh.color = newColor;
-    }
-
-    private void ClickSetColorMap(string colorMapName)
-    {
-        Texture2D colorMap;
-        colorMap = Resources.Load<Texture2D>("Colormaps/" + colorMapName);
-        DataVisualizationMaterial.SetTexture("_ColorMap", colorMap);
-        PlayerPrefs.SetString("ColorMap", colorMapName);
-        PlayerPrefs.Save();
     }
 
     /* All the variables below are non-null if and only if after 
