@@ -28,8 +28,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public CompoundButton ButtonTranslate;
     public CompoundButton ButtonRotate;
     public CompoundButton ButtonScale;
-    public Color ButtonActiveColor = new Color(0f, 0.90f, 0.88f);
-    public Color ButtonInactiveColor = new Color(1f, 1f, 1f);
+    public CompoundButton ButtonLayerDataFlow;
     public Texture2D ButtonIconPlay;
     public Texture2D ButtonIconPause;
     // Drop here "Prefabs/ModelWithPlateRotationRig"
@@ -129,7 +128,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             case "ButtonRotate": ClickChangeTransformationState(TransformationState.Rotate); break;
             case "ButtonScale": ClickChangeTransformationState(TransformationState.Scale); break;
             case "ButtonLayers": ClickToggleLayersState(); break;
-            case "Layer1": ClickChangeLayerState(); break;
+            case "ButtonLayerDataFlow": ClickChangeLayerState(); break;
             case "ButtonAnimationSpeed": AnimationSubmenu.SetActive(!AnimationSubmenu.activeSelf); break;
 
             default:
@@ -224,23 +223,6 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             UnloadDataLayerInstance();
         }
 
-        CompoundButtonText text = LayersSection.GetComponentInChildren<CompoundButtonText>();
-        if (text == null)
-        {
-            Debug.LogWarning("Missing CompoundButtonText");
-            return;
-        }
-        TextMesh textMesh = text.TextMesh;
-        if (textMesh == null)
-        {
-            Debug.LogWarning("Missing TextMesh");
-            return;
-        }
-        // using material, not sharedMaterial, deliberately: we only change color of this material instance
-        Color newColor = dataLayerInstance != null ? ButtonActiveColor : ButtonInactiveColor;
-        //Debug.Log("changing color of " + button.name + " to " + newColor.ToString());
-        // both _EmissiveColor and _Color (Albedo in editor) should be set to make proper effect.
-        textMesh.color = newColor;
     }
 
     private void ClickChangeLayerState()
@@ -257,24 +239,8 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             UnloadDataLayerInstance();
         else
             LoadDataLayerInstance(instanceIndex.Value, "dataflow");
-        
-        CompoundButtonText text = LayersSection.GetComponentInChildren<CompoundButtonText>();
-        if (text == null)
-        {
-            Debug.LogWarning("Missing CompoundButtonText");
-            return;
-        }
-        TextMesh textMesh = text.TextMesh;
-        if (textMesh == null)
-        {
-            Debug.LogWarning("Missing TextMesh");
-            return;
-        }
-        // using material, not sharedMaterial, deliberately: we only change color of this material instance
-        Color newColor = dataLayerInstance != null ? ButtonActiveColor : ButtonInactiveColor;
-        //Debug.Log("changing color of " + button.name + " to " + newColor.ToString());
-        // both _EmissiveColor and _Color (Albedo in editor) should be set to make proper effect.
-        textMesh.color = newColor;
+
+        HoloUtilities.SetButtonStateText(ButtonLayerDataFlow, dataLayerInstance != null);
     }
 
     /* All the variables below are non-null if and only if after 
@@ -501,28 +467,6 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         }
     }
 
-    public void SetButtonState(CompoundButton button, bool active)
-    {
-        CompoundButtonIcon icon = button.GetComponent<CompoundButtonIcon>();
-        if (icon == null)
-        {
-            Debug.LogWarning("Missing CompoundButtonIcon on " + button.name);
-            return;
-        }
-        MeshRenderer iconRenderer = icon.IconMeshFilter.GetComponent<MeshRenderer>();
-        if (iconRenderer == null)
-        {
-            Debug.LogWarning("Missing MeshRenderer on CompoundButtonIcon.IconMeshFilter attached to " + button.name);
-            return;
-        }
-        // using material, not sharedMaterial, deliberately: we only change color of this material instance
-        Color newColor = active ? ButtonActiveColor : ButtonInactiveColor;
-        //Debug.Log("changing color of " + button.name + " to " + newColor.ToString());
-        // both _EmissiveColor and _Color (Albedo in editor) should be set to make proper effect.
-        iconRenderer.material.SetColor("_EmissiveColor", newColor);
-        iconRenderer.material.SetColor("_Color", newColor);
-    }
-
     private void ClickChangeTransformationState(TransformationState newState)
     {
         bool rotationBoxRigActiveOld = transformationState == TransformationState.Rotate;
@@ -534,9 +478,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         }
         transformationState = newState;
 
-        SetButtonState(ButtonTranslate, newState == TransformationState.Translate);
-        SetButtonState(ButtonRotate, newState == TransformationState.Rotate);
-        SetButtonState(ButtonScale, newState == TransformationState.Scale);
+        HoloUtilities.SetButtonState(ButtonTranslate, newState == TransformationState.Translate);
+        HoloUtilities.SetButtonState(ButtonRotate, newState == TransformationState.Rotate);
+        HoloUtilities.SetButtonState(ButtonScale, newState == TransformationState.Scale);
 
         // turn on/off translation manipulation
         handDraggable.enabled = newState == TransformationState.Translate;

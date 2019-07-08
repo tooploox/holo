@@ -79,7 +79,7 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
 
             ButtonClippingPlaneTranslation.gameObject.SetActive(true);
             ButtonClippingPlaneRotation.gameObject.SetActive(true);
-            modelWithPlate.SetButtonState(ButtonClippingPlane, true);
+            HoloUtilities.SetButtonState(ButtonClippingPlane, true);
         }
         else
         {
@@ -89,7 +89,7 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
             clipPlaneQuadBbox.Deactivate();
             ButtonClippingPlaneTranslation.gameObject.SetActive(false);
             ButtonClippingPlaneRotation.gameObject.SetActive(false);
-            modelWithPlate.SetButtonState(ButtonClippingPlane, false);
+            HoloUtilities.SetButtonState(ButtonClippingPlane, false);
         }
     }
 
@@ -103,8 +103,8 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
         }
         ClippingPlaneState = newState;
 
-        modelWithPlate.SetButtonState(ButtonClippingPlaneTranslation, newState == ClipPlaneState.Translation);
-        modelWithPlate.SetButtonState(ButtonClippingPlaneRotation, newState == ClipPlaneState.Rotation);
+        HoloUtilities.SetButtonState(ButtonClippingPlaneTranslation, newState == ClipPlaneState.Translation);
+        HoloUtilities.SetButtonState(ButtonClippingPlaneRotation, newState == ClipPlaneState.Rotation);
 
         HandTranslation.enabled = newState == ClipPlaneState.Translation;
 
