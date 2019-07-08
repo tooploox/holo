@@ -39,7 +39,7 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
 
     public void Click(GameObject clickObj)
     {
-        Debug.Log("Clicked obj: " + clickObj.name);
+        //Debug.Log("Clicked obj: " + clickObj.name);
         switch (clickObj.name)
         {
             case "ButtonClipping":
@@ -62,7 +62,8 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
         ModelWithPlate modelWithPlate = ModelWithPlate.GetComponent<ModelWithPlate>();
         if (!modelWithPlate.Instance)
         {
-            Debug.LogWarning("No model loaded for clipping plane");
+            // This is normal if you try to turn on clipping plane before a model is loaded
+            Debug.Log("No model loaded for clipping plane");
             ClippingPlaneState = ClipPlaneState.Disabled;
             return;
         }

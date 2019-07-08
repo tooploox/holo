@@ -258,6 +258,13 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
     private void ClickChangeLayerState()
     {
+        if (instance == null)
+        {
+            // This is normal if you try to turn on dataflow layer before a model is loaded
+            Debug.Log("No model loaded, cannot show dataflow.");
+            return;
+        }
+
         //TODO: "dataflow" should be extracted from internal state / data / index of instance
         if (dataLayerInstance != null)
             UnloadDataLayerInstance();
