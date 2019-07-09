@@ -35,7 +35,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public GameObject RotationBoxRigTemplate;
     public GameObject Instance { get { return instance; } }
 
-    private enum TransformationState
+    public enum TransformationState
     {
         None,
         Translate,
@@ -208,7 +208,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     private void ClickAdd(int newInstanceIndex)
     {
         LoadInstance(newInstanceIndex, true);
-        ModelClipPlaneCtrl.ResetState();
+        ModelClipPlaneCtrl.ClippingPlaneState = ModelClippingPlaneControl.ClipPlaneState.Disabled;
     }
 
     private void ClickConfirmPreview()
@@ -437,8 +437,12 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             instanceAnimation.Speed = skinnedMesh.sharedMesh.blendShapeCount;
         } else {
             Debug.LogWarning("Model has no blend shapes " + newInstanceIndex);
-        }
+        }        
         instanceAnimation.Playing = true;
+
+        //reset animation speed slider to value 1
+        SliderAnimationSpeed.GetComponent<SliderGestureControl>().SetSliderValue(1f);
+
         // TODO: this should be changed into "throw new...", not a warning.
         // After new import STL->GameObject is ready.
         Animator animator = instance.GetComponent<Animator>();
@@ -467,7 +471,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         }
     }
 
-    private void ClickChangeTransformationState(TransformationState newState)
+    public void ClickChangeTransformationState(TransformationState newState)
     {
         bool rotationBoxRigActiveOld = transformationState == TransformationState.Rotate;
         bool scaleBoxRigActiveOld = transformationState == TransformationState.Scale;
@@ -482,8 +486,13 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         HoloUtilities.SetButtonState(ButtonRotate, newState == TransformationState.Rotate);
         HoloUtilities.SetButtonState(ButtonScale, newState == TransformationState.Scale);
 
+        // if transform the model: disable clipping plane manipulator
+        if (newState != TransformationState.None && ModelClipPlaneCtrl.ClippingPlaneState != ModelClippingPlaneControl.ClipPlaneState.Disabled)
+            ModelClipPlaneCtrl.ClippingPlaneState = ModelClippingPlaneControl.ClipPlaneState.Active;
+
         // turn on/off translation manipulation
         handDraggable.enabled = newState == TransformationState.Translate;
+        handDraggable.IsDraggingEnabled = newState == TransformationState.Translate;
 
         // turn on/off rotation manipulation
         /*
