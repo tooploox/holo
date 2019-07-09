@@ -315,7 +315,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
      * with center in instanceMove above plate origin.
      * This should match the plate designed sizes.
      */
-    const float instanceMaxSize = 1.3f;
+    const float instanceMaxSize = 1.0f;
     const float expandedPlateHeight = 0.4f;
     Vector3 instanceMove = new Vector3(0f, expandedPlateHeight + instanceMaxSize / 2f, 0f); // constant
 
