@@ -4,6 +4,8 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
+using HoloToolkit.Examples.InteractiveElements;
+
 using HoloToolkit.Unity;
 using HoloToolkit.Unity.UX;
 using HoloToolkit.Unity.Buttons;
@@ -13,24 +15,27 @@ using HoloToolkit.Unity.InputModule.Utilities.Interactions;
 public class ModelWithPlate : MonoBehaviour, IClickHandler
 {
     /* Public fields that should be set in Unity Editor */
+    public GameObject SliderAnimationSpeed;
     public GameObject ButtonsModel;
     public GameObject ButtonsModelPreview;
     public GameObject PlateAnimated;
+    public GameObject LayersSection;
+    public GameObject AnimationSubmenu;
     public Material DefaultModelMaterial;
+    public Material DataVisualizationMaterial;
     public Transform InstanceParent;
     public CompoundButton ButtonTogglePlay;
     public CompoundButton ButtonTranslate;
     public CompoundButton ButtonRotate;
     public CompoundButton ButtonScale;
-    public Color ButtonActiveColor = new Color(0f, 0.90f, 0.88f);
-    public Color ButtonInactiveColor = new Color(1f, 1f, 1f);
+    public CompoundButton ButtonLayerDataFlow;
     public Texture2D ButtonIconPlay;
     public Texture2D ButtonIconPause;
     // Drop here "Prefabs/ModelWithPlateRotationRig"
     public GameObject RotationBoxRigTemplate;
     public GameObject Instance { get { return instance; } }
 
-    private enum TransformationState
+    public enum TransformationState
     {
         None,
         Translate,
@@ -51,16 +56,24 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         /* Adding components using code, simply because it's more friendly to version control */
         handDraggable = gameObject.AddComponent<HandDraggable>();
         handDraggable.RotationMode = HandDraggable.RotationModeEnum.LockObjectRotation;
+        GetComponent<TwoHandManipulatable>().enabled = false;
 
         ModelClipPlaneCtrl = ModelClipPlane.GetComponentInChildren<ModelClippingPlaneControl>();
         // Turn off the clipping plane on start
         DefaultModelMaterial.DisableKeyword("CLIPPING_ON");
+        DataVisualizationMaterial.DisableKeyword("CLIPPING_ON");
+
+        LayersSection.SetActive(false);
+        AnimationSubmenu.SetActive(false);
 
         RefreshUserInterface();
         InitializeAddButtons();
 
         // This sets proper state of buttons and components like handDraggable
         ClickChangeTransformationState(TransformationState.None);
+
+        // Animation speed slider
+        SliderAnimationSpeed.GetComponent<SliderGestureControl>().OnUpdateEvent.AddListener(delegate { UpdateAnimationSpeed(); });
     }
 
     /* Number of "add" buttons we have in the scene. */
@@ -114,6 +127,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             case "ButtonTranslate": ClickChangeTransformationState(TransformationState.Translate); break;
             case "ButtonRotate": ClickChangeTransformationState(TransformationState.Rotate); break;
             case "ButtonScale": ClickChangeTransformationState(TransformationState.Scale); break;
+            case "ButtonLayers": ClickToggleLayersState(); break;
+            case "ButtonLayerDataFlow": ClickChangeLayerState(); break;
+            case "ButtonAnimationSpeed": AnimationSubmenu.SetActive(!AnimationSubmenu.activeSelf); break;
 
             default:
                 {
@@ -122,11 +138,33 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
                     if (clickObject.name.StartsWith(addPrefix) &&
                         int.TryParse(clickObject.name.Substring(addPrefix.Length), out addInstanceIndex)) {
                         ClickAdd(addInstanceIndex);
-                    } else {
-                        Debug.LogWarning("Click on unknown object " + clickObject.name);
                     }
                     break;
                 }
+        }
+    }
+
+    private bool StoreTwoHandManipulatableModelActiveState, StoreHandDraggableModelActiveState, StoreHandDraggableClipPlaneActiveState;
+    public void FocusEnter(GameObject focusObject)
+    {
+        if (focusObject.name == "Slider")
+        {
+            StoreTwoHandManipulatableModelActiveState = GetComponent<TwoHandManipulatable>().enabled;
+            StoreHandDraggableModelActiveState = GetComponent<HandDraggable>().enabled;
+            StoreHandDraggableClipPlaneActiveState = ModelClipPlane.GetComponent<HandDraggable>().enabled;
+            GetComponent<TwoHandManipulatable>().enabled = false;
+            GetComponent<HandDraggable>().enabled = false;
+            ModelClipPlane.GetComponent<HandDraggable>().enabled = false;
+        }
+    }
+
+    public void FocusExit(GameObject focusObject)
+    {
+        if (focusObject.name == "Slider")
+        {
+            GetComponent<TwoHandManipulatable>().enabled = StoreTwoHandManipulatableModelActiveState;
+            GetComponent<HandDraggable>().enabled = StoreHandDraggableModelActiveState;
+            ModelClipPlane.GetComponent<HandDraggable>().enabled = StoreHandDraggableClipPlaneActiveState;
         }
     }
 
@@ -134,6 +172,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     {
         if (instanceAnimation != null) {
             instanceAnimation.TogglePlay();
+            if(dataLayerInstanceAnimation != null) {
+                dataLayerInstanceAnimation.TogglePlay();
+            }
             RefreshUserInterface();
         }
         else {
@@ -145,6 +186,10 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     {
         if (instanceAnimation != null) {
             instanceAnimation.CurrentTime = 0f;
+            if(dataLayerInstanceAnimation != null)
+            {
+                dataLayerInstanceAnimation.CurrentTime = 0f;
+            }
         } else {
             Debug.LogWarning("Rewind button clicked, but no model loaded");
         }
@@ -163,7 +208,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     private void ClickAdd(int newInstanceIndex)
     {
         LoadInstance(newInstanceIndex, true);
-        ModelClipPlaneCtrl.ResetState();
+        ModelClipPlaneCtrl.ClippingPlaneState = ModelClippingPlaneControl.ClipPlaneState.Disabled;
     }
 
     private void ClickConfirmPreview()
@@ -171,11 +216,40 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         LoadInstance(instanceIndex.Value, false);
     }
 
+    public void ClickToggleLayersState()
+    {
+        LayersSection.SetActive(!LayersSection.activeSelf);
+        if (!LayersSection.activeSelf) {
+            UnloadDataLayerInstance();
+        }
+
+    }
+
+    private void ClickChangeLayerState()
+    {
+        if (instance == null)
+        {
+            // This is normal if you try to turn on dataflow layer before a model is loaded
+            Debug.Log("No model loaded, cannot show dataflow.");
+            return;
+        }
+
+        //TODO: "dataflow" should be extracted from internal state / data / index of instance
+        if (dataLayerInstance != null)
+            UnloadDataLayerInstance();
+        else
+            LoadDataLayerInstance(instanceIndex.Value, "dataflow");
+
+        HoloUtilities.SetButtonStateText(ButtonLayerDataFlow, dataLayerInstance != null);
+    }
+
     /* All the variables below are non-null if and only if after 
      * LoadInstance call (and before UnloadInstance). */
     private int? instanceIndex; // index to ModelsCollection
     private BlendShapeAnimation instanceAnimation;
+    private BlendShapeAnimation dataLayerInstanceAnimation;
     private GameObject instance;
+    private GameObject dataLayerInstance;
     private GameObject instanceTransformation;
     private bool instanceIsPreview = false;
 
@@ -207,12 +281,15 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     private void UnloadInstance(bool refreshUi = true)
     {
         // First release previous instance
+        UnloadDataLayerInstance();
+
         if (instance != null) {
             Destroy(instance);
             Destroy(instanceTransformation);
             Destroy(rotationBoxRig);
 
             instanceIndex = null;
+            dataLayerInstance = null;
             instance = null;
             instanceTransformation = null;
             instanceAnimation = null;
@@ -225,13 +302,84 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         }
     }
 
+    private void UnloadDataLayerInstance()
+    {
+        if (dataLayerInstance != null)
+            Destroy(dataLayerInstance);
+
+        dataLayerInstance = null;
+        dataLayerInstanceAnimation = null;
+    }
+
     /* Resulting instance will be in box of max size instanceMaxSize, 
      * with center in instanceMove above plate origin.
      * This should match the plate designed sizes.
      */
-    const float instanceMaxSize = 1.3f;
+    const float instanceMaxSize = 1.0f;
     const float expandedPlateHeight = 0.4f;
     Vector3 instanceMove = new Vector3(0f, expandedPlateHeight + instanceMaxSize / 2f, 0f); // constant
+
+    private void LoadDataLayerInstance(int currentInstanceIndex, string dataLayerSufix)
+    {
+        UnloadDataLayerInstance();
+
+        GameObject template = ModelsCollection.Singleton.BundleLoadDataLayer(currentInstanceIndex, dataLayerSufix);
+
+        dataLayerInstance = Instantiate<GameObject>(template, instance.transform);
+
+        dataLayerInstanceAnimation = dataLayerInstance.GetComponent<BlendShapeAnimation>();
+        if (dataLayerInstanceAnimation == null)
+        {
+            // TODO: this should be changed into "throw new...", not a warning.
+            // We should settle whether the stored object has or has not BlendShapeAnimation (I vote not,
+            // but any decision is fine, just stick to it).
+            // After new import STL->GameObject is ready.
+            Debug.LogWarning("BlendShapeAnimation component not found inside " + currentInstanceIndex + ", adding");
+            dataLayerInstanceAnimation = dataLayerInstance.AddComponent<BlendShapeAnimation>();
+        }
+
+        SkinnedMeshRenderer skinnedMesh = dataLayerInstance.GetComponent<SkinnedMeshRenderer>();
+        SkinnedMeshRenderer mainInstanceSkinnedMesh = instance.GetComponent<SkinnedMeshRenderer>();
+
+
+        int blendShapesCount = skinnedMesh.sharedMesh.blendShapeCount;
+        int mainBlendShapesCount = mainInstanceSkinnedMesh.sharedMesh.blendShapeCount;
+        if (blendShapesCount != mainBlendShapesCount)
+        {
+            Debug.LogWarningFormat("Data layer has different number of BlendShapes [{0}] than main model [{1}]",
+                blendShapesCount, mainBlendShapesCount);
+        }
+
+        if (blendShapesCount != 0)
+        {
+            dataLayerInstanceAnimation.Speed = instanceAnimation.Speed;
+        }
+        else
+        {
+            Debug.LogWarning("Model has no blend shapes " + currentInstanceIndex);
+        }
+
+        Animator animator = instance.GetComponent<Animator>();
+        if (animator != null)
+        {
+            Debug.LogWarning("Animator component found but not wanted inside " + currentInstanceIndex + ", removing");
+            Destroy(animator);
+        }
+
+        // Assign material
+        skinnedMesh.sharedMaterial = DataVisualizationMaterial;
+
+        bool playingState = instanceAnimation.Playing;
+
+        dataLayerInstanceAnimation.Playing = false;
+        instanceAnimation.Playing = false;
+
+        instanceAnimation.CurrentTime = 0.0f;
+        dataLayerInstanceAnimation.CurrentTime = instanceAnimation.CurrentTime;
+        instanceAnimation.Playing = playingState;
+        dataLayerInstanceAnimation.Playing = playingState;
+        RefreshUserInterface();
+    }
 
     // Load new animated shape.
     // newInstanceIndex is an index to ModelsCollection.
@@ -289,8 +437,12 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             instanceAnimation.Speed = skinnedMesh.sharedMesh.blendShapeCount;
         } else {
             Debug.LogWarning("Model has no blend shapes " + newInstanceIndex);
-        }
+        }        
         instanceAnimation.Playing = true;
+
+        //reset animation speed slider to value 1
+        SliderAnimationSpeed.GetComponent<SliderGestureControl>().SetSliderValue(1f);
+
         // TODO: this should be changed into "throw new...", not a warning.
         // After new import STL->GameObject is ready.
         Animator animator = instance.GetComponent<Animator>();
@@ -301,19 +453,6 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
         // Assign material
         skinnedMesh.sharedMaterial = DefaultModelMaterial;
-
-        //// Add Direction indicator for loaded model
-        //instance.AddComponent<DirectionIndicator>();
-        //DirectionIndicator directionInd = instance.GetComponent<DirectionIndicator>();
-        //directionInd.Cursor = GameObject.Find("DefaultCursor");
-        //directionInd.DirectionIndicatorObject = Resources.Load(
-        //    "Assets/GFX/UI/HandDetectedFeedbackMod.prefab", typeof(GameObject)) as GameObject;
-        //directionInd.DirectionIndicatorColor.r = 61.0f;
-        //directionInd.DirectionIndicatorColor.g = 206.0f;
-        //directionInd.DirectionIndicatorColor.b = 200.0f;
-        //directionInd.VisibilitySafeFactor = -0.5f;
-        //directionInd.MetersFromCursor = 0.1f;
-        //directionInd.Awake();
 
         instanceIndex = newInstanceIndex;
         instanceIsPreview = newIsPreview;
@@ -332,29 +471,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         }
     }
 
-    public void SetButtonState(CompoundButton button, bool active)
-    {
-        CompoundButtonIcon icon = button.GetComponent<CompoundButtonIcon>();
-        if (icon == null)
-        {
-            Debug.LogWarning("Missing CompoundButtonIcon on " + button.name);
-            return;
-        }
-        MeshRenderer iconRenderer = icon.IconMeshFilter.GetComponent<MeshRenderer>();
-        if (iconRenderer == null)
-        {
-            Debug.LogWarning("Missing MeshRenderer on CompoundButtonIcon.IconMeshFilter attached to " + button.name);
-            return;
-        }
-        // using material, not sharedMaterial, deliberately: we only change color of this material instance
-        Color newColor = active ? ButtonActiveColor : ButtonInactiveColor;
-        //Debug.Log("changing color of " + button.name + " to " + newColor.ToString());
-        // both _EmissiveColor and _Color (Albedo in editor) should be set to make proper effect.
-        iconRenderer.material.SetColor("_EmissiveColor", newColor);
-        iconRenderer.material.SetColor("_Color", newColor);
-    }
-
-    private void ClickChangeTransformationState(TransformationState newState)
+    public void ClickChangeTransformationState(TransformationState newState)
     {
         bool rotationBoxRigActiveOld = transformationState == TransformationState.Rotate;
         bool scaleBoxRigActiveOld = transformationState == TransformationState.Scale;
@@ -365,12 +482,17 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         }
         transformationState = newState;
 
-        SetButtonState(ButtonTranslate, newState == TransformationState.Translate);
-        SetButtonState(ButtonRotate, newState == TransformationState.Rotate);
-        SetButtonState(ButtonScale, newState == TransformationState.Scale);
+        HoloUtilities.SetButtonState(ButtonTranslate, newState == TransformationState.Translate);
+        HoloUtilities.SetButtonState(ButtonRotate, newState == TransformationState.Rotate);
+        HoloUtilities.SetButtonState(ButtonScale, newState == TransformationState.Scale);
+
+        // if transform the model: disable clipping plane manipulator
+        if (newState != TransformationState.None && ModelClipPlaneCtrl.ClippingPlaneState != ModelClippingPlaneControl.ClipPlaneState.Disabled)
+            ModelClipPlaneCtrl.ClippingPlaneState = ModelClippingPlaneControl.ClipPlaneState.Active;
 
         // turn on/off translation manipulation
         handDraggable.enabled = newState == TransformationState.Translate;
+        handDraggable.IsDraggingEnabled = newState == TransformationState.Translate;
 
         // turn on/off rotation manipulation
         /*
@@ -406,23 +528,12 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         }
     }
 
-    // TODO update time slider now
-    /*
-    private void Update()
+    private void UpdateAnimationSpeed()
     {
-        if (playing && blendShapeAnimation != null) {
-            timeSlider.value = blendShapeAnimation.CurrentTime;
-        }
+        float value = SliderAnimationSpeed.GetComponent<SliderGestureControl>().SliderValue;
+        if (instanceAnimation != null)
+            instanceAnimation.Speed = value * instance.GetComponent<SkinnedMeshRenderer>().sharedMesh.blendShapeCount;
+        if (dataLayerInstanceAnimation != null)
+            dataLayerInstanceAnimation.Speed = instanceAnimation.Speed;
     }
-    */
-
-    // TODO: read time slider now
-    /*
-    private void TimeSliderValueChanged(float newPosition)
-    {
-        if (blendShapeAnimation != null) {
-            blendShapeAnimation.CurrentTime = newPosition;
-        }
-    }
-    */
 }

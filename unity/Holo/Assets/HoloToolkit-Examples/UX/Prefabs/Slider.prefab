@@ -604,9 +604,9 @@ MonoBehaviour:
       Culture=neutral, PublicKeyToken=null
   sliderValue: 0
   MinSliderValue: 0
-  MaxSliderValue: 10
+  MaxSliderValue: 3
   Centered: 0
-  LabelFormat: 00
+  LabelFormat: 0.0
 --- !u!114 &114854604571829066
 MonoBehaviour:
   m_ObjectHideFlags: 0
