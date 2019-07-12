@@ -37,7 +37,7 @@ public class AssetBundleLoader
             {
                 Debug.LogWarning("Prefab " + bundleObjectName + " does not contain ModelLayer component, guessing");
                 layer = layerGameObject.AddComponent<ModelLayer>();
-                layer.Caption = HoloUtilities.SuffixRemove(bundleObjectName, ".prefab");
+                layer.Caption = HoloUtilities.SuffixRemove(".prefab", bundleObjectName);
                 layer.DataFlow = bundleObjectName.Contains("dataflow");
             }
 
@@ -50,26 +50,12 @@ public class AssetBundleLoader
         get { return new ReadOnlyCollection<ModelLayer>(layers); }
     }
 
-    public List<GameObject> LoadMultipleGameObjects()
+    public void InstantiateAllLayers()
     {
-        List<string> assetPathList = assetBundle.GetAllAssetNames().ToList();
-        List<GameObject> modelGameObjects = new List<GameObject>();
-        List<string> gameObjectPaths = assetPathList.FindAll(path => path.EndsWith(".prefab"));
-        foreach (string path in gameObjectPaths)
+        foreach (ModelLayer layer in Layers)
         {
-            modelGameObjects.Add(assetBundle.LoadAsset<GameObject>(path));
+            layer.InstantiateGameObject(null);
         }
         return modelGameObjects;
-    }
-
-    public void InstantiateMultipleGameObjects()
-    {
-        List<GameObject> template = LoadMultipleGameObjects();
-
-        foreach (GameObject gameObject in template)
-        {
-            UnityEngine.Object.Instantiate(gameObject);
-        }
-
     }
 }
