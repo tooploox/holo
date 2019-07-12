@@ -55,4 +55,14 @@ public static class HoloUtilities
         renderer.material.SetColor("_EmissiveColor", newColor);
         renderer.material.SetColor("_Color", newColor);
     }
+
+    public static string SuffixRemove(string suffix, string s)
+    {
+        if (s.EndsWith(suffix)) {
+            return s.Substring(0, suffix.Length - 2);
+        } else
+        {
+            return s;
+        }
+    }
 }

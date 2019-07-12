@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 using UnityEngine;
 
@@ -238,7 +239,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         if (dataLayerInstance != null)
             UnloadDataLayerInstance();
         else
-            LoadDataLayerInstance(instanceIndex.Value, "dataflow");
+            LoadDataLayerInstance(instanceIndex.Value);
 
         HoloUtilities.SetButtonStateText(ButtonLayerDataFlow, dataLayerInstance != null);
     }
@@ -319,13 +320,14 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     const float expandedPlateHeight = 0.4f;
     Vector3 instanceMove = new Vector3(0f, expandedPlateHeight + instanceMaxSize / 2f, 0f); // constant
 
-    private void LoadDataLayerInstance(int currentInstanceIndex, string dataLayerSufix)
+    private void LoadDataLayerInstance(int currentInstanceIndex)
     {
         UnloadDataLayerInstance();
 
-        GameObject template = ModelsCollection.Singleton.BundleLoadDataLayer(currentInstanceIndex, dataLayerSufix);
-
-        dataLayerInstance = Instantiate<GameObject>(template, instance.transform);
+        AssetBundleLoader bundleLoader = ModelsCollection.Singleton.BundleLoad(currentInstanceIndex);
+        ModelLayer layer = bundleLoader.Layers.First<ModelLayer>(l => l.DataFlow);
+        // TODO: use instanceTransformation
+        dataLayerInstance = layer.InstantiateGameObject(instance.transform);
 
         dataLayerInstanceAnimation = dataLayerInstance.GetComponent<BlendShapeAnimation>();
         if (dataLayerInstanceAnimation == null)
@@ -387,8 +389,6 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     {
         UnloadInstance(false);
 
-        GameObject template = ModelsCollection.Singleton.BundleLoad(newInstanceIndex, newIsPreview);
-
         /* Instantiate BoundingBoxRig dynamically, as in the next frame (when BoundingBoxRig.Start is run)
          * it will assume that bounding box of children is not empty.
          * So we cannot create BoundingBoxRig (for rotations) earlier.
@@ -400,7 +400,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         instanceTransformation = new GameObject("InstanceTransformation");
         instanceTransformation.transform.parent = rotationBoxRig.transform;
 
-        instance = Instantiate<GameObject>(template, instanceTransformation.transform);
+        AssetBundleLoader bundleLoader = ModelsCollection.Singleton.BundleLoad(newInstanceIndex);
+        ModelLayer layer = bundleLoader.Layers.First<ModelLayer>(l => !l.DataFlow);
+        instance = layer.InstantiateGameObject(instanceTransformation.transform);
 
         SkinnedMeshRenderer skinnedMesh = instance.GetComponent<SkinnedMeshRenderer>();
         // Note that we use bounds, not localBounds, because we want to preserve local rotations

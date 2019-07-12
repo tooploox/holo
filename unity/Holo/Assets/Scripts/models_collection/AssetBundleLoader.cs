@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System;
 using System.IO;
 using System.Linq;
@@ -8,8 +9,7 @@ public class AssetBundleLoader
 {
     private AssetBundle assetBundle;
     private string bundlePath;
-
-    private List<string> dataLayers;
+    private List<ModelLayer> layers;
 
     public void LoadBundle(string aBundlePath)
     {
@@ -21,47 +21,33 @@ public class AssetBundleLoader
             return;
         }
         assetBundle = loadedAssetBundle;
-        dataLayers = GetDataLayers();
+        LoadLayers();
     }
 
-    private List<string> GetDataLayers()
+    private void LoadLayers()
     {
-        var selectedNames = assetBundle.GetAllAssetNames()
-                                .Where(name => name.EndsWith(".prefab"))
-                                .Where(name => !name.EndsWith("_body.prefab"));
-        
-        return new List<string>(selectedNames);
-    }
-
-    public GameObject LoadGameObject(string sufix)
-    {
-        List<string> assetPathList = assetBundle.GetAllAssetNames().ToList();
-
-        string endPattern = "_" + sufix + ".prefab";
-        string gameObjectPath;
-        try
+        layers = new List<ModelLayer>();
+        foreach (string bundleObjectName in assetBundle.GetAllAssetNames())
         {
-            gameObjectPath = assetPathList.Single(path => path.EndsWith(endPattern));
-        } catch (InvalidOperationException e)
-        {
-            Debug.LogError("Probably no path with suffix " + endPattern + " in the asset bundle " + bundlePath + ", exception " + e.Message);
-            // Since the caller probably doesn't except null result, above makes LogError instead of LogWarning
-            return null;
+            if (!bundleObjectName.EndsWith(".prefab")) { continue; } // ignore other objects
+
+            GameObject layerGameObject = assetBundle.LoadAsset<GameObject>(bundleObjectName);
+            ModelLayer layer = layerGameObject.GetComponent<ModelLayer>();
+            if (layer == null)
+            {
+                Debug.LogWarning("Prefab " + bundleObjectName + " does not contain ModelLayer component, guessing");
+                layer = layerGameObject.AddComponent<ModelLayer>();
+                layer.Caption = HoloUtilities.SuffixRemove(bundleObjectName, ".prefab");
+                layer.DataFlow = bundleObjectName.Contains("dataflow");
+            }
+
+            layers.Add(layer);
         }
-
-        return assetBundle.LoadAsset<GameObject>(gameObjectPath);
     }
 
-    public GameObject LoadMainGameObject()
+    public IEnumerable<ModelLayer> Layers
     {
-        return LoadGameObject("body");
-    }
-
-    public GameObject InstantiateMainGameObject()
-    {
-        GameObject template = LoadMainGameObject();
-        GameObject instance = UnityEngine.Object.Instantiate<GameObject>(template);
-        return instance;
+        get { return new ReadOnlyCollection<ModelLayer>(layers); }
     }
 
     public List<GameObject> LoadMultipleGameObjects()

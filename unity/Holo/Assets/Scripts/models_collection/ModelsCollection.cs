@@ -76,7 +76,7 @@ public class ModelsCollection : MonoBehaviour
         return result;
     }
 
-    public GameObject BundleLoad(int i, bool isPreview)
+    public AssetBundleLoader BundleLoad(int i)
     {
         if (i < 0 || i >= BundlesCount) {
             throw new Exception("Invalid bundle index " + i.ToString());
@@ -88,24 +88,7 @@ public class ModelsCollection : MonoBehaviour
             bundles[i].LoadBundle(bundlesFiles[i]);
         }
 
-        return bundles[i].LoadMainGameObject();
-    }
-
-    public GameObject BundleLoadDataLayer(int i, string dataLayerSufix)
-    {
-        if (i < 0 || i >= BundlesCount)
-        {
-            throw new Exception("Invalid bundle index " + i.ToString());
-        }
-
-        if (bundles[i] == null)
-        {
-            bundles[i] = new AssetBundleLoader();
-            bundles[i].LoadBundle(bundlesFiles[i]);
-        }
-
-        return bundles[i].LoadGameObject(dataLayerSufix);
-
+        return bundles[i];
     }
 
     private void Update()
