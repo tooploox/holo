@@ -44,7 +44,7 @@ namespace ModelImport.VTKImport
             var line = "";
             while (!streamReader.EndOfStream)
             {
-                if (verticesFlag & vectorsFlag & tangentsFlag)
+                if (verticesFlag && vectorsFlag && tangentsFlag)
                 {
                     break;
                 }
@@ -73,9 +73,18 @@ namespace ModelImport.VTKImport
                     GetDataflowTangents(streamReader, "beta");
                     tangentsBeta = true;
                 }
-                tangentsFlag = tangentsAlpha & tangentsBeta;
+                if (line.IndexOf("CELL_DATA", StringComparison.CurrentCultureIgnoreCase) >= 0)
+                {
+                    GetDataflowColors(streamReader);
+                    tangentsFlag = true;
+                }
+                if (tangentsAlpha && tangentsBeta)
+                {
+                    tangentsFlag = true;
+                }
             }
-            if (!verticesFlag | !vectorsFlag | !tangentsFlag)
+
+            if (!verticesFlag || !vectorsFlag || !tangentsFlag)
             {
                 throw new Exception("Insufficient data in a file!");
             }
@@ -238,6 +247,16 @@ namespace ModelImport.VTKImport
                     Indices[i+j] = currentVertexNumber;
                 }
                 currentVertexNumber++;
+            }
+        }
+
+        private void GetDataflowColors(StreamReader streamReader)
+        {
+            streamReader.ReadLine();
+            for (int i = 0; i < DeltaTangents.Length; i++)
+            {
+                Vector3 currentVertex = streamReader.GetLineVertex();
+                DeltaTangents[i] = currentVertex;
             }
         }
     }
