@@ -327,7 +327,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         AssetBundleLoader bundleLoader = ModelsCollection.Singleton.BundleLoad(currentInstanceIndex);
         ModelLayer layer = bundleLoader.Layers.First<ModelLayer>(l => l.DataFlow);
         // TODO: use instanceTransformation
-        dataLayerInstance = layer.InstantiateGameObject(instance.transform);
+        dataLayerInstance = layer.InstantiateGameObject(instanceTransformation.transform.transform);
 
         dataLayerInstanceAnimation = dataLayerInstance.GetComponent<BlendShapeAnimation>();
         if (dataLayerInstanceAnimation == null)
@@ -426,10 +426,6 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
         instanceAnimation = instance.GetComponent<BlendShapeAnimation>();
         if (instanceAnimation == null) {
-            // TODO: this should be changed into "throw new...", not a warning.
-            // We should settle whether the stored object has or has not BlendShapeAnimation (I vote not,
-            // but any decision is fine, just stick to it).
-            // After new import STL->GameObject is ready.
             Debug.LogWarning("BlendShapeAnimation component not found inside " + newInstanceIndex + ", adding");
             instanceAnimation = instance.AddComponent<BlendShapeAnimation>();
         }
@@ -445,8 +441,6 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         //reset animation speed slider to value 1
         SliderAnimationSpeed.GetComponent<SliderGestureControl>().SetSliderValue(1f);
 
-        // TODO: this should be changed into "throw new...", not a warning.
-        // After new import STL->GameObject is ready.
         Animator animator = instance.GetComponent<Animator>();
         if (animator != null) {
             Debug.LogWarning("Animator component found but not wanted inside " + newInstanceIndex + ", removing");
