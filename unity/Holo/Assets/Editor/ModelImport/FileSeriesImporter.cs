@@ -19,16 +19,16 @@ namespace ModelImport
         private string extension;
         private FileImporter fileImporter;
         private Dictionary<string, Vector3> boundingVertices = new Dictionary<string, Vector3>();
-        private bool dataflow = false;
+        private bool simulationData = false;
         
         //Imports data from file series.
         public void ImportData(string fileSeriesDirectory, string gameObjectName)
         {
             ModelGameObject = new GameObject(gameObjectName);
             ModelMesh = new Mesh();
-            if (gameObjectName.Contains("dataflow"))
+            if (gameObjectName.Contains("simulation"))
             {
-                dataflow = true;
+                simulationData = true;
             }
             bool cancelImport = EditorUtility.DisplayCancelableProgressBar("Conversion in progress: " + ModelGameObject.name, "Converting file nr: " + 0.ToString(), 0);
             //TODO: Progress bar
@@ -52,7 +52,7 @@ namespace ModelImport
         //Loads meshes from separate files into Mesh Object as BlendShapeFrames
         private void ImportFiles()
         {
-            fileImporter = new FileImporter(extension, dataflow);
+            fileImporter = new FileImporter(extension, simulationData);
 
             //Configuring progress bar
             float progressChunk = (float) 1 / filePaths.Length;
@@ -74,7 +74,7 @@ namespace ModelImport
                 }
                 CheckTopology(i);
                 UpdateBounds(firstMesh);
-                if (dataflow)
+                if (simulationData)
                 {
                     ModelMesh.AddBlendShapeFrame(Path.GetFileName(filePaths[i]), 100f, fileImporter.Vertices, fileImporter.Normals, fileImporter.DeltaTangents);
                 }
@@ -115,7 +115,7 @@ namespace ModelImport
             {
                 throw new Exception("Wrong number of indices in a facet!");
             }
-            if (dataflow)
+            if (simulationData)
             {
                 Vector4[] tangents = new Vector4[fileImporter.Vertices.Length];
                 
@@ -158,7 +158,7 @@ namespace ModelImport
         {
             SkinnedMeshRenderer skinnedMesh = ModelGameObject.AddComponent<SkinnedMeshRenderer>();
             skinnedMesh.sharedMesh = ModelMesh;
-            if (fileImporter.VerticesInFacet == 3 & !dataflow)
+            if (fileImporter.VerticesInFacet == 3 & !simulationData)
             {
                 skinnedMesh.sharedMesh.RecalculateNormals();
             }
