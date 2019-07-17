@@ -27,7 +27,7 @@ VTK is a versatile format, allowing user to save its model in various combinatio
 - One file is representing one frame in the animation. 
 - File concerning one mesh/one simulation should be stored in one folder separately. 
 - Each frame should have its number stated at the end, and the numbers should be zero-padded e.g.: XYZ_01.vtk, XYZ_02.vtk etc.
-- Number of frames should be the same in every root subfolder and equal to 42, i.e. with XYZ_00 file at the beginning and XYZ_41 file at the end.
+- Number of frames should be the same in every root subfolder.
 - Every file starts with four lines listed below, followed by an empty line:
 `# vtk DataFile Version 4.0 `
 `<Name of the current body/simulation> vtk output`
