@@ -6,16 +6,16 @@ In order to upload your model into the application, your data needs to follow sp
 
 All data describing a model should place in one root folder. The structure is as follows:
 
--   [. . .] - Root folder.
+-   [XXX]* - Root folder.
 
-	-  [. . . _body]* - Folder with vtk meshes - animation frames for the model mesh, where # is its number.
+	-  [XYZ_body]* - Folder with vtk meshes - animation frames for the model mesh, where # is its number.
     
-	- [. . . _simulation]* - Folder with dataflow simulation vtk files - animation frames for data simulation,, where # is its number.
+	- [ZXY_simulation]* - Folder with dataflow simulation vtk files - animation frames for data simulation,, where # is its number.
     
 	- [ModelInfo.txt]* - info file with the name of a model, and names of optional thumbnails,, where # is its number.
 
 Each folder should have a unique name within root directory.
-*[name of the folder/file]. ". . ."  is a name chosen by the user.
+*[name of the folder/file]. "XXX/XYZ/ZXY"  is a name chosen by the user.
 
 
 ## Data files general specification
@@ -26,8 +26,8 @@ VTK is a versatile format, allowing user to save its model in various combinatio
 - All data should be stored in ASCII format and of UNSTRUCTURED_GRID dataset type. 
 - One file is representing one frame in the animation. 
 - File concerning one mesh/one simulation should be stored in one folder separately. 
-- Each frame should have its number stated at the end, and the numbers should be zero-padded e.g.: lv_01.vtk, lv_02.vtk etc.
-- Number of frames should be the same in every root subfolder.
+- Each frame should have its number stated at the end, and the numbers should be zero-padded e.g.: XYZ_01.vtk, XYZ_02.vtk etc.
+- Number of frames should be the same in every root subfolder and equal to 42, i.e. with XYZ_00 file at the beginning and XYZ_41 file at the end.
 - Every file starts with four lines listed below, followed by an empty line:
 `# vtk DataFile Version 4.0 `
 `<Name of the current body/simulation> vtk output`
@@ -98,7 +98,7 @@ Four fields are mandatory: **POINTS**; **COLOR_SCALARS** and **Vectors fn float*
 		- Each vector is corresponding to a vertex in **POINTS**, mapped by their order.
 		- Number and order of colors between frames is not supposed to change.
 
-	- **Vectors fn float** is a list of vectors, signifying orientation and speed of a particular point in the flow.  
+	- **Vectors fn float** is a list of vectors, signifying orientation and speed of a particular point in the flow. We use this vector's length and color to visualise the speed of this point in the flow.  
 		- Similar to **POINTS**, Vectors are described by 3 (x,y,z) floats.  
 		- There should be only one vector per line and vertex.
 		- Each vector is corresponding to a vertex in **POINTS**, mapped by their order.
