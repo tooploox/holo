@@ -45,5 +45,8 @@ public class JoinSelectedSessionButton : MonoBehaviour, IInputClickHandler
     public void OnInputClicked(InputClickedEventData eventData)
     {
         ScrollingSessionListUIController.Instance.JoinSelectedSession();
+
+        //disable side menu
+
     }
 }

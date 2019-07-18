@@ -67,23 +67,22 @@ public class SharingSceneData : NetworkBehaviour
         {
             hostPlatePosition = transform.localPosition;
             hostPlateScale = transform.localScale;
+            hostClippingPlaneActive = ClipPlaneManager.ClippingPlaneState != ModelClippingPlaneControl.ClipPlaneState.Disabled;
             hostInstanceIndex = (ModelManager.instanceIndex.HasValue) ? ModelManager.instanceIndex.Value : -1;
             if (hostInstanceIndex > 0)
             {
                 hostModelRotation = ModelManager.rotationBoxRig.transform.localRotation;
-                hostClippingPlaneActive = ClipPlaneManager.ClippingPlaneState != ModelClippingPlaneControl.ClipPlaneState.Disabled;
                 hostClippingPlaneTransform = ModelManager.ModelClipPlane.transform;                
                 hostColorMap = ModelManager.DataVisualizationMaterial.GetTexture("_ColorMap").name;
 
                 hostAnimationState = ModelManager.instanceAnimation.Playing;
                 hostAnimationTime = ModelManager.instanceAnimation.CurrentTime;
                 hostAnimationSpeed = ModelManager.instanceAnimation.Speed;
-
-                //temporary solution for dataflow
-                hostDataLayerActive = ModelManager.dataLayerInstance != null;
             }
+            //temporary solution for dataflow
+            hostDataLayerActive = ModelManager.dataLayerInstance != null;
         }
-        else
+        else if(isClient)
         {
             transform.localPosition = hostPlatePosition;
             transform.localScale = hostPlateScale;
@@ -92,7 +91,13 @@ public class SharingSceneData : NetworkBehaviour
             if (localInstanceIndex != hostInstanceIndex)
             {
                 if (hostInstanceIndex >= 0)
+                {
                     ModelManager.LoadInstance(hostInstanceIndex, false);
+                    if (hostDataLayerActive)
+                    {
+                        ModelManager.LoadDataLayerInstance(hostInstanceIndex, "dataflow");
+                    }
+                }
                 else
                     ModelManager.UnloadInstance();
             }
@@ -101,7 +106,8 @@ public class SharingSceneData : NetworkBehaviour
             {
                 ModelManager.rotationBoxRig.transform.localRotation = hostModelRotation;
 
-                if((ClipPlaneManager.ClippingPlaneState == ModelClippingPlaneControl.ClipPlaneState.Active) && !hostClippingPlaneActive)
+                bool isClipingPlaneLocallyActive = ClipPlaneManager.ClippingPlaneState == ModelClippingPlaneControl.ClipPlaneState.Active;
+                if (isClipingPlaneLocallyActive != hostClippingPlaneActive)
                     ClipPlaneManager.ClippingPlaneState = (hostClippingPlaneActive) ? ModelClippingPlaneControl.ClipPlaneState.Active : ModelClippingPlaneControl.ClipPlaneState.Disabled;
                 ModelManager.ModelClipPlane.transform.SetPositionAndRotation(hostClippingPlaneTransform.localPosition, hostClippingPlaneTransform.localRotation);
                 
