@@ -245,16 +245,21 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
     /* All the variables below are non-null if and only if after 
      * LoadInstance call (and before UnloadInstance). */
-    private int? instanceIndex; // index to ModelsCollection
-    private BlendShapeAnimation instanceAnimation;
-    private BlendShapeAnimation dataLayerInstanceAnimation;
+    [HideInInspector]
+    public int? instanceIndex; // index to ModelsCollection
+    [HideInInspector]
+    public BlendShapeAnimation instanceAnimation;
+    [HideInInspector]
+    public BlendShapeAnimation dataLayerInstanceAnimation;
     private GameObject instance;
-    private GameObject dataLayerInstance;
+    [HideInInspector]
+    public GameObject dataLayerInstance;
     private GameObject instanceTransformation;
     private bool instanceIsPreview = false;
 
     // Created only when instance != null, as it initializes bbox in Start and assumes it's not empty
-    private GameObject rotationBoxRig;
+    [HideInInspector]
+    public GameObject rotationBoxRig;
 
     private void RefreshUserInterface()
     {
@@ -278,7 +283,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     // Unload currently loaded instance.
     // May be safely called even when instance is already unloaded.
     // LoadInstance() calls this automatically at the beginning.
-    private void UnloadInstance(bool refreshUi = true)
+    public void UnloadInstance(bool refreshUi = true)
     {
         // First release previous instance
         UnloadDataLayerInstance();
@@ -302,7 +307,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         }
     }
 
-    private void UnloadDataLayerInstance()
+    public void UnloadDataLayerInstance()
     {
         if (dataLayerInstance != null)
             Destroy(dataLayerInstance);
@@ -319,7 +324,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     const float expandedPlateHeight = 0.4f;
     Vector3 instanceMove = new Vector3(0f, expandedPlateHeight + instanceMaxSize / 2f, 0f); // constant
 
-    private void LoadDataLayerInstance(int currentInstanceIndex, string dataLayerSufix)
+    public void LoadDataLayerInstance(int currentInstanceIndex, string dataLayerSufix)
     {
         UnloadDataLayerInstance();
 
@@ -383,7 +388,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
     // Load new animated shape.
     // newInstanceIndex is an index to ModelsCollection.
-    private void LoadInstance(int newInstanceIndex, bool newIsPreview)
+    public void LoadInstance(int newInstanceIndex, bool newIsPreview)
     {
         UnloadInstance(false);
 

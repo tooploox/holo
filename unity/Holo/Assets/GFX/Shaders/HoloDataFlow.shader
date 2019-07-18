@@ -66,6 +66,10 @@
 			{
 				g2f o;
 
+				if(length(IN[0].normal) == 0){
+					return;
+				}
+				
 				float3 nNormal = normalize(IN[0].normal); //normalized normal
 				float3 eyePosition = UnityObjectToViewPos(IN[0].vertex.xyz);
 				float directionToCamera = -normalize(eyePosition);
@@ -78,6 +82,7 @@
 				fixed4 startColor = fixed4(.8, .8, .8, 1.);
 
 				float _WeightFactor = _ScaleFactor * 0.45;
+				_ScaleFactor *= length(IN[0].normal);
 
 				/* We perform clipping in the geometry shader,
 				   using the "main vertex" from IN[0].vertex as the position that
@@ -197,7 +202,9 @@
 				fixed4 col = i.col;
 				col.a = i.col.a;
 
-				if(_DisplayMode == 1)
+				if(_DisplayMode == 0)
+					col = i.tan * i.col;
+				else if(_DisplayMode == 1)
 					col = tex2D(_ColorMap, float2((i.tan.x + 1) / 2,0)) * i.col;
 				else if (_DisplayMode == 2)
 					col = tex2D(_ColorMap, float2((i.tan.y + 1) / 2,0)) * i.col;

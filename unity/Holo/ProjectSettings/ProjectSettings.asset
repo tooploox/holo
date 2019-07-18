@@ -613,13 +613,13 @@ PlayerSettings:
       VoipCall: False
       WebCam: False
   metroTargetDeviceFamilies:
-    Desktop: False
+    Desktop: True
     Holographic: True
     IoT: False
     IoTHeadless: False
     Mobile: False
     Team: False
-    Xbox: False
+    Xbox: True
   metroFTAName: 
   metroFTAFileTypes: []
   metroProtocolName: 

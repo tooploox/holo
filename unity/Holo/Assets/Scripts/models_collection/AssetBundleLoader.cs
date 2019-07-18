@@ -82,7 +82,7 @@ public class AssetBundleLoader
 
         foreach (GameObject gameObject in template)
         {
-            Object.Instantiate(gameObject);
+            UnityEngine.Object.Instantiate(gameObject);
         }
 
     }
