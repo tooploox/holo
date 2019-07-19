@@ -79,9 +79,7 @@ public class AssetBundleLoader
                 if (layer.Simulation)
                 {
                     int simulationsCount = layers.Count(c => c.Simulation);
-                    layer.Caption = simulationsCount == 0 ? 
-                        "Fiber Fields" : 
-                        "Simulation " + (simulationsCount+1).ToString();
+                    layer.Caption = "Simulation " + (simulationsCount + 1).ToString();
                 }
                 Debug.LogWarning(layerDebugName + " does not contain ModelLayer component, guessing layer Caption (" + 
                     layer.Caption + ") and simulation (" + 
