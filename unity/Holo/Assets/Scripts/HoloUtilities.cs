@@ -59,9 +59,8 @@ public static class HoloUtilities
     public static string SuffixRemove(string suffix, string s)
     {
         if (s.EndsWith(suffix)) {
-            return s.Substring(0, suffix.Length - 2);
-        } else
-        {
+            return s.Substring(0, s.Length - suffix.Length);
+        } else {
             return s;
         }
     }

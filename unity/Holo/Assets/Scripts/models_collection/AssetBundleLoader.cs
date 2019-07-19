@@ -10,6 +10,7 @@ public class AssetBundleLoader
     private AssetBundle assetBundle;
     private string bundlePath;
     private List<ModelLayer> layers;
+    private Bounds bounds;
 
     public void LoadBundle(string aBundlePath)
     {
@@ -27,28 +28,82 @@ public class AssetBundleLoader
     private void LoadLayers()
     {
         layers = new List<ModelLayer>();
+        bounds = new Bounds();
+        int? blendShapesCount = null;
         foreach (string bundleObjectName in assetBundle.GetAllAssetNames())
         {
             if (!bundleObjectName.EndsWith(".prefab")) { continue; } // ignore other objects
 
             GameObject layerGameObject = assetBundle.LoadAsset<GameObject>(bundleObjectName);
+            string layerDebugName = "Prefab '" + bundleObjectName + "' layer '" + layerGameObject.name + "'";
+
+            // update bounds
+            SkinnedMeshRenderer skinnedMesh = layerGameObject.GetComponent<SkinnedMeshRenderer>();
+            if (skinnedMesh == null)
+            {
+                Debug.LogWarning(layerDebugName + " does not contain SkinnedMeshRenderer component, ignoring whole layer");
+                continue;
+            }
+            bounds.Encapsulate(skinnedMesh.bounds);
+
+            // check and update blendShapesCount
+            if (blendShapesCount.HasValue && blendShapesCount.Value != skinnedMesh.sharedMesh.blendShapeCount)
+            {
+                Debug.LogWarning(layerDebugName + " have different number of blend shapes, " +
+                    blendShapesCount.Value.ToString() + " versus " +
+                    skinnedMesh.sharedMesh.blendShapeCount.ToString());
+            }
+            blendShapesCount = skinnedMesh.sharedMesh.blendShapeCount;
+
+            // check BlendShapeAnimation
+            BlendShapeAnimation animation = layerGameObject.GetComponent<BlendShapeAnimation>();
+            if (animation == null)
+            {
+                Debug.LogWarning(layerDebugName + " does not contain BlendShapeAnimation component, adding");
+                animation = layerGameObject.AddComponent<BlendShapeAnimation>();
+            }
+            animation.Speed = blendShapesCount.Value;
+
+            // check ModelLayer existence
             ModelLayer layer = layerGameObject.GetComponent<ModelLayer>();
             if (layer == null)
             {
-                Debug.LogWarning("Prefab " + bundleObjectName + " does not contain ModelLayer component, guessing");
                 layer = layerGameObject.AddComponent<ModelLayer>();
-                layer.Caption = HoloUtilities.SuffixRemove(".prefab", bundleObjectName);
-                layer.DataFlow = bundleObjectName.Contains("dataflow");
+                layer.Caption = Path.GetFileNameWithoutExtension(bundleObjectName);
+                layer.Simulation = bundleObjectName.Contains("dataflow") || bundleObjectName.Contains("simulation");
+                if (layer.Simulation)
+                {
+                    int simulationsCount = layers.Count(c => c.Simulation);
+                    layer.Caption = simulationsCount == 0 ? 
+                        "Fiber Fields" : 
+                        "Simulation " + (simulationsCount+1).ToString();
+                }
+                Debug.LogWarning(layerDebugName + " does not contain ModelLayer component, guessing layer Caption (" + 
+                    layer.Caption + ") and simulation (" + 
+                    layer.Simulation.ToString() + ")");
             }
 
+            // check Animator does not exist (we do not animate using Mecanim)
+            Animator animator = layerGameObject.GetComponent<Animator>();
+            if (animator != null)
+            {
+                Debug.LogWarning(layerDebugName + " contains Animator component, removing");
+                UnityEngine.Object.Destroy(animator);
+            }
+
+            // add to layers list
             layers.Add(layer);
         }
     }
 
+    // All layers, available after LoadLayer
     public IEnumerable<ModelLayer> Layers
     {
         get { return new ReadOnlyCollection<ModelLayer>(layers); }
     }
+
+    // Bounding box of all layers, available after LoadLayer
+    public Bounds Bounds { get { return bounds;  } }
 
     public void InstantiateAllLayers()
     {

@@ -11,8 +11,8 @@ public class ModelLayer : MonoBehaviour
     // Nice name to show to user.
     public string Caption;
 
-    // Is this a dataflow layer (using dataflow shader etc.)
-    public bool DataFlow;
+    // Is this a simulation layer (using simulation shader etc.)
+    public bool Simulation;
 
     public GameObject InstantiateGameObject(Transform parent)
     {
