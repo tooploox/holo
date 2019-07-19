@@ -28,7 +28,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public CompoundButton ButtonTranslate;
     public CompoundButton ButtonRotate;
     public CompoundButton ButtonScale;
-    public CompoundButton ButtonLayerDataFlow;
+    public GameObject ButtonLayerTemplate;
     public Texture2D ButtonIconPlay;
     public Texture2D ButtonIconPause;
     // Drop here "Prefabs/ModelWithPlateRotationRig"
@@ -50,7 +50,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
     private ModelClippingPlaneControl ModelClipPlaneCtrl;
 
-    private class LoadedLayer
+    private class LayerLoaded
     {
         public GameObject Instance;
         public BlendShapeAnimation Animation;
@@ -58,11 +58,12 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
     private bool instanceLoaded = false;
     public bool InstanceLoaded { get { return instanceLoaded; } }
-    /* All the variables below are non-null 
+    /* All the variables below are non-null
      * only when instanceLoaded,
      * that is only after LoadInstance call (and before UnloadInstance). */
     private int? instanceIndex; // index to ModelsCollection
-    private Dictionary<ModelLayer, LoadedLayer> loadedLayers;
+    private Dictionary<ModelLayer, LayerLoaded> layersLoaded;
+    private Dictionary<ModelLayer, CompoundButton> layersButtons;
     private GameObject instanceTransformation;
     private bool instanceIsPreview = false;
 
@@ -146,16 +147,23 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             case "ButtonRotate": ClickChangeTransformationState(TransformationState.Rotate); break;
             case "ButtonScale": ClickChangeTransformationState(TransformationState.Scale); break;
             case "ButtonLayers": ClickToggleLayersState(); break;
-            case "ButtonLayerDataFlow": ClickChangeLayerState(); break;
             case "ButtonAnimationSpeed": AnimationSubmenu.SetActive(!AnimationSubmenu.activeSelf); break;
 
             default:
                 {
-                    const string addPrefix = "Add";
-                    int addInstanceIndex;
-                    if (clickObject.name.StartsWith(addPrefix) &&
-                        int.TryParse(clickObject.name.Substring(addPrefix.Length), out addInstanceIndex)) {
-                        ClickAdd(addInstanceIndex);
+                    ModelLayer layer = ButtonOfLayer(clickObject);
+                    if (layer != null)
+                    {
+                        ClickChangeLayerState(layer);
+                    } else
+                    {
+                        const string addPrefix = "Add";
+                        int addInstanceIndex;
+                        if (clickObject.name.StartsWith(addPrefix) &&
+                            int.TryParse(clickObject.name.Substring(addPrefix.Length), out addInstanceIndex))
+                        {
+                            ClickAdd(addInstanceIndex);
+                        }
                     }
                     break;
                 }
@@ -188,9 +196,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
     public void ClickTogglePlay()
     {
-        if (loadedLayers != null) {
-            foreach (LoadedLayer loadedLayer in loadedLayers.Values) {
-                loadedLayer.Animation.TogglePlay();
+        if (layersLoaded != null) {
+            foreach (LayerLoaded l in layersLoaded.Values) {
+                l.Animation.TogglePlay();
             }
             RefreshUserInterface();
         } else {
@@ -200,9 +208,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
     public void ClickRewind()
     {
-        if (loadedLayers != null) {
-            foreach (LoadedLayer loadedLayer in loadedLayers.Values) {
-                loadedLayer.Animation.CurrentTime = 0f;
+        if (layersLoaded != null) {
+            foreach (LayerLoaded l in layersLoaded.Values) {
+                l.Animation.CurrentTime = 0f;
             }
             RefreshUserInterface();
         } else {
@@ -242,31 +250,27 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         LayersSection.SetActive(!LayersSection.activeSelf);
     }
 
-    private void ClickChangeLayerState()
+    private void ClickChangeLayerState(ModelLayer layer)
     {
-        // TODO: get layer id (some internal name? or just reference to ModelLayer?)
-
         if (!instanceLoaded)
         {
             Debug.Log("No model loaded, cannot show layer.");
             return;
         }
 
-        AssetBundleLoader bundleLoader = ModelsCollection.Singleton.BundleLoad(instanceIndex.Value);
-        ModelLayer layerSimulation = bundleLoader.Layers.First<ModelLayer>(l => l.Simulation);
-        bool addLayer = !loadedLayers.ContainsKey(layerSimulation);
+        bool addLayer = !layersLoaded.ContainsKey(layer);
         if (!addLayer) {
-            UnloadLayer(layerSimulation);
+            UnloadLayer(layer);
         } else {
-            LoadLayer(layerSimulation);
+            LoadLayer(layer);
         }
-        HoloUtilities.SetButtonStateText(ButtonLayerDataFlow, addLayer);
+        HoloUtilities.SetButtonStateText(layersButtons[layer], addLayer);
     }
 
-    // First LoadedLayer, of any layer is loaded now.
-    private LoadedLayer FirstLoadedLayer()
+    // First LayerLoaded, of any layer is loaded now.
+    private LayerLoaded FirstLayerLoaded()
     {
-        return loadedLayers != null && loadedLayers.Count != 0 ? loadedLayers.Values.First<LoadedLayer>() : null;
+        return layersLoaded != null && layersLoaded.Count != 0 ? layersLoaded.Values.First<LayerLoaded>() : null;
     }
 
     private void RefreshUserInterface()
@@ -276,7 +280,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         PlateVisible = (!instanceLoaded) || instanceIsPreview;
 
         // update ButtonTogglePlay caption and icon
-        LoadedLayer firstLayer = FirstLoadedLayer();
+        LayerLoaded firstLayer = FirstLayerLoaded();
         bool playing = firstLayer != null && firstLayer.Animation.Playing;
         string playOrPauseText = playing ? "PAUSE" : "PLAY";
         ButtonTogglePlay.GetComponent<CompoundButtonText>().Text = playOrPauseText;
@@ -286,32 +290,42 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             iconRenderer.sharedMaterial.mainTexture = playOrPatseIcon;
         } else {
             Debug.LogWarning("ButtonTogglePlay icon does not have MeshRenderer");
-        }        
+        }
     }
 
     private void UnloadLayer(ModelLayer layer)
     {
-        if (!loadedLayers.ContainsKey(layer)) {
+        if (!layersLoaded.ContainsKey(layer)) {
             Debug.LogWarning("Cannot unload layer " + layer.Caption + ", it is not loaded yet");
             return;
         }
-        Destroy(loadedLayers[layer].Instance);
-        loadedLayers.Remove(layer);
+        Destroy(layersLoaded[layer].Instance);
+        layersLoaded.Remove(layer);
     }
 
     /* Unload currently loaded model.
      * May be safely called even when instance is already unloaded.
      * LoadInstance() calls this automatically at the beginning.
-     * 
+     *
      * After calling this, remember to call RefreshUserInterface at some point.
      */
     private void UnloadInstance()
     {
-        if (loadedLayers != null) {
-            foreach (LoadedLayer loadedLayer in loadedLayers.Values) {
-                Destroy(loadedLayer.Instance);
+        if (layersLoaded != null) {
+            foreach (LayerLoaded l in layersLoaded.Values) {
+                Destroy(l.Instance);
             }
-            loadedLayers = null;
+            layersLoaded = null;
+        }
+
+        if (layersButtons != null) {
+            foreach (CompoundButton button in layersButtons.Values) {
+                // remove from ButtonsClickReceiver.interactables
+                ButtonsClickReceiver clickReceiver = GetComponent<ButtonsClickReceiver>();
+                clickReceiver.interactables.Remove(button.gameObject);
+                Destroy(button.gameObject);
+            }
+            layersButtons = null;
         }
 
         if (instanceTransformation != null)
@@ -327,13 +341,14 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         instanceLoaded = false;
     }
 
-    /* Resulting instance will be in box of max size instanceMaxSize, 
+    /* Resulting instance will be in box of max size instanceMaxSize,
      * with center in instanceMove above plate origin.
      * This should match the plate designed sizes.
      */
     const float instanceMaxSize = 1.0f;
     const float expandedPlateHeight = 0.4f;
     Vector3 instanceMove = new Vector3(0f, expandedPlateHeight + instanceMaxSize / 2f, 0f); // constant
+    const float buttonLayerHeight = 1.6f;
 
     private bool plateVisible;
     private bool PlateVisible
@@ -377,7 +392,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
          * and it woud actually break Activate (because you cannot call Activate in the same
          * frame as setting enabled=true for the 1st frame, this causes problems in BoundingBoxRig
          * as private "objectToBound" is only assigned in BoundingBoxRig.Start).
-         * 
+         *
         rotationBoxRig.enabled = newState == TransformationState.Rotate;
         */
         // call rotationBoxRig.Activate or Deactivate
@@ -404,15 +419,28 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         }
     }
 
+    /* Does this button toggles some layer (returns null if not), and which one. */
+    private ModelLayer ButtonOfLayer(GameObject buttonGameObject)
+    {
+        if (layersButtons != null) {
+            foreach (var pair in layersButtons) {
+                if (pair.Value.gameObject == buttonGameObject) {
+                    return pair.Key;
+                }
+            }
+        }
+        return null;
+    }
+
     /* Load new model.
-	 *
-	 * newInstanceIndex is an index to ModelsCollection bundle.
-	 *
-	 * No layer is initially loaded -- you usually want to call
-	 * LoadLayer immediately after this.
-	 *
+     *
+     * newInstanceIndex is an index to ModelsCollection bundle.
+     *
+     * No layer is initially loaded -- you usually want to call
+     * LoadLayer immediately after this.
+     *
      * After calling this, remember to call RefreshUserInterface at some point.
-	 */
+     */
     private void LoadInstance(int newInstanceIndex, bool newIsPreview)
     {
         UnloadInstance();
@@ -420,7 +448,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         instanceLoaded = true;
         instanceIndex = newInstanceIndex;
         instanceIsPreview = newIsPreview;
-        loadedLayers = new Dictionary<ModelLayer, LoadedLayer>();
+        layersLoaded = new Dictionary<ModelLayer, LayerLoaded>();
 
         /* Instantiate BoundingBoxRig dynamically, as in the next frame (when BoundingBoxRig.Start is run)
          * it will assume that bounding box of children is not empty.
@@ -434,21 +462,24 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         instanceTransformation.transform.parent = rotationBoxRig.transform;
 
         AssetBundleLoader bundleLoader = ModelsCollection.Singleton.BundleLoad(newInstanceIndex);
-        // Note that we use bounds, not localBounds, because we want to preserve local rotations
-        Bounds b = bundleLoader.Bounds;
+        
+        Vector3 boundsSize = Vector3.one;
         float scale = 1f;
-        float maxSize = Mathf.Max(new float[] { b.size.x, b.size.y, b.size.z });
-        if (maxSize > Mathf.Epsilon)
-        {
-            scale = instanceMaxSize / maxSize;
+        if (bundleLoader.Bounds.HasValue) { 
+            Bounds b = bundleLoader.Bounds.Value;
+            boundsSize = b.size;            
+            float maxSize = Mathf.Max(new float[] { boundsSize.x, boundsSize.y, boundsSize.z });
+            if (maxSize > Mathf.Epsilon) {
+                scale = instanceMaxSize / maxSize;
+            }
+            instanceTransformation.transform.localScale = new Vector3(scale, scale, scale);
+            instanceTransformation.transform.localPosition = -b.center * scale + instanceMove;
         }
-        instanceTransformation.transform.localScale = new Vector3(scale, scale, scale);
-        instanceTransformation.transform.localPosition = -b.center * scale + instanceMove;
 
         // set proper BoxCollider bounds
         BoxCollider rotationBoxCollider = rotationBoxRig.GetComponent<BoxCollider>();
         rotationBoxCollider.center = instanceMove;
-        rotationBoxCollider.size = b.size * scale;
+        rotationBoxCollider.size = boundsSize * scale;
         // Disable the component, to not prevent mouse clicking on buttons.
         // It will be taken into account to calculate bbox in BoundingBoxRig anyway,
         // since inside BoundingBox.GetColliderBoundsPoints it looks at all GetComponentsInChildren<Collider>() .
@@ -456,6 +487,33 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
         // reset animation speed slider to value 1
         SliderAnimationSpeed.GetComponent<SliderGestureControl>().SetSliderValue(1f);
+
+        // add buttons to toggle layers
+        layersButtons = new Dictionary<ModelLayer, CompoundButton>();
+        int buttonIndex = 0;
+        foreach (ModelLayer layer in bundleLoader.Layers)
+        {
+            // add button to scene
+            GameObject buttonGameObject = Instantiate<GameObject>(ButtonLayerTemplate, LayersSection.transform);
+            buttonGameObject.transform.localPosition =
+                buttonGameObject.transform.localPosition + new Vector3(0f, 0f, buttonLayerHeight * buttonIndex);
+            buttonIndex++;
+
+            // configure button text
+            CompoundButton button = buttonGameObject.GetComponent<CompoundButton>();
+            if (button == null) {
+                Debug.LogWarning("Missing component CompoundButton in ButtonLayerTemplate");
+                continue;
+            }
+            button.GetComponent<CompoundButtonText>().Text = layer.Caption;
+
+            // extend ButtonsClickReceiver.interactables
+            ButtonsClickReceiver clickReceiver = GetComponent<ButtonsClickReceiver>();
+            clickReceiver.interactables.Add(buttonGameObject);
+
+            // update layersButtons dictionary
+            layersButtons[layer] = button;
+        }
     }
 
     private void LoadInitialLayers()
@@ -469,57 +527,57 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         AssetBundleLoader bundleLoader = ModelsCollection.Singleton.BundleLoad(instanceIndex.Value);
         ModelLayer layer = bundleLoader.Layers.First<ModelLayer>(l => !l.Simulation);
         LoadLayer(layer);
+        HoloUtilities.SetButtonStateText(layersButtons[layer], true);
     }
 
     /* Instantiate new animated layer from currently loaded model.
-	 * If the layer is already instantiated, does nothing
-	 * (for now it makes a warning, but we can disable the warning if it's useful).
-	 *
-	 * This can only be used after LoadInstance (and before corresponding UnloadInstance).
-	 *
+     * If the layer is already instantiated, does nothing
+     * (for now it makes a warning, but we can disable the warning if it's useful).
+     *
+     * This can only be used after LoadInstance (and before corresponding UnloadInstance).
+     *
      * After calling this, remember to call RefreshUserInterface at some point.
-	 */
+     */
     private void LoadLayer(ModelLayer layer)
     {
         if (!instanceLoaded)
         {
             throw new Exception("Cannot call LoadLayer before LoadInstance");
         }
-        if (loadedLayers.ContainsKey(layer))
+        if (layersLoaded.ContainsKey(layer))
         {
             Debug.LogWarning("Layer already loaded");
             return;
         }
 
-        LoadedLayer firstLayer = FirstLoadedLayer();
+        LayerLoaded firstLayer = FirstLayerLoaded();
         bool currentlyPlaying = firstLayer != null ? firstLayer.Animation.Playing : true;
         float currentlyTime = firstLayer != null ? firstLayer.Animation.CurrentTime : 0f;
 
-        LoadedLayer loadedLayer = new LoadedLayer();
-        loadedLayer.Instance = layer.InstantiateGameObject(instanceTransformation.transform);
+        LayerLoaded l = new LayerLoaded();
+        l.Instance = layer.InstantiateGameObject(instanceTransformation.transform);
 
-        loadedLayer.Animation = loadedLayer.Instance.GetComponent<BlendShapeAnimation>();
+        l.Animation = l.Instance.GetComponent<BlendShapeAnimation>();
         // It should be already checked and eventually fixed in AssetBundleLoader
-        Assert.IsTrue(loadedLayer.Animation != null);
-        loadedLayer.Animation.Playing = currentlyPlaying;
-        loadedLayer.Animation.CurrentTime = currentlyTime;
+        Assert.IsTrue(l.Animation != null);
+        l.Animation.Playing = currentlyPlaying;
+        l.Animation.CurrentTime = currentlyTime;
 
         // Assign material
-        SkinnedMeshRenderer skinnedMesh = loadedLayer.Instance.GetComponent<SkinnedMeshRenderer>();
+        SkinnedMeshRenderer skinnedMesh = l.Instance.GetComponent<SkinnedMeshRenderer>();
         skinnedMesh.sharedMaterial = layer.Simulation ? DataVisualizationMaterial : DefaultModelMaterial;
 
-        // update loadedLayers dictionary
-        loadedLayers[layer] = loadedLayer;
+        // update layersLoaded dictionary
+        layersLoaded[layer] = l;
     }
 
     private void UpdateAnimationSpeed()
     {
         float value = SliderAnimationSpeed.GetComponent<SliderGestureControl>().SliderValue;
 
-        if (loadedLayers != null) {
-            foreach (LoadedLayer loadedLayer in loadedLayers.Values) {
-                loadedLayer.Animation.Speed = value;
-                // * loadedLayer.Instance.GetComponent<SkinnedMeshRenderer>().sharedMesh.blendShapeCount;
+        if (layersLoaded != null) {
+            foreach (LayerLoaded l in layersLoaded.Values) {
+                l.Animation.Speed = value;
             }
             RefreshUserInterface();
         }

@@ -10,7 +10,7 @@ public class AssetBundleLoader
     private AssetBundle assetBundle;
     private string bundlePath;
     private List<ModelLayer> layers;
-    private Bounds bounds;
+    private Bounds? bounds;
 
     public void LoadBundle(string aBundlePath)
     {
@@ -28,7 +28,7 @@ public class AssetBundleLoader
     private void LoadLayers()
     {
         layers = new List<ModelLayer>();
-        bounds = new Bounds();
+        bounds = null;
         int? blendShapesCount = null;
         foreach (string bundleObjectName in assetBundle.GetAllAssetNames())
         {
@@ -44,8 +44,13 @@ public class AssetBundleLoader
                 Debug.LogWarning(layerDebugName + " does not contain SkinnedMeshRenderer component, ignoring whole layer");
                 continue;
             }
-            bounds.Encapsulate(skinnedMesh.bounds);
-
+            // Note that we use skinnedMesh.bounds, not skinnedMesh.localBounds, because we want to preserve local rotations
+            if (bounds.HasValue) {
+                bounds.Value.Encapsulate(skinnedMesh.bounds);
+            } else {
+                bounds = skinnedMesh.bounds;
+            }
+            
             // check and update blendShapesCount
             if (blendShapesCount.HasValue && blendShapesCount.Value != skinnedMesh.sharedMesh.blendShapeCount)
             {
@@ -94,6 +99,12 @@ public class AssetBundleLoader
             // add to layers list
             layers.Add(layer);
         }
+
+        if (!bounds.HasValue) {
+            Debug.LogWarning("Empty model, no layers with something visible");            
+        } else { 
+            Debug.Log("Loaded model with bounds " + bounds.ToString());
+        }
     }
 
     // All layers, available after LoadLayer
@@ -102,8 +113,10 @@ public class AssetBundleLoader
         get { return new ReadOnlyCollection<ModelLayer>(layers); }
     }
 
-    // Bounding box of all layers, available after LoadLayer
-    public Bounds Bounds { get { return bounds;  } }
+    /* Bounding box of all layers, available after LoadLayer.
+     * May be null, if no visible layers are present.
+     */
+    public Bounds? Bounds { get { return bounds;  } }
 
     public void InstantiateAllLayers()
     {
