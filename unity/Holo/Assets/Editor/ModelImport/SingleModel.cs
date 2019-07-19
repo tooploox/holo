@@ -14,7 +14,7 @@ namespace ModelImport
         public string ModelName { get; private set; } = "";
         public string ThumbnailDirectory { get; private set; } = "";
 
-        //Loads a single model, with its body and/or dataflow.
+        //Loads a single model, with its body and/or simulationData.
         public void GetModelData()
         {
             string rootDirectory = GetRootDirectory();
@@ -63,7 +63,7 @@ namespace ModelImport
                 while (!streamReader.EndOfStream)
                 {
                     string modelElement = streamReader.ReadLine();
-                    if (modelElement == "body" || modelElement == "dataflow")
+                    if (modelElement.Contains("_body") || modelElement.Contains("_simulation"))
                     {
                         directoriesList.Add(rootDirectory + @"\" + modelElement);
                     }
@@ -79,7 +79,7 @@ namespace ModelImport
             }
             return directoriesList;
         }
-        //Imports data for body or dataflow blendshape.
+        //Imports data for body or simulationData blendshape.
         private void ImportData(string dataDirectory)
         {
             string dictionaryKey = ModelName + "_" + Path.GetFileName(dataDirectory);

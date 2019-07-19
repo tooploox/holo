@@ -20,12 +20,12 @@ namespace ModelImport.VTKImport
             { "maxVertex", new Vector3()}
         };
 
-        //Imports a single file. Checks if it's a body mesh or dataflow object.
-        public void ImportFile(StreamReader streamReader, bool dataflow)
+        //Imports a single file. Checks if it's a body mesh or simulation object.
+        public void ImportFile(StreamReader streamReader, bool simulationData)
         {
-            if (dataflow)
+            if (simulationData)
             {
-                ImportDataFlow(streamReader);
+                ImportsimulationData(streamReader);
             }
             else
             {
@@ -33,8 +33,8 @@ namespace ModelImport.VTKImport
             }
 
         }
-        //Imports a single dataflow mesh file.
-        private void ImportDataFlow(StreamReader streamReader)
+        //Imports a single simulation data mesh file.
+        private void ImportsimulationData(StreamReader streamReader)
         {
             bool verticesFlag = false;
             bool vectorsFlag = false;
@@ -44,7 +44,7 @@ namespace ModelImport.VTKImport
             var line = "";
             while (!streamReader.EndOfStream)
             {
-                if (verticesFlag & vectorsFlag & tangentsFlag)
+                if (verticesFlag && vectorsFlag && tangentsFlag)
                 {
                     break;
                 }
@@ -60,26 +60,35 @@ namespace ModelImport.VTKImport
                 }
                 if (line.IndexOf("Vectors fn float", StringComparison.CurrentCultureIgnoreCase) >= 0)
                 {
-                    GetDataflowVectors(streamReader);
+                    GetSimulationVectors(streamReader);
                     vectorsFlag = true;
                 }
                 if (line.IndexOf("LOOKUP_TABLE alpha", StringComparison.CurrentCultureIgnoreCase) >= 0)
                 {
-                    GetDataflowTangents(streamReader, "alpha");
+                    GetSimulationTangents(streamReader, "alpha");
                     tangentsAlpha = true;
                 }
                 if (line.IndexOf("LOOKUP_TABLE beta", StringComparison.CurrentCultureIgnoreCase) >= 0)
                 {
-                    GetDataflowTangents(streamReader, "beta");
+                    GetSimulationTangents(streamReader, "beta");
                     tangentsBeta = true;
                 }
-                tangentsFlag = tangentsAlpha & tangentsBeta;
+                if (line.IndexOf("CELL_DATA", StringComparison.CurrentCultureIgnoreCase) >= 0)
+                {
+                    GetSimulationColors(streamReader);
+                    tangentsFlag = true;
+                }
+                if (tangentsAlpha && tangentsBeta)
+                {
+                    tangentsFlag = true;
+                }
             }
-            if (!verticesFlag | !vectorsFlag | !tangentsFlag)
+
+            if (!verticesFlag || !vectorsFlag || !tangentsFlag)
             {
                 throw new Exception("Insufficient data in a file!");
             }
-            SetDataflowIndices();
+            SetSimulationIndices();
         }
 
         ////Imports a single body mesh file.
@@ -193,8 +202,8 @@ namespace ModelImport.VTKImport
             return normal;
         }
 
-        //Gets dataflow vectors.
-        private void GetDataflowVectors(StreamReader streamReader)
+        //Gets simulation vectors.
+        private void GetSimulationVectors(StreamReader streamReader)
         {
             Normals = new Vector3[Vertices.Length];
             for (int i = 0; i < Normals.Length; i++)
@@ -204,8 +213,8 @@ namespace ModelImport.VTKImport
             }
         }
 
-        //Gets angles for dataflow visualisation and stores them in deltaTangents for blendshapeanimation.
-        private void GetDataflowTangents(StreamReader streamReader, string angleName)
+        //Gets angles for simulation visualisation and stores them in deltaTangents for blendshapeanimation.
+        private void GetSimulationTangents(StreamReader streamReader, string angleName)
         {
             if (angleName.Equals("alpha"))
             {
@@ -224,9 +233,9 @@ namespace ModelImport.VTKImport
             }
         }
 
-        // Sets dataflow indices. We use single vertices for dataflow so it's an array of incrementing numbers ranged from 0, Vertices.Length. 
+        // Sets simulation indices. We use single vertices for simulation so it's an array of incrementing numbers ranged from 0, Vertices.Length. 
         // Each point is a triangle so indices array is three times longer, each triangle pointing to only one vertex.
-        private void SetDataflowIndices()
+        private void SetSimulationIndices()
         {
             VerticesInFacet = 3;
             Indices = new int[Vertices.Length * 3];
@@ -238,6 +247,16 @@ namespace ModelImport.VTKImport
                     Indices[i+j] = currentVertexNumber;
                 }
                 currentVertexNumber++;
+            }
+        }
+
+        private void GetSimulationColors(StreamReader streamReader)
+        {
+            streamReader.ReadLine();
+            for (int i = 0; i < DeltaTangents.Length; i++)
+            {
+                Vector3 currentVertex = streamReader.GetLineVertex();
+                DeltaTangents[i] = currentVertex;
             }
         }
     }

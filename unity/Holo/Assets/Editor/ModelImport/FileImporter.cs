@@ -26,7 +26,7 @@ namespace ModelImport
         };
 
         //A constructor ensuring FileImporter is format-specific (only STL and VTK for now)
-        public FileImporter(string extension, bool dataflow)
+        public FileImporter(string extension, bool simulationData)
         {
             fileExtension = extension;
             if (extension == ".stl")
@@ -35,7 +35,7 @@ namespace ModelImport
             }
             else if (extension == ".vtk")
             {
-                vtkImporter = new VTKImporter(dataflow);
+                vtkImporter = new VTKImporter(simulationData);
             }
             else
             {
