@@ -11,6 +11,20 @@ public class AssetBundleLoader
     private string bundlePath;
     private List<ModelLayer> layers;
     private Bounds? bounds;
+    private int blendShapeCount;
+
+    // All layers, available after LoadLayer
+    public IEnumerable<ModelLayer> Layers
+    {
+        get { return new ReadOnlyCollection<ModelLayer>(layers); }
+    }
+
+    /* Bounding box of all layers, available after LoadLayer.
+     * May be null, if no visible layers are present.
+     */
+    public Bounds? Bounds { get { return bounds;  } }
+
+    public int BlendShapeCount { get { return blendShapeCount;  } }
 
     public void LoadBundle(string aBundlePath)
     {
@@ -29,7 +43,7 @@ public class AssetBundleLoader
     {
         layers = new List<ModelLayer>();
         bounds = null;
-        int? blendShapesCount = null;
+        int? newBlendShapesCount = null;
         foreach (string bundleObjectName in assetBundle.GetAllAssetNames())
         {
             if (!bundleObjectName.EndsWith(".prefab")) { continue; } // ignore other objects
@@ -51,14 +65,14 @@ public class AssetBundleLoader
                 bounds = skinnedMesh.bounds;
             }
             
-            // check and update blendShapesCount
-            if (blendShapesCount.HasValue && blendShapesCount.Value != skinnedMesh.sharedMesh.blendShapeCount)
+            // check and update newBlendShapesCount
+            if (newBlendShapesCount.HasValue && newBlendShapesCount.Value != skinnedMesh.sharedMesh.blendShapeCount)
             {
                 Debug.LogWarning(layerDebugName + " have different number of blend shapes, " +
-                    blendShapesCount.Value.ToString() + " versus " +
+                    newBlendShapesCount.Value.ToString() + " versus " +
                     skinnedMesh.sharedMesh.blendShapeCount.ToString());
             }
-            blendShapesCount = skinnedMesh.sharedMesh.blendShapeCount;
+            newBlendShapesCount = skinnedMesh.sharedMesh.blendShapeCount;
 
             // check BlendShapeAnimation
             BlendShapeAnimation animation = layerGameObject.GetComponent<BlendShapeAnimation>();
@@ -67,7 +81,6 @@ public class AssetBundleLoader
                 Debug.LogWarning(layerDebugName + " does not contain BlendShapeAnimation component, adding");
                 animation = layerGameObject.AddComponent<BlendShapeAnimation>();
             }
-            animation.Speed = blendShapesCount.Value;
 
             // check ModelLayer existence
             ModelLayer layer = layerGameObject.GetComponent<ModelLayer>();
@@ -103,18 +116,15 @@ public class AssetBundleLoader
         } else { 
             Debug.Log("Loaded model with bounds " + bounds.ToString());
         }
-    }
 
-    // All layers, available after LoadLayer
-    public IEnumerable<ModelLayer> Layers
-    {
-        get { return new ReadOnlyCollection<ModelLayer>(layers); }
+        if (!newBlendShapesCount.HasValue) {
+            Debug.LogWarning("Empty model, no layers with blend shapes");
+            blendShapeCount = 0;
+        } else { 
+            blendShapeCount = newBlendShapesCount.Value;
+            Debug.Log("Loaded model with blend shapes " + blendShapeCount.ToString());
+        }
     }
-
-    /* Bounding box of all layers, available after LoadLayer.
-     * May be null, if no visible layers are present.
-     */
-    public Bounds? Bounds { get { return bounds;  } }
 
     public void InstantiateAllLayers()
     {

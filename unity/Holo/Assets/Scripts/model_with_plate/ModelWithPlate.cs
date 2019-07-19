@@ -62,6 +62,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
      * only when instanceLoaded,
      * that is only after LoadInstance call (and before UnloadInstance). */
     private int? instanceIndex; // index to ModelsCollection
+    private AssetBundleLoader instanceBundle;
     private Dictionary<ModelLayer, LayerLoaded> layersLoaded;
     private Dictionary<ModelLayer, CompoundButton> layersButtons;
     private GameObject instanceTransformation;
@@ -69,6 +70,8 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
     // Created only when instance != null, as it initializes bbox in Start and assumes it's not empty
     private GameObject rotationBoxRig;
+
+    private float speedSlider = 1f;
 
     private void Start()
     {
@@ -333,6 +336,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             Destroy(instanceTransformation);
             Destroy(rotationBoxRig);
             instanceIndex = null;
+            instanceBundle = null;
             instanceTransformation = null;
             rotationBoxRig = null;
             instanceIsPreview = false; // value does not matter, but for security better to set it to something well-defined
@@ -447,6 +451,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
         instanceLoaded = true;
         instanceIndex = newInstanceIndex;
+        instanceBundle = ModelsCollection.Singleton.BundleLoad(instanceIndex.Value);
         instanceIsPreview = newIsPreview;
         layersLoaded = new Dictionary<ModelLayer, LayerLoaded>();
 
@@ -460,13 +465,11 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
         instanceTransformation = new GameObject("InstanceTransformation");
         instanceTransformation.transform.parent = rotationBoxRig.transform;
-
-        AssetBundleLoader bundleLoader = ModelsCollection.Singleton.BundleLoad(newInstanceIndex);
-        
+       
         Vector3 boundsSize = Vector3.one;
         float scale = 1f;
-        if (bundleLoader.Bounds.HasValue) { 
-            Bounds b = bundleLoader.Bounds.Value;
+        if (instanceBundle.Bounds.HasValue) { 
+            Bounds b = instanceBundle.Bounds.Value;
             boundsSize = b.size;            
             float maxSize = Mathf.Max(new float[] { boundsSize.x, boundsSize.y, boundsSize.z });
             if (maxSize > Mathf.Epsilon) {
@@ -486,12 +489,13 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         rotationBoxCollider.enabled = false;
 
         // reset animation speed slider to value 1
-        SliderAnimationSpeed.GetComponent<SliderGestureControl>().SetSliderValue(1f);
+        speedSlider = 1f;
+        SliderAnimationSpeed.GetComponent<SliderGestureControl>().SetSliderValue(speedSlider);
 
         // add buttons to toggle layers
         layersButtons = new Dictionary<ModelLayer, CompoundButton>();
         int buttonIndex = 0;
-        foreach (ModelLayer layer in bundleLoader.Layers)
+        foreach (ModelLayer layer in instanceBundle.Layers)
         {
             // add button to scene
             GameObject buttonGameObject = Instantiate<GameObject>(ButtonLayerTemplate, LayersSection.transform);
@@ -524,8 +528,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         }
 
         Assert.IsTrue(instanceIndex.HasValue);
-        AssetBundleLoader bundleLoader = ModelsCollection.Singleton.BundleLoad(instanceIndex.Value);
-        ModelLayer layer = bundleLoader.Layers.First<ModelLayer>(l => !l.Simulation);
+        ModelLayer layer = instanceBundle.Layers.First<ModelLayer>(l => !l.Simulation);
         LoadLayer(layer);
         HoloUtilities.SetButtonStateText(layersButtons[layer], true);
     }
@@ -560,8 +563,10 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         l.Animation = l.Instance.GetComponent<BlendShapeAnimation>();
         // It should be already checked and eventually fixed in AssetBundleLoader
         Assert.IsTrue(l.Animation != null);
+        l.Animation.InitializeBlendShapes();
         l.Animation.Playing = currentlyPlaying;
         l.Animation.CurrentTime = currentlyTime;
+        l.Animation.SpeedNormalized = speedSlider;
 
         // Assign material
         SkinnedMeshRenderer skinnedMesh = l.Instance.GetComponent<SkinnedMeshRenderer>();
@@ -573,11 +578,11 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
     private void UpdateAnimationSpeed()
     {
-        float value = SliderAnimationSpeed.GetComponent<SliderGestureControl>().SliderValue;
+        speedSlider = SliderAnimationSpeed.GetComponent<SliderGestureControl>().SliderValue;
 
         if (layersLoaded != null) {
             foreach (LayerLoaded l in layersLoaded.Values) {
-                l.Animation.Speed = value;
+                l.Animation.SpeedNormalized = speedSlider;
             }
             RefreshUserInterface();
         }
