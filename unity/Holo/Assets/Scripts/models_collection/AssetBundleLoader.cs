@@ -122,6 +122,5 @@ public class AssetBundleLoader
         {
             layer.InstantiateGameObject(null);
         }
-        return modelGameObjects;
     }
 }
