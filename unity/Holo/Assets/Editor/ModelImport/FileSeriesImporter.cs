@@ -32,6 +32,7 @@ namespace ModelImport
             GetFilepaths(layerInfo.Directory);
             ImportFiles();
             ConfigureMesh();
+            AddLayerComponent(layerInfo);
         }
 
         //Gets filepaths of particular frames and their extension
@@ -165,6 +166,13 @@ namespace ModelImport
             }
             skinnedMesh.sharedMesh.bounds = CalculateBounds();
             ModelGameObject.AddComponent<BlendShapeAnimation>();
+        }
+
+        private void AddLayerComponent(ModelLayerInfo layerInfo)
+        {
+            ModelLayer layer = ModelGameObject.AddComponent<ModelLayer>();
+            layer.Caption = layerInfo.Caption;
+            layer.Simulation = layerInfo.Simulation;
         }
 
         //Calculates Bounds for the GameObject after final extremities of the mesh series is known.
