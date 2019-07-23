@@ -22,17 +22,14 @@ namespace ModelImport
         private bool simulationData = false;
         
         //Imports data from file series.
-        public void ImportData(string fileSeriesDirectory, string gameObjectName)
+        public void ImportData(ModelLayerInfo layerInfo, string gameObjectName)
         {
             ModelGameObject = new GameObject(gameObjectName);
             ModelMesh = new Mesh();
-            if (gameObjectName.Contains("simulation"))
-            {
-                simulationData = true;
-            }
+            simulationData = layerInfo.Simulation;
             bool cancelImport = EditorUtility.DisplayCancelableProgressBar("Conversion in progress: " + ModelGameObject.name, "Converting file nr: " + 0.ToString(), 0);
             //TODO: Progress bar
-            GetFilepaths(fileSeriesDirectory);
+            GetFilepaths(layerInfo.Directory);
             ImportFiles();
             ConfigureMesh();
         }
@@ -52,40 +49,44 @@ namespace ModelImport
         //Loads meshes from separate files into Mesh Object as BlendShapeFrames
         private void ImportFiles()
         {
-            fileImporter = new FileImporter(extension, simulationData);
+			try {
+			    // the FileImporter constructor can already initialize progress bar,
+				// so it's inside try..finally to make sure we clear progress bar in case of error.
+	            fileImporter = new FileImporter(extension, simulationData);
 
-            //Configuring progress bar
-            float progressChunk = (float) 1 / filePaths.Length;
-           
+    	        //Configuring progress bar
+        	    float progressChunk = (float) 1 / filePaths.Length;           
+			
+				bool firstMesh = true;
+				for(int i = 0; i < filePaths.Length; i++)
+				{
+					bool cancelImport = EditorUtility.DisplayCancelableProgressBar("Conversion in progress: " + ModelGameObject.name, "Converting file nr: " + i.ToString(), i * progressChunk);
+					if (cancelImport)
+					{
+						AbortImport();
+					}
+					fileImporter.ImportFile(filePaths[i], firstMesh);
 
-            bool firstMesh = true;
-            for(int i = 0; i < filePaths.Length; i++)
-            {
-                bool cancelImport = EditorUtility.DisplayCancelableProgressBar("Conversion in progress: " + ModelGameObject.name, "Converting file nr: " + i.ToString(), i * progressChunk);
-                if (cancelImport)
-                {
-                    AbortImport();
-                }
-                fileImporter.ImportFile(filePaths[i], firstMesh);
-
-                if (firstMesh)
-                {
-                    InitiateMesh();
-                }
-                CheckTopology(i);
-                UpdateBounds(firstMesh);
-                if (simulationData)
-                {
-                    ModelMesh.AddBlendShapeFrame(Path.GetFileName(filePaths[i]), 100f, fileImporter.Vertices, fileImporter.Normals, fileImporter.DeltaTangents);
-                }
-                else
-                {
-                    ModelMesh.AddBlendShapeFrame(Path.GetFileName(filePaths[i]), 100f, fileImporter.Vertices, fileImporter.Normals, null);
-                }
-                firstMesh = false;
-                cancelImport = EditorUtility.DisplayCancelableProgressBar("Conversion in progress", "Converting file nr: " + (i + 1).ToString(), (i + 1) * progressChunk);
-            }
-            EditorUtility.ClearProgressBar();
+					if (firstMesh)
+					{
+						InitiateMesh();
+					}
+					CheckTopology(i);
+					UpdateBounds(firstMesh);
+					if (simulationData)
+					{
+						ModelMesh.AddBlendShapeFrame(Path.GetFileName(filePaths[i]), 100f, fileImporter.Vertices, fileImporter.Normals, fileImporter.DeltaTangents);
+					}
+					else
+					{
+						ModelMesh.AddBlendShapeFrame(Path.GetFileName(filePaths[i]), 100f, fileImporter.Vertices, fileImporter.Normals, null);
+					}
+					firstMesh = false;
+					cancelImport = EditorUtility.DisplayCancelableProgressBar("Conversion in progress", "Converting file nr: " + (i + 1).ToString(), (i + 1) * progressChunk);
+				}
+			} finally {
+            	EditorUtility.ClearProgressBar();
+			}
         }
 
         //Function for aborting the import of a model

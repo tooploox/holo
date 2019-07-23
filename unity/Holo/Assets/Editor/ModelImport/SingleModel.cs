@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
+using Newtonsoft.Json;
 
 namespace ModelImport
 {
@@ -11,8 +12,8 @@ namespace ModelImport
         private FileSeriesImporter seriesImporter = new FileSeriesImporter();
         public Dictionary<string, Tuple<Mesh, GameObject>> ModelObjects { get; private set; } = new Dictionary<string, Tuple<Mesh, GameObject>>();
 
-        public string ModelName { get; private set; } = "";
-        public string ThumbnailDirectory { get; private set; } = "";
+        private ModelInfo info;
+        public ModelInfo Info { get { return info; } }
 
         //Loads a single model, with its body and/or simulationData.
         public void GetModelData()
@@ -20,11 +21,12 @@ namespace ModelImport
             string rootDirectory = GetRootDirectory();
 
             ModelObjects.Clear();
-            ThumbnailDirectory = "";
-            List<string> directoriesList = ReadInfoFile(rootDirectory);
-            foreach (string directory in directoriesList)
+            ReadInfoFile(rootDirectory);
+            //Debug.Log("Reading model " + info.Caption);
+            foreach (ModelLayerInfo layerInfo in info.Layers)
             {
-                ImportData(directory);
+                //Debug.Log("Reading layer " + layerInfo.Caption + " " + layerInfo.Directory + " " + layerInfo.Simulation.ToString());
+                ImportLayer(layerInfo);
             }
         }
 
@@ -44,7 +46,7 @@ namespace ModelImport
             else
             {
                 Debug.Log("It's not Batchmode!");
-                rootDirectory = EditorUtility.OpenFolderPanel("Select STL series root folder", Application.dataPath, "");
+                rootDirectory = EditorUtility.OpenFolderPanel("Select model root folder (with ModelInfo.json or ModelInfo.txt)", Application.dataPath, "");
             }
             if (String.IsNullOrEmpty(rootDirectory))
             {
@@ -53,37 +55,70 @@ namespace ModelImport
             return rootDirectory;
         }
 
-        //Reads info file and gets a list of files to load into assetbundle.
-        private List<string> ReadInfoFile(string rootDirectory)
+        // Reads info file and gets a list of files to load into assetbundle.
+        private void ReadInfoFile(string rootDirectory)
         {
-            List<string> directoriesList = new List<string>();
+            if (File.Exists(rootDirectory + @"\" + "ModelInfo.txt")) {
+                info = ReadInfoTxtFile(rootDirectory);
+            } else
+            if (File.Exists(rootDirectory + @"\" + "ModelInfo.json")) {
+                info = ReadInfoJsonFile(rootDirectory);
+            } else
+            {
+                throw new Exception("No models found in info file!");
+            }
+
+            // simple validation of the structure
+            if (info.Layers.Count == 0) {
+                throw new Exception("No layers found in ModelInfo.txt file");
+            }
+        }
+
+        private ModelInfo ReadInfoTxtFile(string rootDirectory)
+        {
+            ModelInfo result = new ModelInfo();
             using (StreamReader streamReader = new StreamReader(rootDirectory + @"\" + "ModelInfo.txt"))
             {
-                ModelName = streamReader.ReadLine();
+                result.Caption = streamReader.ReadLine();
                 while (!streamReader.EndOfStream)
                 {
                     string modelElement = streamReader.ReadLine();
-                    if (modelElement.Contains("_body") || modelElement.Contains("_simulation"))
+                    if (String.IsNullOrWhiteSpace(modelElement))
                     {
-                        directoriesList.Add(rootDirectory + @"\" + modelElement);
+                        continue; // ignore empty lines
                     }
-                    else
-                    {
-                        ThumbnailDirectory = rootDirectory + @"\" + modelElement;
-                    }
-                }
-                if (directoriesList.Count == 0)
-                {
-                    throw new Exception("No models found in info file!");
-                }
+
+                    ModelLayerInfo layerInfo = new ModelLayerInfo();
+                    result.Layers.Add(layerInfo);
+
+                    layerInfo.Directory = rootDirectory + @"\" + modelElement;
+                    layerInfo.Caption = modelElement;
+                    layerInfo.Simulation = modelElement.Contains("simulation") || modelElement.Contains("dataflow");
+                }                
             }
-            return directoriesList;
+            return result;
         }
-        //Imports data for body or simulationData blendshape.
-        private void ImportData(string dataDirectory)
+
+        private ModelInfo ReadInfoJsonFile(string rootDirectory)
         {
-            string dictionaryKey = ModelName + "_" + Path.GetFileName(dataDirectory);
-            seriesImporter.ImportData(dataDirectory, dictionaryKey);
+            ModelInfo result;
+            using (StreamReader r = new StreamReader(rootDirectory + @"\" + "ModelInfo.json"))
+            {
+                string json = r.ReadToEnd();
+                result = JsonConvert.DeserializeObject<ModelInfo>(json);
+            }
+            foreach (ModelLayerInfo layerInfo in result.Layers)
+            {
+                layerInfo.Directory = rootDirectory + @"\" + layerInfo.Directory;
+            }
+            return result;
+        }
+
+        // Imports layer (with body or simulation blendshapes).
+        private void ImportLayer(ModelLayerInfo layerInfo)
+        {
+            string dictionaryKey = info.Caption + "_" + Path.GetFileName(layerInfo.Directory);
+            seriesImporter.ImportData(layerInfo, dictionaryKey);
             Tuple<Mesh, GameObject> gameObjectData = new Tuple<Mesh, GameObject>(seriesImporter.ModelMesh, seriesImporter.ModelGameObject);
             ModelObjects.Add(dictionaryKey, gameObjectData);
         }

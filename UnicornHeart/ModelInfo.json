@@ -1,0 +1,15 @@
+{
+    Caption: "Unicorn Heart",
+    Layers: [
+        {
+            Caption: "Mesh",
+            Simulation: false,
+            Directory: "meshes"
+        },
+        {
+            Caption: "Dataflow Demo",
+            Simulation: true,
+            Directory: "dataflow"
+        }
+    ]
+}

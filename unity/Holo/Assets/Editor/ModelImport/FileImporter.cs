@@ -39,7 +39,6 @@ namespace ModelImport
             }
             else
             {
-                EditorUtility.ClearProgressBar();
                 throw new Exception("Type not supported!");
             }
         }
