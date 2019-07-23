@@ -69,7 +69,7 @@ namespace ModelImport
 
             // simple validation of the structure
             if (Info.Layers.Count == 0) {
-                throw new Exception("No layers found in ModelInfo.txt file");
+                throw new Exception("No layers found in ModelInfo.{json,txt} file");
             }
         }
 
