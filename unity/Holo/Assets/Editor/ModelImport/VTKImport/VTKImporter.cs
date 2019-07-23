@@ -46,6 +46,21 @@ namespace ModelImport.VTKImport
                 }
 
                 string[] datatype = streamReader.ReadLine().Split(' ');
+
+                /* Skip all lines until an empty line.
+                 * Allows to ignore lines like
+                 * 
+                 * FIELD FieldData 1
+                 * MaterialNames 1 1 string
+                 * None
+                 * 
+                 * in test UnicornHeart/meshes_body/unicornMesh01.vtk 
+                 */
+                string headerLine;
+                do { 
+                    headerLine = streamReader.ReadLine();
+                } while (!String.IsNullOrWhiteSpace(headerLine));
+
                 switch (datatype[1])
                 {
                     case "POLYDATA":
