@@ -12,8 +12,7 @@ namespace ModelImport
         private FileSeriesImporter seriesImporter = new FileSeriesImporter();
         public Dictionary<string, Tuple<Mesh, GameObject>> ModelObjects { get; private set; } = new Dictionary<string, Tuple<Mesh, GameObject>>();
 
-        private ModelInfo info;
-        public ModelInfo Info { get { return info; } }
+        public ModelInfo Info { get; private set; }
 
         //Loads a single model, with its body and/or simulationData.
         public void GetModelData()
@@ -22,8 +21,8 @@ namespace ModelImport
 
             ModelObjects.Clear();
             ReadInfoFile(rootDirectory);
-            //Debug.Log("Reading model " + info.Caption);
-            foreach (ModelLayerInfo layerInfo in info.Layers)
+            //Debug.Log("Reading model " + Info.Caption);
+            foreach (ModelLayerInfo layerInfo in Info.Layers)
             {
                 //Debug.Log("Reading layer " + layerInfo.Caption + " " + layerInfo.Directory + " " + layerInfo.Simulation.ToString());
                 ImportLayer(layerInfo);
@@ -59,17 +58,17 @@ namespace ModelImport
         private void ReadInfoFile(string rootDirectory)
         {
             if (File.Exists(rootDirectory + @"\" + "ModelInfo.txt")) {
-                info = ReadInfoTxtFile(rootDirectory);
+                Info = ReadInfoTxtFile(rootDirectory);
             } else
             if (File.Exists(rootDirectory + @"\" + "ModelInfo.json")) {
-                info = ReadInfoJsonFile(rootDirectory);
+                Info = ReadInfoJsonFile(rootDirectory);
             } else
             {
                 throw new Exception("No models found in info file!");
             }
 
             // simple validation of the structure
-            if (info.Layers.Count == 0) {
+            if (Info.Layers.Count == 0) {
                 throw new Exception("No layers found in ModelInfo.txt file");
             }
         }
@@ -117,7 +116,7 @@ namespace ModelImport
         // Imports layer (with body or simulation blendshapes).
         private void ImportLayer(ModelLayerInfo layerInfo)
         {
-            string dictionaryKey = info.Caption + "_" + Path.GetFileName(layerInfo.Directory);
+            string dictionaryKey = Info.Caption + "_" + Path.GetFileName(layerInfo.Directory);
             seriesImporter.ImportData(layerInfo, dictionaryKey);
             Tuple<Mesh, GameObject> gameObjectData = new Tuple<Mesh, GameObject>(seriesImporter.ModelMesh, seriesImporter.ModelGameObject);
             ModelObjects.Add(dictionaryKey, gameObjectData);
