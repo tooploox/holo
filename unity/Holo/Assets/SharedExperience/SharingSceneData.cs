@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.Networking.Match;
 
+#pragma warning disable CS0618 // using deprecated Unity stuff (TODO: upgrade in Holo project in the future)
 public class SharingSceneData : NetworkBehaviour
 {
     [SyncVar]
@@ -40,6 +41,7 @@ public class SharingSceneData : NetworkBehaviour
     [SyncVar]
     bool hostDataLayerActive;
 
+#pragma warning restore CS0618 // using deprecated Unity stuff (TODO: upgrade in Holo project in the future)
 
     ModelWithPlate ModelManager;
     ModelClippingPlaneControl ClipPlaneManager;

@@ -5,6 +5,8 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.Networking.Match;
 
+#pragma warning disable CS0618 // using deprecated Unity stuff (TODO: upgrade in Holo project in the future)
+
 public class HTKNetworkManager : NetworkManager {
 
 #if LOG_FUNCTION_CALLS
@@ -73,6 +75,7 @@ public class HTKNetworkManager : NetworkManager {
         LogExit();
 
     }
+#pragma warning restore CS0618 // using deprecated Unity stuff (TODO: upgrade in Holo project in the future)
 
     public override void OnDestroyMatch(bool success, string extendedInfo)
     {
@@ -88,6 +91,7 @@ public class HTKNetworkManager : NetworkManager {
         LogExit();
     }
 
+#pragma warning disable CS0618 // using deprecated Unity stuff (TODO: upgrade in Holo project in the future)
     public override void OnMatchCreate(bool success, string extendedInfo, MatchInfo matchInfo)
     {
         LogEntry();
@@ -241,3 +245,5 @@ public class HTKNetworkManager : NetworkManager {
 
     
 }
+
+#pragma warning restore CS0618 // using deprecated Unity stuff (TODO: upgrade in Holo project in the future)

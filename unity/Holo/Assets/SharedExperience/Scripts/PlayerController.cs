@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using HoloToolkit.Unity;
 using UnityEngine.XR.WSA.Input;
 
+#pragma warning disable CS0618 // using deprecated Unity stuff (TODO: upgrade in Holo project in the future)
+
 namespace HoloToolkit.Examples.SharingWithUNET
 {
     /// <summary>
@@ -388,3 +390,5 @@ namespace HoloToolkit.Examples.SharingWithUNET
         }
     }
 }
+
+#pragma warning restore CS0618 // using deprecated Unity stuff (TODO: upgrade in Holo project in the future)

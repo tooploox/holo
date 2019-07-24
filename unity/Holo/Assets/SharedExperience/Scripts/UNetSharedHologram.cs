@@ -7,13 +7,17 @@ using System;
 using HoloToolkit.Examples.SharingWithUNET;
 using HoloToolkit.Unity.SpatialMapping;
 
+#pragma warning disable CS0618 // using deprecated Unity stuff (TODO: upgrade in Holo project in the future)
 public class UNetSharedHologram : NetworkBehaviour, IInputClickHandler
+#pragma warning restore CS0618 // using deprecated Unity stuff (TODO: upgrade in Holo project in the future)
 {
 
     /// <summary>
     /// The position relative to the shared world anchor.
     /// </summary>
+#pragma warning disable CS0618 // using deprecated Unity stuff (TODO: upgrade in Holo project in the future)
     [SyncVar(hook="xformchange")]
+#pragma warning restore CS0618 // using deprecated Unity stuff (TODO: upgrade in Holo project in the future)
     private Vector3 localPosition;
 
     void xformchange(Vector3 update)
@@ -29,7 +33,9 @@ public class UNetSharedHologram : NetworkBehaviour, IInputClickHandler
     /// <summary>
     /// The rotation relative to the shared world anchor.
     /// </summary>
+#pragma warning disable CS0618 // using deprecated Unity stuff (TODO: upgrade in Holo project in the future)
     [SyncVar]
+#pragma warning restore CS0618 // using deprecated Unity stuff (TODO: upgrade in Holo project in the future)
     private Quaternion localRotation;
 
     /// <summary>
@@ -37,7 +43,9 @@ public class UNetSharedHologram : NetworkBehaviour, IInputClickHandler
     /// </summary>
     /// <param name="postion">the localPosition to set</param>
     /// <param name="rotation">the localRotation to set</param>
+#pragma warning disable CS0618 // using deprecated Unity stuff (TODO: upgrade in Holo project in the future)
     [Command]
+#pragma warning restore CS0618 // using deprecated Unity stuff (TODO: upgrade in Holo project in the future)
     public void CmdTransform(Vector3 postion, Quaternion rotation)
     {
         if (!isLocalPlayer)

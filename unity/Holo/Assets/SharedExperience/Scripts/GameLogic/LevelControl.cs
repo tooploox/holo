@@ -13,7 +13,9 @@ using HoloToolkit.Unity;
 /// <summary>
 /// This script has the primary game state logic for the Shared Mixed Reality 250 app.
 /// </summary>
+#pragma warning disable CS0618 // using deprecated Unity stuff (TODO: upgrade in Holo project in the future)
 public class LevelControl : NetworkBehaviour
+#pragma warning restore CS0618 // using deprecated Unity stuff (TODO: upgrade in Holo project in the future)
 {
     // Can't easily make network behaviors singletons with the template
     private static LevelControl _Instance;
@@ -333,7 +335,9 @@ public class LevelControl : NetworkBehaviour
     /// <param name="PlayerName"></param>
     /// <param name="pos"></param>
     /// <param name="rot"></param>
+#pragma warning disable CS0618 // using deprecated Unity stuff (TODO: upgrade in Holo project in the future)
     [ClientRpc]
+#pragma warning restore CS0618 // using deprecated Unity stuff (TODO: upgrade in Holo project in the future)
     void RpcSetRemoteAvatarLevelPosition(string PlayerName, Vector3 pos, Quaternion rot)
     {
         LevelPlayerStateData lpsd;
