@@ -8,7 +8,6 @@ using HoloToolkit.Examples.SharingWithUNET;
 
 public class ResetAnchorButton : MonoBehaviour, IInputClickHandler {
 
-    int resetFrame = 0;
     public void OnInputClicked(InputClickedEventData eventData)
     {
         if (UnityEngine.XR.WSA.HolographicSettings.IsDisplayOpaque == false && NetworkDiscoveryWithAnchors.Instance.isServer)

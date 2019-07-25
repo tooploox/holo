@@ -246,7 +246,8 @@ namespace HoloToolkit.Examples.SharingWithUNET
             }
             else
             {
-                networkTransmitter.dataReadyEvent += NetworkTransmitter_dataReadyEvent;
+                // TODO: Is this OK that this is unused in Holo?
+                //networkTransmitter.dataReadyEvent += NetworkTransmitter_dataReadyEvent;
             }
             Debug.Log("setting starting anchor name");
             AnchorNameHook(AnchorName);

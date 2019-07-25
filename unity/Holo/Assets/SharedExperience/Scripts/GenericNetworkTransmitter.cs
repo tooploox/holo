@@ -30,7 +30,8 @@ namespace HoloToolkit.Examples.SharingWithUNET
         /// </summary>
         /// <param name="data">The data that arrived.</param>
         public delegate void OnDataReady(byte[] data);
-        public event OnDataReady dataReadyEvent;
+        // TODO: Is this OK that this is unused in Holo?
+        //public event OnDataReady dataReadyEvent;
 
         /// <summary>
         /// The server to connect to when data is needed.

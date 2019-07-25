@@ -164,11 +164,6 @@ public class LevelControl : NetworkBehaviour
     }
 
     /// <summary>
-    /// Tracks which path we are currently on
-    /// </summary>
-    int onPathIndex = -1;
-
-    /// <summary>
     /// Keeps a mapping from user name to their game objects.
     /// </summary>
     Dictionary<string, LevelPlayerStateData> systemIdToPlayerState = new Dictionary<string, LevelPlayerStateData>();
@@ -407,8 +402,6 @@ public class LevelControl : NetworkBehaviour
             }
         }
     }
-
-    private int DeferredPathIndex = -1;
 
     /// <summary>
     /// Sets up the proper avatars for each remote player based on the local
