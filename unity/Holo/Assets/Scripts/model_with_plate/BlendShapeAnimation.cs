@@ -22,20 +22,35 @@ public class BlendShapeAnimation : MonoBehaviour
 
     /* Public fields, configurable from Unity Editor */
     public bool MirrorAnimation = false;
+    // Speed equal 1.0 means that we advance 1 frame (1 blend shape) in 1 second.
     public float Speed = 1f;
+
+    // Speed normalized such that 1.0 means that we make complete animation in 1 second.
+    public float SpeedNormalized {
+        get
+        {
+            return blendShapeCount != 0 ? Speed / blendShapeCount : 0f;
+        }
+        set
+        {
+            Speed = value * blendShapeCount;
+        }
+    }
 
     /* Public fields, but not serialized/configurable from Unity Editor */
     [System.NonSerialized]
     public bool Playing = true;
 
-    private void Awake()
+    /* Call this after creation, before using anything that depends on blend shape count,
+     * like CurrentTime or SpeedNormalized.
+     * This makes sure that internal blendShapeCount is initialized.
+     * Waiting until Start() is called on this component is sometimes not comfortable.
+     */
+    public void InitializeBlendShapes()
     {
         skinnedMeshRenderer = GetComponent<SkinnedMeshRenderer>();
         skinnedMesh = GetComponent<SkinnedMeshRenderer>().sharedMesh;
-    }
 
-    private void Start()
-    {
         blendShapeCount = skinnedMesh.blendShapeCount;
         if (blendShapeCount == 0) {
             Debug.LogWarning("No blendShapes, will not animate");
