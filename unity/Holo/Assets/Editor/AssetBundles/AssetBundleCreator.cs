@@ -15,9 +15,9 @@ public class AssetBundleCreator
     {
         foreach (KeyValuePair<string, Tuple<Mesh, GameObject>> modelObject in importedModel.ModelObjects)
         {
-            SaveFilesForExport(modelObject.Key, modelObject.Value, importedModel.ModelName);
+            SaveFilesForExport(modelObject.Key, modelObject.Value, importedModel.Info.Caption);
         }
-        AssetBundleBuild[] buildMapArray = BuildMapABs(importedModel.ModelName);
+        AssetBundleBuild[] buildMapArray = BuildMapABs(importedModel.Info.Caption);
         CreateAssetBundle(buildMapArray);
     }
 

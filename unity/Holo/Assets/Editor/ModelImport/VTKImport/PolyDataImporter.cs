@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
@@ -23,8 +24,21 @@ namespace ModelImport.VTKImport
 
         private void GetVertices(StreamReader streamReader)
         {
-            string[] pointsData = streamReader.ReadLine().Split(' ');
-            int numberOfVertices = int.Parse(pointsData[1]);
+            string pointsStr = streamReader.ReadLine();
+            string[] pointsData = pointsStr.Split(' ');
+            int numberOfVertices;
+
+            try { 
+                numberOfVertices = int.Parse(pointsData[1]);
+            } catch (FormatException)
+            {
+                Debug.LogError("Invalid VTK line " + pointsStr);
+                throw;
+            } catch (IndexOutOfRangeException)
+            {
+                Debug.LogError("Invalid VTK line " + pointsStr);
+                throw;
+            }
 
             int lineCount = (numberOfVertices - 1) / 3 + 1;
             for (int i = 0; i < lineCount; i++)
@@ -33,11 +47,36 @@ namespace ModelImport.VTKImport
             }
         }
 
+        // Read lines from stream, until a non-empty line is found.
+        private string ReadNonEmptyLine(StreamReader streamReader)
+        {
+            string result;
+            do
+            {
+                result = streamReader.ReadLine();
+            } while (String.IsNullOrWhiteSpace(result));
+            return result;
+        }
+
         //skipping data about lines joining vertices
         private void SkipLines(StreamReader streamReader)
         {
-            string[] linesData = streamReader.ReadLine().Split(' ');
-            int numberOfLines = int.Parse(linesData[1]);
+            string linesStr = ReadNonEmptyLine(streamReader);
+            string[] linesData = linesStr.Split(' ');
+
+            int numberOfLines;
+            try { 
+                numberOfLines = int.Parse(linesData[1]);
+            } catch (FormatException)
+            {
+                Debug.LogError("Invalid VTK line " + linesStr);
+                throw;
+            } catch (IndexOutOfRangeException)
+            {
+                Debug.LogError("Invalid VTK line " + linesStr);
+                throw;
+            }
+
             for (int i = 0; i < numberOfLines; i++)
             {
                 streamReader.ReadLine();
