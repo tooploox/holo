@@ -30,8 +30,9 @@ namespace HoloToolkit.Examples.SharingWithUNET
         /// </summary>
         /// <param name="data">The data that arrived.</param>
         public delegate void OnDataReady(byte[] data);
-        // TODO: Is this OK that this is unused in Holo?
-        //public event OnDataReady dataReadyEvent;
+        #pragma warning disable CS0067
+        public event OnDataReady dataReadyEvent;
+        #pragma warning restore CS0067
 
         /// <summary>
         /// The server to connect to when data is needed.
