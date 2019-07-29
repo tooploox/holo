@@ -14,6 +14,7 @@ namespace ModelImport
 
             var modelGameObject = (GameObject)AssetDatabase.LoadAssetAtPath(objectPath, typeof(GameObject));
             GameObject modelInstance = Object.Instantiate(modelGameObject);
+            AddLayerComponent(modelInstance, layerInfo);
             CreatePrefab(layerInfo, modelInstance, objectName);
             GameObject.DestroyImmediate(modelInstance);
         }

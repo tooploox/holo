@@ -79,5 +79,14 @@ namespace ModelImport
 
         // Imports layer (with body or simulation blendshapes).
         abstract protected void ImportLayer(ModelLayerInfo layerInfo);
+
+        // Descendants must use this on all GameObjects representing layers
+        protected void AddLayerComponent(GameObject go, ModelLayerInfo layerInfo)
+        {
+            ModelLayer layer = go.AddComponent<ModelLayer>();
+            layer.Caption = layerInfo.Caption;
+            layer.Simulation = layerInfo.Simulation;
+        }
+
     }
 }

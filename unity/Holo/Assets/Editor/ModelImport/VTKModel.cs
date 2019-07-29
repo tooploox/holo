@@ -12,6 +12,7 @@ namespace ModelImport
         {
             string objectName = Info.Caption + "_" + Path.GetFileName(layerInfo.Directory);
             seriesImporter.ImportData(layerInfo, objectName);
+            AddLayerComponent(seriesImporter.ModelGameObject, layerInfo);
             SaveFilesForExport(layerInfo, objectName, seriesImporter.ModelMesh, seriesImporter.ModelGameObject);
         }
 
