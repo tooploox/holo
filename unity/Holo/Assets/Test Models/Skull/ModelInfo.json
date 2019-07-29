@@ -1,0 +1,10 @@
+{
+    Caption: "Skull",
+    Layers: [
+        {
+            Caption: "Body",
+            Simulation: false,
+            Directory: "skull_body"
+        }
+    ]
+}
