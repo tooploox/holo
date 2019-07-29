@@ -4,7 +4,8 @@
         {
             Caption: "Body",
             Simulation: false,
-            Directory: "skull_body"
+            Directory: "skull_body",
+            AssetFileName: "skull_rotated.prefab"
         }
     ]
 }

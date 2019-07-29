@@ -9,10 +9,14 @@ namespace ModelImport
         protected override void ImportLayer(ModelLayerInfo layerInfo)
         {
             string objectName = Info.Caption + "_" + Path.GetFileName(layerInfo.Directory);
-            string absolutePath = Directory.GetFiles(layerInfo.Directory)[0].Replace(@"\", "/");
+            string absolutePath = layerInfo.Directory + "/" + layerInfo.AssetFileName;
             string objectPath = "Assets" + absolutePath.Substring(Application.dataPath.Length);
 
-            var modelGameObject = (GameObject)AssetDatabase.LoadAssetAtPath(objectPath, typeof(GameObject));
+            GameObject modelGameObject = AssetDatabase.LoadAssetAtPath<GameObject>(objectPath);
+            if (modelGameObject == null)
+            {
+                throw new System.Exception("Cannot load model from " + objectPath);
+            }
             GameObject modelInstance = Object.Instantiate(modelGameObject);
             AddLayerComponent(modelInstance, layerInfo);
             CreatePrefab(layerInfo, modelInstance, objectName);

@@ -19,7 +19,7 @@ To see initial model please load **AnimatedModels** scene located in *Assets/Sce
 
       * You can import models as a series of VTK models. The [input format specification is here](https://github.com/MicroscopeIT/holo/tree/master/Input%20documentation). Example VTK model is inside `Test Model` subdirectory there. This is the advised format, that supports animation using blend shapes.
 
-      * You can import models with each layer loaded from Unity assets (so it can be .obj, .prefab or any other model format supported by Unity).
+      * You can import models with each layer loaded from Unity assets (so it can be .obj, .prefab or any other model format supported by Unity). Example is inside `unity/Holo/Assets/Test Models/Skull/` in this repository.
 
   * Upload AssetBundles with models into Hololens headset
   * Run application
