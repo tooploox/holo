@@ -7,23 +7,28 @@ To see initial model please load **AnimatedModels** scene located in *Assets/Sce
 
 ## Installation
 
-### Prerequisites 
+### Prerequisites
   * Setup Hololens with Windows Device Portal enabled: https://docs.microsoft.com/en-us/windows/mixed-reality/using-the-windows-device-portal
-  * Install Holo Model Series application on Hololens (use relasese versions: https://github.com/MicroscopeIT/holo/releases) 
+  * Install Holo Model Series application on Hololens (use relasese versions: https://github.com/MicroscopeIT/holo/releases)
     Application instalation: https://docs.microsoft.com/en-us/hololens/hololens-install-apps#use-the-windows-device-portal-to-install-apps-on-hololens
 
   **IMPORTANT**
       If you got *.NET CoreRuntime* invalid or missing version error please install application with additional dependencies. To do this select option: *Allow me to select framework packages*, and in next step select the *Microsoft.NET.CoreRuntime.1.1.appx* file from release archive (Dependencies -> x86).
 
-  * Convert VTK model series into Asset Bundles
+  * Convert your input models into Asset Bundles.
+
+      * You can import models as a series of VTK models. The [input format specification is here](https://github.com/MicroscopeIT/holo/tree/master/Input%20documentation). Example VTK model is inside `Test Model` subdirectory there. This is the advised format, that supports animation using blend shapes.
+
+      * You can import models with each layer loaded from Unity assets (so it can be .obj, .prefab or any other model format supported by Unity).
+
   * Upload AssetBundles with models into Hololens headset
   * Run application
-    
+
 #### Converting VTK model series into Asset Bundles
 
 Open Unity project from unity/Holo.
 
-1. Run script: **Holo -> Convert model to a AssetBundle's GameObject**
+1. Run script: **Holo -> Convert VTK model to an AssetBundle's GameObject**
 2. Choose the directory with model time series in VTK files
 3. Your resulting AssetBundle is located in _**<repository location>/unity/Holo/Assets/StreamingAssets/<name of converted directory>\_bundle(.manifest)**_
 
