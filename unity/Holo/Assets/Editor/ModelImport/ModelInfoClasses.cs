@@ -1,8 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.IO;
-using UnityEditor;
-using UnityEngine;
 
 /* Classes that contain information about a model, usually deserialized from ModelInfo.json. */
 

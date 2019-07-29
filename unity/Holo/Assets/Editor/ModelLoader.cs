@@ -9,10 +9,22 @@ public class ModelLoader
      * To use in batchmode: "<Path to Unity.exe>" -quit -batchmode -logFile "<Path to the logfile>"  
     * -executeMethod ModelLoader.LoadModel -rootDirectory "<Directory of the folder which stores the meshes>" 
     */
-    [MenuItem("Holo/Convert model to a AssetBundle's GameObject")]
-    public static void LoadModel()
+    [MenuItem("Holo/Convert VTK model to an AssetBundle's GameObject")]
+    public static void LoadVTKModel()
     {
-        SingleModel importedModel = new SingleModel();
+        SingleModel importedModel = new VTKModel();
+        LoadModel(importedModel);
+    }
+
+    [MenuItem("Holo/Convert GameObject model to an AssetBundle's GameObject")]
+    public static void LoadGameObjectModel()
+    {
+        SingleModel importedModel = new GOModel();
+        LoadModel(importedModel);
+    }
+
+    private static void LoadModel(SingleModel importedModel)
+    {
         AssetBundleCreator assetBundleCreator = new AssetBundleCreator();
 
         bool loadModel = true;
