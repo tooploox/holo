@@ -39,6 +39,17 @@ public class AssetBundleLoader
         LoadLayers();
     }
 
+    // Enlarge bounds to contain newBounds.
+    // bounds may be null if empty.
+    private void BoundsAdd(ref Bounds? bounds, Bounds newBounds)
+    {
+        if (bounds.HasValue) {
+            bounds.Value.Encapsulate(newBounds);
+        } else {
+            bounds = newBounds;
+        }
+    }
+
     private void LoadLayers()
     {
         layers = new List<ModelLayer>();
@@ -51,35 +62,52 @@ public class AssetBundleLoader
             GameObject layerGameObject = assetBundle.LoadAsset<GameObject>(bundleObjectName);
             string layerDebugName = "Prefab '" + bundleObjectName + "' layer '" + layerGameObject.name + "'";
 
-            // update bounds
             SkinnedMeshRenderer skinnedMesh = layerGameObject.GetComponent<SkinnedMeshRenderer>();
-            if (skinnedMesh == null)
+            if (skinnedMesh != null && 
+                skinnedMesh.sharedMesh != null && 
+                skinnedMesh.sharedMesh.blendShapeCount != 0)
             {
-                Debug.LogWarning(layerDebugName + " does not contain SkinnedMeshRenderer component, ignoring whole layer");
-                continue;
-            }
-            // Note that we use skinnedMesh.bounds, not skinnedMesh.localBounds, because we want to preserve local rotations
-            if (bounds.HasValue) {
-                bounds.Value.Encapsulate(skinnedMesh.bounds);
-            } else {
-                bounds = skinnedMesh.bounds;
-            }
+                // Update bounds
+                // Note that we use skinnedMesh.bounds, not skinnedMesh.localBounds, because we want to preserve local rotations
+                BoundsAdd(ref bounds, skinnedMesh.bounds);
             
-            // check and update newBlendShapesCount
-            if (newBlendShapesCount.HasValue && newBlendShapesCount.Value != skinnedMesh.sharedMesh.blendShapeCount)
-            {
-                Debug.LogWarning(layerDebugName + " have different number of blend shapes, " +
-                    newBlendShapesCount.Value.ToString() + " versus " +
-                    skinnedMesh.sharedMesh.blendShapeCount.ToString());
-            }
-            newBlendShapesCount = skinnedMesh.sharedMesh.blendShapeCount;
+                // check and update newBlendShapesCount
+                if (newBlendShapesCount.HasValue && newBlendShapesCount.Value != skinnedMesh.sharedMesh.blendShapeCount)
+                {
+                    Debug.LogWarning(layerDebugName + " have different number of blend shapes, " +
+                        newBlendShapesCount.Value.ToString() + " versus " +
+                        skinnedMesh.sharedMesh.blendShapeCount.ToString());
+                }
+                newBlendShapesCount = skinnedMesh.sharedMesh.blendShapeCount;
 
-            // check BlendShapeAnimation
-            BlendShapeAnimation animation = layerGameObject.GetComponent<BlendShapeAnimation>();
-            if (animation == null)
+                // check BlendShapeAnimation
+                BlendShapeAnimation animation = layerGameObject.GetComponent<BlendShapeAnimation>();
+                if (animation == null)
+                {
+                    Debug.LogWarning(layerDebugName + " does not contain BlendShapeAnimation component, adding");
+                    animation = layerGameObject.AddComponent<BlendShapeAnimation>();
+                }
+
+                // check Animator does not exist (we do not animate using Mecanim)
+                Animator animator = layerGameObject.GetComponent<Animator>();
+                if (animator != null)
+                {
+                    Debug.LogWarning(layerDebugName + " contains Animator component, removing");
+                    UnityEngine.Object.Destroy(animator);
+                }
+            } else
             {
-                Debug.LogWarning(layerDebugName + " does not contain BlendShapeAnimation component, adding");
-                animation = layerGameObject.AddComponent<BlendShapeAnimation>();
+                // Model not animated using BlendShapeAnimation, search for meshes (skinned or not) inside
+                var renderers = layerGameObject.GetComponentsInChildren<Renderer>();
+                if (renderers.Length == 0)
+                {
+                    Debug.LogWarning(layerDebugName + " has nothing visible, ignoring");
+                    continue;
+                }
+                foreach (Renderer renderer in renderers)
+                { 
+                    BoundsAdd(ref bounds, renderer.bounds);
+                }
             }
 
             // check ModelLayer existence
@@ -99,14 +127,6 @@ public class AssetBundleLoader
                     layer.Simulation.ToString() + ")");
             }
 
-            // check Animator does not exist (we do not animate using Mecanim)
-            Animator animator = layerGameObject.GetComponent<Animator>();
-            if (animator != null)
-            {
-                Debug.LogWarning(layerDebugName + " contains Animator component, removing");
-                UnityEngine.Object.Destroy(animator);
-            }
-
             // add to layers list
             layers.Add(layer);
         }
@@ -118,7 +138,7 @@ public class AssetBundleLoader
         }
 
         if (!newBlendShapesCount.HasValue) {
-            Debug.LogWarning("Empty model, no layers with blend shapes");
+            Debug.LogWarning("Not animated model, no layers with blend shapes");
             blendShapeCount = 0;
         } else { 
             blendShapeCount = newBlendShapesCount.Value;

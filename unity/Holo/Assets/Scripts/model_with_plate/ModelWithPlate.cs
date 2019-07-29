@@ -52,7 +52,10 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
     private class LayerLoaded
     {
+        // Instance on scene.
         public GameObject Instance;
+        // Shortcut for Instance.GetComponent<BlendShapeAnimation>().
+        // May be null for layers not animated using BlendShapeAnimation.
         public BlendShapeAnimation Animation;
     }
 
@@ -201,7 +204,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     {
         if (layersLoaded != null) {
             foreach (LayerLoaded l in layersLoaded.Values) {
-                l.Animation.TogglePlay();
+                if (l.Animation != null) { 
+                    l.Animation.TogglePlay();
+                }
             }
             RefreshUserInterface();
         } else {
@@ -213,7 +218,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     {
         if (layersLoaded != null) {
             foreach (LayerLoaded l in layersLoaded.Values) {
-                l.Animation.CurrentTime = 0f;
+                if (l.Animation != null) { 
+                    l.Animation.CurrentTime = 0f;
+                }
             }
             RefreshUserInterface();
         } else {
@@ -284,7 +291,10 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
         // update ButtonTogglePlay caption and icon
         LayerLoaded firstLayer = FirstLayerLoaded();
-        bool playing = firstLayer != null && firstLayer.Animation.Playing;
+        bool playing = 
+            firstLayer != null && 
+            firstLayer.Animation != null &&
+            firstLayer.Animation.Playing;
         string playOrPauseText = playing ? "PAUSE" : "PLAY";
         ButtonTogglePlay.GetComponent<CompoundButtonText>().Text = playOrPauseText;
         Texture2D playOrPatseIcon = playing ? ButtonIconPause : ButtonIconPlay;
@@ -554,23 +564,25 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         }
 
         LayerLoaded firstLayer = FirstLayerLoaded();
-        bool currentlyPlaying = firstLayer != null ? firstLayer.Animation.Playing : true;
-        float currentlyTime = firstLayer != null ? firstLayer.Animation.CurrentTime : 0f;
+        bool currentlyPlaying = firstLayer != null && firstLayer.Animation != null ? firstLayer.Animation.Playing : true;
+        float currentlyTime = firstLayer != null && firstLayer.Animation != null ? firstLayer.Animation.CurrentTime : 0f;
 
         LayerLoaded l = new LayerLoaded();
         l.Instance = layer.InstantiateGameObject(instanceTransformation.transform);
 
         l.Animation = l.Instance.GetComponent<BlendShapeAnimation>();
-        // It should be already checked and eventually fixed in AssetBundleLoader
-        Assert.IsTrue(l.Animation != null);
-        l.Animation.InitializeBlendShapes();
-        l.Animation.Playing = currentlyPlaying;
-        l.Animation.CurrentTime = currentlyTime;
-        l.Animation.SpeedNormalized = speedSlider;
+        if (l.Animation != null)
+        { 
+            l.Animation.InitializeBlendShapes();
+            l.Animation.Playing = currentlyPlaying;
+            l.Animation.CurrentTime = currentlyTime;
+            l.Animation.SpeedNormalized = speedSlider;
+        }
 
-        // Assign material
-        SkinnedMeshRenderer skinnedMesh = l.Instance.GetComponent<SkinnedMeshRenderer>();
-        skinnedMesh.sharedMaterial = layer.Simulation ? DataVisualizationMaterial : DefaultModelMaterial;
+        // Assign material to all MeshRenderer and SkinnedMeshRenderer inside
+        foreach (var renderer in l.Instance.GetComponentsInChildren<Renderer>()) { 
+            renderer.sharedMaterial = layer.Simulation ? DataVisualizationMaterial : DefaultModelMaterial;
+        }
 
         // update layersLoaded dictionary
         layersLoaded[layer] = l;
@@ -582,7 +594,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
         if (layersLoaded != null) {
             foreach (LayerLoaded l in layersLoaded.Values) {
-                l.Animation.SpeedNormalized = speedSlider;
+                if (l.Animation != null) { 
+                    l.Animation.SpeedNormalized = speedSlider;
+                }
             }
             RefreshUserInterface();
         }
