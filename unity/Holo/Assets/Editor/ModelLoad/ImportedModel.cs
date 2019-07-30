@@ -1,10 +1,11 @@
 ﻿using System.IO;
 using UnityEditor;
 using UnityEngine;
+using ModelLoad.ModelImport;
 
-namespace ModelImport
+namespace ModelLoad
 {
-    public class VTKModel : SingleModel
+    public class ImportedModel : SingleModel
     {
         private FileSeriesImporter seriesImporter = new FileSeriesImporter();
 
@@ -13,7 +14,7 @@ namespace ModelImport
             string objectName = Info.Caption + "_" + Path.GetFileName(layerInfo.Directory);
             seriesImporter.ImportData(layerInfo, objectName);
             AddLayerComponent(seriesImporter.ModelGameObject, layerInfo);
-            SaveFilesForExport(layerInfo, objectName, seriesImporter.ModelMesh, seriesImporter.ModelGameObject);
+            SaveFilesForExport(layerInfo, objectName, seriesImporter.ModelMesh.Get(), seriesImporter.ModelGameObject);
         }
 
         // Saves imported model to a Unity-friendly files, to be put in AssetBundles.

@@ -27,7 +27,6 @@ namespace ModelLoad.ModelImport
             GetFilepaths(layerInfo.Directory);
             ImportFiles();
             AddMeshToGameObject();
-            AddLayerComponent(layerInfo);
         }
 
         //Gets filepaths of particular frames and their extension
@@ -123,13 +122,6 @@ namespace ModelLoad.ModelImport
             SkinnedMeshRenderer skinnedMesh = ModelGameObject.AddComponent<SkinnedMeshRenderer>();
             skinnedMesh.sharedMesh = ModelMesh.Get();
             ModelGameObject.AddComponent<BlendShapeAnimation>();
-        }
-
-        private void AddLayerComponent(ModelLayerInfo layerInfo)
-        {
-            ModelLayer layer = ModelGameObject.AddComponent<ModelLayer>();
-            layer.Caption = layerInfo.Caption;
-            layer.Simulation = layerInfo.Simulation;
         }
     }
 }
