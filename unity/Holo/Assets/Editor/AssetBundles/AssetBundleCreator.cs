@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-using ModelImport;
+using ModelLoad;
 
 public class AssetBundleCreator
 {  

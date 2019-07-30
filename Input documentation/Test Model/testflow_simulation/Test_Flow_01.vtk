@@ -1,7 +1,7 @@
 # vtk DataFile Version 4.2
 test_flow vtk output
 ASCII
-DATASET UNSTRUCTURED_GRID
+DATASET POLYDATA
 
 POINTS 3 float
 10.00 -3.00 0.00

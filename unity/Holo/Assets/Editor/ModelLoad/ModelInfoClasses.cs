@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 /* Classes that contain information about a model, usually deserialized from ModelInfo.json. */
 
-namespace ModelImport
+namespace ModelLoad
 {
     // Information about a whole model, usually deserialized from ModelInfo.json.
     public class ModelInfo

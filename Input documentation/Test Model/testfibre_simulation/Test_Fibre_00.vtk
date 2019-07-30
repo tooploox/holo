@@ -1,7 +1,7 @@
 # vtk DataFile Version 4.0 
 Test_fibre vtk output
 ASCII
-DATASET UNSTRUCTURED_GRID
+DATASET POLYDATA
 
 POINTS 8 float 
 -2.0 -2.0 -2.0  

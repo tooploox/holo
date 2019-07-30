@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEngine;
 using Newtonsoft.Json;
 
-namespace ModelImport
+namespace ModelLoad
 {
     public abstract class SingleModel
     {

@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace ModelImport
+namespace ModelLoad
 {
     class GOModel: SingleModel
     {

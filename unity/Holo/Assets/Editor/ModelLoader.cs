@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-using ModelImport;
+using ModelLoad;
 
 public class ModelLoader
 {
@@ -12,7 +12,7 @@ public class ModelLoader
     [MenuItem("Holo/Convert VTK model to an AssetBundle's GameObject")]
     public static void LoadVTKModel()
     {
-        SingleModel importedModel = new VTKModel();
+        SingleModel importedModel = new ImportedModel();
         LoadModel(importedModel);
     }
 

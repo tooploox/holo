@@ -6,7 +6,7 @@ using UnityEngine;
 using System.Text.RegularExpressions;
 
 
-namespace ModelImport.VTKImport
+namespace ModelLoad.ModelImport.VTKImport
 {
     public static class VTKImportUtils
     {
