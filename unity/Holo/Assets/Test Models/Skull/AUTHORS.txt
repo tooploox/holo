@@ -1,0 +1,3 @@
+The model obtained from Open Anatomy Project, see https://www.openanatomy.org/atlas-pages/ .
+
+The license: https://github.com/Slicer/Slicer/blob/master/License.txt (BSD style license with slight modifications).
