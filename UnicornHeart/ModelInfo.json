@@ -2,12 +2,12 @@
     Caption: "Unicorn Heart",
     Layers: [
         {
-            Caption: "Mesh",
+            Caption: "Heart",
             Simulation: false,
             Directory: "meshes"
         },
         {
-            Caption: "Dataflow Demo",
+            Caption: "Fibre Demo",
             Simulation: true,
             Directory: "dataflow"
         }

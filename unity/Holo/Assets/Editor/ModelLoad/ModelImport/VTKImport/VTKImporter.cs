@@ -70,10 +70,14 @@ namespace ModelLoad.ModelImport.VTKImport
             bool firstVertex = true;
             for (int i = 0; i < numberOfVertices; i++)
             {
-                Vector3 currentVertex = streamReader.GetLineVertex();
-                Vertices[i] = currentVertex;
-                BoundingVertices.UpdateBoundingVertices(firstVertex, currentVertex);
-                firstVertex = false;
+                List<Vector3> verticesList = streamReader.GetLineVertices();
+                for (int j = 0; j < verticesList.Count; j++)
+                {
+                    Vertices[i+j] = verticesList[j];
+                    BoundingVertices.UpdateBoundingVertices(firstVertex, verticesList[j]);
+                    firstVertex = false;
+                }
+                i += verticesList.Count - 1;
             }
         }
     }
