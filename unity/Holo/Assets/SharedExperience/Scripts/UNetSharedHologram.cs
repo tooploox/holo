@@ -72,7 +72,15 @@ public class UNetSharedHologram : NetworkBehaviour, IInputClickHandler
             localRotation = transform.localRotation;
         }
 
-        layerMask = SpatialMappingManager.Instance.LayerMask;
+        if (SpatialMappingManager.Instance != null)
+        {
+            layerMask = SpatialMappingManager.Instance.LayerMask;
+        } else
+        {
+            Debug.LogWarning("SpatialMappingManager.Instance is null at UNetSharedHologram.Start");
+            layerMask = (1 << /*PhysicsLayer*/31);
+        }
+        
         inputManager = InputManager.Instance;
         
     }
@@ -86,6 +94,13 @@ public class UNetSharedHologram : NetworkBehaviour, IInputClickHandler
         }
         else
         {
+            if (float.IsNaN(localPosition.x) ||
+                float.IsNaN(localPosition.y) ||
+                float.IsNaN(localPosition.z))
+            {
+                Debug.LogWarning("UNetSharedHologram localPosition has NaN, ignoring synchronization");
+                return;
+            }
             
             transform.localPosition = localPosition;
             transform.localRotation = localRotation;

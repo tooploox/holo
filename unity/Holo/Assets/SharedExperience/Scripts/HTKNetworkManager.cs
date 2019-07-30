@@ -9,6 +9,32 @@ using UnityEngine.Networking.Match;
 
 public class HTKNetworkManager : NetworkManager {
 
+    void Start()
+    {
+        /* Here you could configure Unity server settings:
+		
+        customConfig = true;
+        connectionConfig.MaxCombinedReliableMessageCount = 40;
+        connectionConfig.MaxCombinedReliableMessageSize = 800;
+        connectionConfig.MaxSentMessageQueueSize = 2048;
+        // https://forum.unity.com/threads/timeout-disconnect-after-a-few-minutes.367545/
+        connectionConfig.NetworkDropThreshold = 90;
+        // https://forum.unity.com/threads/matchmaker-client-timeout.342745/
+        connectionConfig.PingTimeout = 5000;
+        connectionConfig.DisconnectTimeout = 5000;
+        connectionConfig.ConnectTimeout = 5000;
+
+        //connectionConfig.NetworkDropThreshold = 45;
+        connectionConfig.OverflowDropThreshold = 45;
+       
+        connectionConfig.AckDelay = 200;
+        connectionConfig.AcksType = ConnectionAcksType.Acks96;
+        connectionConfig.MaxSentMessageQueueSize = 256;
+
+        globalConfig.ThreadAwakeTimeout = 1;
+        */
+    }
+
 #if LOG_FUNCTION_CALLS
 #if WINDOWS_UWP
     void LogEntry([System.Runtime.CompilerServices.CallerMemberName] string memberName = "")

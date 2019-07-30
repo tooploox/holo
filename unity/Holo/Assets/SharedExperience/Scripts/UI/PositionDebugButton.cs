@@ -14,7 +14,8 @@ public class PositionDebugButton : SingleInstance<PositionDebugButton> {
 	// Use this for initialization
 	void Start ()
     {
-        transform.SetParent(DisconnectedPosition.transform,false);
+	    // Do not change parent, keep debug button inside side menu, this way it is also not hidden after "Start"
+        //transform.SetParent(DisconnectedPosition.transform,false);
         networkDisco = NetworkDiscoveryWithAnchors.Instance;
         networkDisco.ConnectionStatusChanged += NetworkDisco_ConnectionStatusChanged;
 	}
