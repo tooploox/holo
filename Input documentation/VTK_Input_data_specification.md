@@ -57,11 +57,12 @@ VTK is a versatile format, allowing user to save its model in various combinatio
 # vtk DataFile Version 4.0
 <Name of the current body/simulation> vtk output
 ASCII
-DATASET UNSTRUCTURED_GRID
+DATASET [POLYDATA/UNSTRUCTURED_GRID]
 ```
-
+Type of the dataset depends on the data inside.
 
 ## Body data
+Dataset type **UNSTRUCTURED_GRID**
 
 Two fields are required; **POINTS** and **CELLS**.
 
@@ -79,6 +80,7 @@ Two fields are required; **POINTS** and **CELLS**.
 	- In case of triangles, counter-clockwise winding order is required.
 
 ## Simulation data
+Dataset type: **POLYDATA**
 
 Currently, there are two types of data that we can simulate: fibre orientation data and flow simulation data. Both types differ from each other in structure, which is described below. Similarly to the body data, you can find them in the test files within this folder.
 

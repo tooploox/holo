@@ -52,7 +52,6 @@ namespace ModelLoad
             return rootDirectory;
         }
 
-
         protected void ReadInfoFile(string rootDirectory)
         {
             if (!File.Exists(rootDirectory + @"\" + "ModelInfo.json"))
