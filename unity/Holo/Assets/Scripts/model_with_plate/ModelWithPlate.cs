@@ -95,6 +95,34 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         }
     }
 
+    /* Currently visible layers, expressed as a bitmask. */
+    public uint InstanceLayers
+    {
+        get
+        {
+            uint result = 0;
+            if (layersLoaded != null) {
+                foreach (ModelLayer layer in layersLoaded.Keys) { 
+                    result |= ((uint)1 << layer.LayerIndex);
+                }
+            }
+            return result;
+        }
+        set
+        {
+            uint currentLayers = InstanceLayers;
+            foreach (ModelLayer layer in instanceBundle.Layers) { 
+                uint layerMask = (uint)1 << layer.LayerIndex;
+                if ((layerMask & value) != 0 && (layerMask & currentLayers) == 0) {
+                    LoadLayer(layer);
+                } else
+                if ((layerMask & value) == 0 && (layerMask & currentLayers) != 0) {
+                    UnloadLayer(layer);
+                }
+            }
+        }
+    }
+
     private void Start()
     {
         /* Adding components using code, simply because it's more friendly to version control */

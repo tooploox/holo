@@ -135,6 +135,8 @@ public class AssetBundleLoader
                     layer.Simulation.ToString() + ")");
             }
 
+            layer.LayerIndex = layers.Count;
+
             // add to layers list
             layers.Add(layer);
         }

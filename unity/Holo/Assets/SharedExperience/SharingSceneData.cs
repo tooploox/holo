@@ -11,6 +11,9 @@ public class SharingSceneData : NetworkBehaviour
     string hostInstanceName;
 
     [SyncVar]
+    uint hostInstanceLayers;
+
+    [SyncVar]
     Vector3 hostPlatePosition;
 
     [SyncVar]
@@ -50,6 +53,7 @@ public class SharingSceneData : NetworkBehaviour
         ColorMapManager = gameObject.GetComponent<ColorMap>();
 
         hostInstanceName = ModelManager.InstanceName;
+        hostInstanceLayers = ModelManager.InstanceLayers;
         hostPlatePosition = transform.localPosition;
         hostPlateScale = transform.localScale;
 
@@ -67,6 +71,7 @@ public class SharingSceneData : NetworkBehaviour
             hostPlateScale = transform.localScale;
             hostClippingPlaneActive = ClipPlaneManager.ClippingPlaneState != ModelClippingPlaneControl.ClipPlaneState.Disabled;
             hostInstanceName = ModelManager.InstanceName;
+            hostInstanceLayers = ModelManager.InstanceLayers;
             if (!string.IsNullOrEmpty(ModelManager.InstanceName))
             {
                 hostModelRotation = ModelManager.ModelRotation;
@@ -98,6 +103,7 @@ public class SharingSceneData : NetworkBehaviour
 
             if (!string.IsNullOrEmpty(finalHostInstanceName))
             {
+                ModelManager.InstanceLayers = hostInstanceLayers;
                 ModelManager.ModelRotation = hostModelRotation;
 
                 bool isClipingPlaneLocallyActive = ClipPlaneManager.ClippingPlaneState == ModelClippingPlaneControl.ClipPlaneState.Active;
