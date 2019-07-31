@@ -8,7 +8,7 @@ using UnityEngine.Networking.Match;
 public class SharingSceneData : NetworkBehaviour
 {
     [SyncVar]
-    int hostInstanceIndex;
+    string hostInstanceName;
 
     [SyncVar]
     Vector3 hostPlatePosition;
@@ -28,18 +28,14 @@ public class SharingSceneData : NetworkBehaviour
     [SyncVar]
     string hostColorMap;
 
-    [SyncVar]
-    bool hostAnimationState;
+    //[SyncVar]
+    //bool hostAnimationState;
 
-    [SyncVar]
-    float hostAnimationTime; // maybe we should set it only when pause or any state change
+    //[SyncVar]
+    //float hostAnimationTime; // maybe we should set it only when pause or any state change
 
-    [SyncVar]
-    float hostAnimationSpeed;
-
-    //temporary solution for dataflow
-    [SyncVar]
-    bool hostDataLayerActive;
+    ///[SyncVar]
+    //float hostAnimationSpeed;
 
 #pragma warning restore CS0618 // using deprecated Unity stuff (TODO: upgrade in Holo project in the future)
 
@@ -53,7 +49,7 @@ public class SharingSceneData : NetworkBehaviour
         ClipPlaneManager = ModelManager.ModelClipPlane.GetComponent<ModelClippingPlaneControl>();
         ColorMapManager = gameObject.GetComponent<ColorMap>();
 
-        hostInstanceIndex = (ModelManager.instanceIndex.HasValue) ? ModelManager.instanceIndex.Value : -1;
+        hostInstanceName = ModelManager.InstanceName;
         hostPlatePosition = transform.localPosition;
         hostPlateScale = transform.localScale;
 
@@ -70,10 +66,10 @@ public class SharingSceneData : NetworkBehaviour
             hostPlatePosition = transform.localPosition;
             hostPlateScale = transform.localScale;
             hostClippingPlaneActive = ClipPlaneManager.ClippingPlaneState != ModelClippingPlaneControl.ClipPlaneState.Disabled;
-            hostInstanceIndex = (ModelManager.instanceIndex.HasValue) ? ModelManager.instanceIndex.Value : -1;
-            if (hostInstanceIndex > 0)
+            hostInstanceName = ModelManager.InstanceName;
+            if (!string.IsNullOrEmpty(ModelManager.InstanceName))
             {
-                hostModelRotation = ModelManager.rotationBoxRig.transform.localRotation;
+                hostModelRotation = ModelManager.ModelRotation;
                 hostClippingPlaneTransform = ModelManager.ModelClipPlane.transform;                
                 hostColorMap = ModelManager.DataVisualizationMaterial.GetTexture("_ColorMap").name;
 
@@ -91,25 +87,23 @@ public class SharingSceneData : NetworkBehaviour
             transform.localPosition = hostPlatePosition;
             transform.localScale = hostPlateScale;
 
-            int localInstanceIndex = (ModelManager.instanceIndex.HasValue) ? ModelManager.instanceIndex.Value : -1;
-            if (localInstanceIndex != hostInstanceIndex)
+            string localInstanceName = ModelManager.InstanceName;
+            string finalHostInstanceName = hostInstanceName;
+            /* Turn "" into null for finalHostInstanceName.
+             * It would work anyway without it (ModelManager.SetInstance accepts both "" and null),
+             * but would unnecessarily keep calling ModelManager.SetInstance every frame).
+             */
+            if (finalHostInstanceName == "") {
+                finalHostInstanceName = null;
+            }
+            if (localInstanceName != finalHostInstanceName)
             {
-                if (hostInstanceIndex >= 0)
-                {
-                    ModelManager.SetInstance(hostInstanceIndex);
-                    // TODO not synched now
-                    //if (hostDataLayerActive)
-                    //{
-                    //    ModelManager.LoadDataLayerInstance(hostInstanceIndex, "dataflow");
-                    //}
-                }
-                else
-                    ModelManager.SetInstance(null);
+                ModelManager.SetInstance(finalHostInstanceName);
             }
 
-            if (hostInstanceIndex >= 0)
+            if (!string.IsNullOrEmpty(finalHostInstanceName))
             {
-                ModelManager.rotationBoxRig.transform.localRotation = hostModelRotation;
+                ModelManager.ModelRotation = hostModelRotation;
 
                 bool isClipingPlaneLocallyActive = ClipPlaneManager.ClippingPlaneState == ModelClippingPlaneControl.ClipPlaneState.Active;
                 if (isClipingPlaneLocallyActive != hostClippingPlaneActive)

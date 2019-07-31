@@ -64,8 +64,6 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     /* All the variables below are non-null
      * only when instanceLoaded,
      * that is only after LoadInstance call (and before UnloadInstance). */
-    // TODO: should not be public, is for synchronization now
-    public int? instanceIndex; // index to ModelsCollection
     private AssetBundleLoader instanceBundle;
     private Dictionary<ModelLayer, LayerLoaded> layersLoaded;
     private Dictionary<ModelLayer, CompoundButton> layersButtons;
@@ -73,10 +71,31 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     private bool instanceIsPreview = false;
 
     // Created only when instance != null, as it initializes bbox in Start and assumes it's not empty
-    // TODO: should not be public, is for synchronization now
-    public GameObject rotationBoxRig;
+    private GameObject rotationBoxRig;
 
     private float speedSlider = 1f;
+
+    /* Currently loaded bundle name, null if none. */
+    public string InstanceName
+    {
+        get
+        {
+            return instanceBundle != null ? instanceBundle.Name : null;
+        }
+    }
+
+    public Quaternion ModelRotation
+    {
+        get { 
+            return rotationBoxRig != null ? rotationBoxRig.transform.localRotation : Quaternion.identity; 
+        }
+        set { 
+            if (rotationBoxRig != null) {
+                rotationBoxRig.transform.localRotation = value;
+            } 
+            // TODO: otherwise ignore, we do not synchronize rotation for unloaded models now
+        }
+    }
 
     private void Start()
     {
@@ -170,7 +189,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
                         if (clickObject.name.StartsWith(addPrefix) &&
                             int.TryParse(clickObject.name.Substring(addPrefix.Length), out addInstanceIndex))
                         {
-                            ClickAdd(addInstanceIndex);
+                            ClickAdd(ModelsCollection.Singleton.BundleName(addInstanceIndex));
                         }
                     }
                     break;
@@ -242,12 +261,15 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         RefreshUserInterface();
     }
 
-    /* Load new model or unload (when newInstanceIndex = null). */
-    public void SetInstance(int? newInstanceIndex)
+    /* Load new model or unload.
+     * newInstanceBundleName must match asset bundle name, returned by AssetBundleLoader.Name.
+     * It can also be null or empty to unload a model.
+     */
+    public void SetInstance(string newInstanceBundleName)
     {
-        if (newInstanceIndex.HasValue)
+        if (!string.IsNullOrEmpty(newInstanceBundleName))
         {
-            LoadInstance(newInstanceIndex.Value, false);
+            LoadInstance(newInstanceBundleName, false);
             LoadInitialLayers();
             ModelClipPlaneCtrl.ClippingPlaneState = ModelClippingPlaneControl.ClipPlaneState.Disabled;
         } else
@@ -257,9 +279,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         RefreshUserInterface(); // necessary after LoadInstance and UnloadInstance
     }
 
-    private void ClickAdd(int newInstanceIndex)
+    private void ClickAdd(string newInstanceBundleName)
     {
-        LoadInstance(newInstanceIndex, true);
+        LoadInstance(newInstanceBundleName, true);
         LoadInitialLayers();
         RefreshUserInterface();
         ModelClipPlaneCtrl.ClippingPlaneState = ModelClippingPlaneControl.ClipPlaneState.Disabled;
@@ -267,7 +289,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
     private void ClickConfirmPreview()
     {
-        LoadInstance(instanceIndex.Value, false);
+        LoadInstance(instanceBundle.Name, false);
         LoadInitialLayers();
         RefreshUserInterface();
     }
@@ -362,7 +384,6 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         {
             Destroy(instanceTransformation);
             Destroy(rotationBoxRig);
-            instanceIndex = null;
             instanceBundle = null;
             instanceTransformation = null;
             rotationBoxRig = null;
@@ -465,20 +486,19 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
     /* Load new model.
      *
-     * newInstanceIndex is an index to ModelsCollection bundle.
+     * newInstanceBundleName is a bundle name known to the ModelsCollection bundle.
      *
      * No layer is initially loaded -- you usually want to call
      * LoadLayer immediately after this.
      *
      * After calling this, remember to call RefreshUserInterface at some point.
      */
-    private void LoadInstance(int newInstanceIndex, bool newIsPreview)
+    private void LoadInstance(string newInstanceBundleName, bool newIsPreview)
     {
         UnloadInstance();
 
         instanceLoaded = true;
-        instanceIndex = newInstanceIndex;
-        instanceBundle = ModelsCollection.Singleton.BundleLoad(instanceIndex.Value);
+        instanceBundle = ModelsCollection.Singleton.BundleLoad(newInstanceBundleName);
         instanceIsPreview = newIsPreview;
         layersLoaded = new Dictionary<ModelLayer, LayerLoaded>();
 
@@ -554,7 +574,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             throw new Exception("Cannot call TodoLoadMeshLayer before LoadInstance");
         }
 
-        Assert.IsTrue(instanceIndex.HasValue);
+        Assert.IsTrue(instanceBundle != null);
         ModelLayer layer = instanceBundle.Layers.First<ModelLayer>(l => !l.Simulation);
         LoadLayer(layer);
         HoloUtilities.SetButtonStateText(layersButtons[layer], true);
