@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System;
 using System.IO;
 using System.Linq;
@@ -8,8 +9,22 @@ public class AssetBundleLoader
 {
     private AssetBundle assetBundle;
     private string bundlePath;
+    private List<ModelLayer> layers;
+    private Bounds? bounds;
+    private int blendShapeCount;
 
-    private List<string> dataLayers;
+    // All layers, available after LoadLayer
+    public IEnumerable<ModelLayer> Layers
+    {
+        get { return new ReadOnlyCollection<ModelLayer>(layers); }
+    }
+
+    /* Bounding box of all layers, available after LoadLayer.
+     * May be null, if no visible layers are present.
+     */
+    public Bounds? Bounds { get { return bounds;  } }
+
+    public int BlendShapeCount { get { return blendShapeCount;  } }
 
     public void LoadBundle(string aBundlePath)
     {
@@ -21,69 +36,121 @@ public class AssetBundleLoader
             return;
         }
         assetBundle = loadedAssetBundle;
-        dataLayers = GetDataLayers();
+        LoadLayers();
     }
 
-    private List<string> GetDataLayers()
+    // Enlarge bounds to contain newBounds.
+    // bounds may be null if empty.
+    private void BoundsAdd(ref Bounds? bounds, Bounds newBounds)
     {
-        var selectedNames = assetBundle.GetAllAssetNames()
-                                .Where(name => name.EndsWith(".prefab"))
-                                .Where(name => !name.EndsWith("_body.prefab"));
-        
-        return new List<string>(selectedNames);
+        if (bounds.HasValue) {
+            bounds.Value.Encapsulate(newBounds);
+        } else {
+            bounds = newBounds;
+        }
     }
 
-    public GameObject LoadGameObject(string sufix)
+    private void LoadLayers()
     {
-        List<string> assetPathList = assetBundle.GetAllAssetNames().ToList();
+        layers = new List<ModelLayer>();
+        bounds = null;
+        int? newBlendShapesCount = null;
+        foreach (string bundleObjectName in assetBundle.GetAllAssetNames())
+        {
+            if (!bundleObjectName.EndsWith(".prefab")) { continue; } // ignore other objects
 
-        string endPattern = "_" + sufix + ".prefab";
-        string gameObjectPath;
-        try
-        {
-            gameObjectPath = assetPathList.Single(path => path.EndsWith(endPattern));
-        } catch (InvalidOperationException e)
-        {
-            Debug.LogError("Probably no path with suffix " + endPattern + " in the asset bundle " + bundlePath + ", exception " + e.Message);
-            // Since the caller probably doesn't except null result, above makes LogError instead of LogWarning
-            return null;
+            GameObject layerGameObject = assetBundle.LoadAsset<GameObject>(bundleObjectName);
+            string layerDebugName = "Prefab '" + bundleObjectName + "' layer '" + layerGameObject.name + "'";
+
+            SkinnedMeshRenderer skinnedMesh = layerGameObject.GetComponent<SkinnedMeshRenderer>();
+            if (skinnedMesh != null && 
+                skinnedMesh.sharedMesh != null && 
+                skinnedMesh.sharedMesh.blendShapeCount != 0)
+            {
+                // Update bounds
+                // Note that we use skinnedMesh.bounds, not skinnedMesh.localBounds, because we want to preserve local rotations
+                BoundsAdd(ref bounds, skinnedMesh.bounds);
+            
+                // check and update newBlendShapesCount
+                if (newBlendShapesCount.HasValue && newBlendShapesCount.Value != skinnedMesh.sharedMesh.blendShapeCount)
+                {
+                    Debug.LogWarning(layerDebugName + " have different number of blend shapes, " +
+                        newBlendShapesCount.Value.ToString() + " versus " +
+                        skinnedMesh.sharedMesh.blendShapeCount.ToString());
+                }
+                newBlendShapesCount = skinnedMesh.sharedMesh.blendShapeCount;
+
+                // check BlendShapeAnimation
+                BlendShapeAnimation animation = layerGameObject.GetComponent<BlendShapeAnimation>();
+                if (animation == null)
+                {
+                    Debug.LogWarning(layerDebugName + " does not contain BlendShapeAnimation component, adding");
+                    animation = layerGameObject.AddComponent<BlendShapeAnimation>();
+                }
+
+                // check Animator does not exist (we do not animate using Mecanim)
+                Animator animator = layerGameObject.GetComponent<Animator>();
+                if (animator != null)
+                {
+                    Debug.LogWarning(layerDebugName + " contains Animator component, removing");
+                    UnityEngine.Object.Destroy(animator);
+                }
+            } else
+            {
+                // Model not animated using BlendShapeAnimation, search for meshes (skinned or not) inside
+                var renderers = layerGameObject.GetComponentsInChildren<Renderer>();
+                if (renderers.Length == 0)
+                {
+                    Debug.LogWarning(layerDebugName + " has nothing visible, ignoring");
+                    continue;
+                }
+                foreach (Renderer renderer in renderers)
+                { 
+                    BoundsAdd(ref bounds, renderer.bounds);
+                }
+            }
+
+            // check ModelLayer existence
+            ModelLayer layer = layerGameObject.GetComponent<ModelLayer>();
+            if (layer == null)
+            {
+                layer = layerGameObject.AddComponent<ModelLayer>();
+                layer.Caption = Path.GetFileNameWithoutExtension(bundleObjectName);
+                layer.Simulation = bundleObjectName.Contains("dataflow") || bundleObjectName.Contains("simulation");
+                if (layer.Simulation)
+                {
+                    int simulationsCount = layers.Count(c => c.Simulation);
+                    layer.Caption = "Simulation " + (simulationsCount + 1).ToString();
+                }
+                Debug.LogWarning(layerDebugName + " does not contain ModelLayer component, guessing layer Caption (" + 
+                    layer.Caption + ") and simulation (" + 
+                    layer.Simulation.ToString() + ")");
+            }
+
+            // add to layers list
+            layers.Add(layer);
         }
 
-        return assetBundle.LoadAsset<GameObject>(gameObjectPath);
-    }
-
-    public GameObject LoadMainGameObject()
-    {
-        return LoadGameObject("body");
-    }
-
-    public GameObject InstantiateMainGameObject()
-    {
-        GameObject template = LoadMainGameObject();
-        GameObject instance = UnityEngine.Object.Instantiate<GameObject>(template);
-        return instance;
-    }
-
-    public List<GameObject> LoadMultipleGameObjects()
-    {
-        List<string> assetPathList = assetBundle.GetAllAssetNames().ToList();
-        List<GameObject> modelGameObjects = new List<GameObject>();
-        List<string> gameObjectPaths = assetPathList.FindAll(path => path.EndsWith(".prefab"));
-        foreach (string path in gameObjectPaths)
-        {
-            modelGameObjects.Add(assetBundle.LoadAsset<GameObject>(path));
-        }
-        return modelGameObjects;
-    }
-
-    public void InstantiateMultipleGameObjects()
-    {
-        List<GameObject> template = LoadMultipleGameObjects();
-
-        foreach (GameObject gameObject in template)
-        {
-            UnityEngine.Object.Instantiate(gameObject);
+        if (!bounds.HasValue) {
+            Debug.LogWarning("Empty model, no layers with something visible");            
+        } else { 
+            Debug.Log("Loaded model with bounds " + bounds.ToString());
         }
 
+        if (!newBlendShapesCount.HasValue) {
+            Debug.LogWarning("Not animated model, no layers with blend shapes");
+            blendShapeCount = 0;
+        } else { 
+            blendShapeCount = newBlendShapesCount.Value;
+            Debug.Log("Loaded model with blend shapes " + blendShapeCount.ToString());
+        }
+    }
+
+    public void InstantiateAllLayers()
+    {
+        foreach (ModelLayer layer in Layers)
+        {
+            layer.InstantiateGameObject(null);
+        }
     }
 }

@@ -1,12 +1,12 @@
-﻿using System.IO;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using UnityEngine;
+using UnityEngine.Assertions;
 
 using HoloToolkit.Examples.InteractiveElements;
 
-using HoloToolkit.Unity;
 using HoloToolkit.Unity.UX;
 using HoloToolkit.Unity.Buttons;
 using HoloToolkit.Unity.InputModule;
@@ -28,12 +28,11 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public CompoundButton ButtonTranslate;
     public CompoundButton ButtonRotate;
     public CompoundButton ButtonScale;
-    public CompoundButton ButtonLayerDataFlow;
+    public GameObject ButtonLayerTemplate;
     public Texture2D ButtonIconPlay;
     public Texture2D ButtonIconPause;
     // Drop here "Prefabs/ModelWithPlateRotationRig"
     public GameObject RotationBoxRigTemplate;
-    public GameObject Instance { get { return instance; } }
 
     public enum TransformationState
     {
@@ -49,7 +48,35 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
     public GameObject ModelClipPlane;
 
-    ModelClippingPlaneControl ModelClipPlaneCtrl;
+    private ModelClippingPlaneControl ModelClipPlaneCtrl;
+
+    private class LayerLoaded
+    {
+        // Instance on scene.
+        public GameObject Instance;
+        // Shortcut for Instance.GetComponent<BlendShapeAnimation>().
+        // May be null for layers not animated using BlendShapeAnimation.
+        public BlendShapeAnimation Animation;
+    }
+
+    private bool instanceLoaded = false;
+    public bool InstanceLoaded { get { return instanceLoaded; } }
+    /* All the variables below are non-null
+     * only when instanceLoaded,
+     * that is only after LoadInstance call (and before UnloadInstance). */
+    // TODO: should not be public, is for synchronization now
+    public int? instanceIndex; // index to ModelsCollection
+    private AssetBundleLoader instanceBundle;
+    private Dictionary<ModelLayer, LayerLoaded> layersLoaded;
+    private Dictionary<ModelLayer, CompoundButton> layersButtons;
+    private GameObject instanceTransformation;
+    private bool instanceIsPreview = false;
+
+    // Created only when instance != null, as it initializes bbox in Start and assumes it's not empty
+    // TODO: should not be public, is for synchronization now
+    public GameObject rotationBoxRig;
+
+    private float speedSlider = 1f;
 
     private void Start()
     {
@@ -128,16 +155,23 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             case "ButtonRotate": ClickChangeTransformationState(TransformationState.Rotate); break;
             case "ButtonScale": ClickChangeTransformationState(TransformationState.Scale); break;
             case "ButtonLayers": ClickToggleLayersState(); break;
-            case "ButtonLayerDataFlow": ClickChangeLayerState(); break;
             case "ButtonAnimationSpeed": AnimationSubmenu.SetActive(!AnimationSubmenu.activeSelf); break;
 
             default:
                 {
-                    const string addPrefix = "Add";
-                    int addInstanceIndex;
-                    if (clickObject.name.StartsWith(addPrefix) &&
-                        int.TryParse(clickObject.name.Substring(addPrefix.Length), out addInstanceIndex)) {
-                        ClickAdd(addInstanceIndex);
+                    ModelLayer layer = ButtonOfLayer(clickObject);
+                    if (layer != null)
+                    {
+                        ClickChangeLayerState(layer);
+                    } else
+                    {
+                        const string addPrefix = "Add";
+                        int addInstanceIndex;
+                        if (clickObject.name.StartsWith(addPrefix) &&
+                            int.TryParse(clickObject.name.Substring(addPrefix.Length), out addInstanceIndex))
+                        {
+                            ClickAdd(addInstanceIndex);
+                        }
                     }
                     break;
                 }
@@ -170,26 +204,27 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
     public void ClickTogglePlay()
     {
-        if (instanceAnimation != null) {
-            instanceAnimation.TogglePlay();
-            if(dataLayerInstanceAnimation != null) {
-                dataLayerInstanceAnimation.TogglePlay();
+        if (layersLoaded != null) {
+            foreach (LayerLoaded l in layersLoaded.Values) {
+                if (l.Animation != null) { 
+                    l.Animation.TogglePlay();
+                }
             }
             RefreshUserInterface();
-        }
-        else {
+        } else {
             Debug.LogWarning("Play / Stop button clicked, but no model loaded");
         }
     }
 
     public void ClickRewind()
     {
-        if (instanceAnimation != null) {
-            instanceAnimation.CurrentTime = 0f;
-            if(dataLayerInstanceAnimation != null)
-            {
-                dataLayerInstanceAnimation.CurrentTime = 0f;
+        if (layersLoaded != null) {
+            foreach (LayerLoaded l in layersLoaded.Values) {
+                if (l.Animation != null) { 
+                    l.Animation.CurrentTime = 0f;
+                }
             }
+            RefreshUserInterface();
         } else {
             Debug.LogWarning("Rewind button clicked, but no model loaded");
         }
@@ -198,77 +233,85 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     private void ClickRemove()
     {
         UnloadInstance();
+        RefreshUserInterface();
     }
 
     private void ClickCancelPreview()
     {
         UnloadInstance();
+        RefreshUserInterface();
+    }
+
+    /* Load new model or unload (when newInstanceIndex = null). */
+    public void SetInstance(int? newInstanceIndex)
+    {
+        if (newInstanceIndex.HasValue)
+        {
+            LoadInstance(newInstanceIndex.Value, false);
+            LoadInitialLayers();
+            ModelClipPlaneCtrl.ClippingPlaneState = ModelClippingPlaneControl.ClipPlaneState.Disabled;
+        } else
+        {
+            UnloadInstance();
+        }
+        RefreshUserInterface(); // necessary after LoadInstance and UnloadInstance
     }
 
     private void ClickAdd(int newInstanceIndex)
     {
         LoadInstance(newInstanceIndex, true);
+        LoadInitialLayers();
+        RefreshUserInterface();
         ModelClipPlaneCtrl.ClippingPlaneState = ModelClippingPlaneControl.ClipPlaneState.Disabled;
     }
 
     private void ClickConfirmPreview()
     {
         LoadInstance(instanceIndex.Value, false);
+        LoadInitialLayers();
+        RefreshUserInterface();
     }
 
     public void ClickToggleLayersState()
     {
         LayersSection.SetActive(!LayersSection.activeSelf);
-        if (!LayersSection.activeSelf) {
-            UnloadDataLayerInstance();
-        }
-
     }
 
-    private void ClickChangeLayerState()
+    private void ClickChangeLayerState(ModelLayer layer)
     {
-        if (instance == null)
+        if (!instanceLoaded)
         {
-            // This is normal if you try to turn on dataflow layer before a model is loaded
-            Debug.Log("No model loaded, cannot show dataflow.");
+            Debug.Log("No model loaded, cannot show layer.");
             return;
         }
 
-        //TODO: "dataflow" should be extracted from internal state / data / index of instance
-        if (dataLayerInstance != null)
-            UnloadDataLayerInstance();
-        else
-            LoadDataLayerInstance(instanceIndex.Value, "dataflow");
-
-        HoloUtilities.SetButtonStateText(ButtonLayerDataFlow, dataLayerInstance != null);
+        bool addLayer = !layersLoaded.ContainsKey(layer);
+        if (!addLayer) {
+            UnloadLayer(layer);
+        } else {
+            LoadLayer(layer);
+        }
+        HoloUtilities.SetButtonStateText(layersButtons[layer], addLayer);
     }
 
-    /* All the variables below are non-null if and only if after 
-     * LoadInstance call (and before UnloadInstance). */
-    [HideInInspector]
-    public int? instanceIndex; // index to ModelsCollection
-    [HideInInspector]
-    public BlendShapeAnimation instanceAnimation;
-    [HideInInspector]
-    public BlendShapeAnimation dataLayerInstanceAnimation;
-    private GameObject instance;
-    [HideInInspector]
-    public GameObject dataLayerInstance;
-    private GameObject instanceTransformation;
-    private bool instanceIsPreview = false;
-
-    // Created only when instance != null, as it initializes bbox in Start and assumes it's not empty
-    [HideInInspector]
-    public GameObject rotationBoxRig;
+    // First LayerLoaded, of any layer is loaded now.
+    private LayerLoaded FirstLayerLoaded()
+    {
+        return layersLoaded != null && layersLoaded.Count != 0 ? layersLoaded.Values.First<LayerLoaded>() : null;
+    }
 
     private void RefreshUserInterface()
     {
-        ButtonsModel.SetActive(instance != null && !instanceIsPreview);
-        ButtonsModelPreview.SetActive(instance != null && instanceIsPreview);
-        PlateVisible = instance == null || instanceIsPreview;
+        ButtonsModel.SetActive(instanceLoaded && !instanceIsPreview);
+        ButtonsModelPreview.SetActive(instanceLoaded && instanceIsPreview);
+        PlateVisible = (!instanceLoaded) || instanceIsPreview;
 
         // update ButtonTogglePlay caption and icon
-        bool playing = instanceAnimation != null && instanceAnimation.Playing;
+        LayerLoaded firstLayer = FirstLayerLoaded();
+        bool playing = 
+            firstLayer != null && 
+            firstLayer.Animation != null &&
+            firstLayer.Animation.Playing;
         string playOrPauseText = playing ? "PAUSE" : "PLAY";
         ButtonTogglePlay.GetComponent<CompoundButtonText>().Text = playOrPauseText;
         Texture2D playOrPatseIcon = playing ? ButtonIconPause : ButtonIconPlay;
@@ -277,192 +320,66 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             iconRenderer.sharedMaterial.mainTexture = playOrPatseIcon;
         } else {
             Debug.LogWarning("ButtonTogglePlay icon does not have MeshRenderer");
-        }        
-    }
-
-    // Unload currently loaded instance.
-    // May be safely called even when instance is already unloaded.
-    // LoadInstance() calls this automatically at the beginning.
-    public void UnloadInstance(bool refreshUi = true)
-    {
-        // First release previous instance
-        UnloadDataLayerInstance();
-
-        if (instance != null) {
-            Destroy(instance);
-            Destroy(instanceTransformation);
-            Destroy(rotationBoxRig);
-
-            instanceIndex = null;
-            dataLayerInstance = null;
-            instance = null;
-            instanceTransformation = null;
-            instanceAnimation = null;
-            rotationBoxRig = null;
-            instanceIsPreview = false; // value does not matter, but for security better to set it to something well-defined
-
-            if (refreshUi) {
-                RefreshUserInterface();
-            }
         }
     }
 
-    public void UnloadDataLayerInstance()
+    private void UnloadLayer(ModelLayer layer)
     {
-        if (dataLayerInstance != null)
-            Destroy(dataLayerInstance);
-
-        dataLayerInstance = null;
-        dataLayerInstanceAnimation = null;
+        if (!layersLoaded.ContainsKey(layer)) {
+            Debug.LogWarning("Cannot unload layer " + layer.Caption + ", it is not loaded yet");
+            return;
+        }
+        Destroy(layersLoaded[layer].Instance);
+        layersLoaded.Remove(layer);
     }
 
-    /* Resulting instance will be in box of max size instanceMaxSize, 
+    /* Unload currently loaded model.
+     * May be safely called even when instance is already unloaded.
+     * LoadInstance() calls this automatically at the beginning.
+     *
+     * After calling this, remember to call RefreshUserInterface at some point.
+     */
+    private void UnloadInstance()
+    {
+        if (layersLoaded != null) {
+            foreach (LayerLoaded l in layersLoaded.Values) {
+                Destroy(l.Instance);
+            }
+            layersLoaded = null;
+        }
+
+        if (layersButtons != null) {
+            foreach (CompoundButton button in layersButtons.Values) {
+                // remove from ButtonsClickReceiver.interactables
+                ButtonsClickReceiver clickReceiver = GetComponent<ButtonsClickReceiver>();
+                clickReceiver.interactables.Remove(button.gameObject);
+                Destroy(button.gameObject);
+            }
+            layersButtons = null;
+        }
+
+        if (instanceTransformation != null)
+        {
+            Destroy(instanceTransformation);
+            Destroy(rotationBoxRig);
+            instanceIndex = null;
+            instanceBundle = null;
+            instanceTransformation = null;
+            rotationBoxRig = null;
+            instanceIsPreview = false; // value does not matter, but for security better to set it to something well-defined
+        }
+
+        instanceLoaded = false;
+    }
+
+    /* Resulting instance will be in box of max size instanceMaxSize,
      * with center in instanceMove above plate origin.
      * This should match the plate designed sizes.
      */
     const float instanceMaxSize = 1.0f;
     const float expandedPlateHeight = 0.4f;
     Vector3 instanceMove = new Vector3(0f, expandedPlateHeight + instanceMaxSize / 2f, 0f); // constant
-
-    public void LoadDataLayerInstance(int currentInstanceIndex, string dataLayerSufix)
-    {
-        UnloadDataLayerInstance();
-
-        GameObject template = ModelsCollection.Singleton.BundleLoadDataLayer(currentInstanceIndex, dataLayerSufix);
-
-        dataLayerInstance = Instantiate<GameObject>(template, instance.transform);
-
-        dataLayerInstanceAnimation = dataLayerInstance.GetComponent<BlendShapeAnimation>();
-        if (dataLayerInstanceAnimation == null)
-        {
-            // TODO: this should be changed into "throw new...", not a warning.
-            // We should settle whether the stored object has or has not BlendShapeAnimation (I vote not,
-            // but any decision is fine, just stick to it).
-            // After new import STL->GameObject is ready.
-            Debug.LogWarning("BlendShapeAnimation component not found inside " + currentInstanceIndex + ", adding");
-            dataLayerInstanceAnimation = dataLayerInstance.AddComponent<BlendShapeAnimation>();
-        }
-
-        SkinnedMeshRenderer skinnedMesh = dataLayerInstance.GetComponent<SkinnedMeshRenderer>();
-        SkinnedMeshRenderer mainInstanceSkinnedMesh = instance.GetComponent<SkinnedMeshRenderer>();
-
-
-        int blendShapesCount = skinnedMesh.sharedMesh.blendShapeCount;
-        int mainBlendShapesCount = mainInstanceSkinnedMesh.sharedMesh.blendShapeCount;
-        if (blendShapesCount != mainBlendShapesCount)
-        {
-            Debug.LogWarningFormat("Data layer has different number of BlendShapes [{0}] than main model [{1}]",
-                blendShapesCount, mainBlendShapesCount);
-        }
-
-        if (blendShapesCount != 0)
-        {
-            dataLayerInstanceAnimation.Speed = instanceAnimation.Speed;
-        }
-        else
-        {
-            Debug.LogWarning("Model has no blend shapes " + currentInstanceIndex);
-        }
-
-        Animator animator = instance.GetComponent<Animator>();
-        if (animator != null)
-        {
-            Debug.LogWarning("Animator component found but not wanted inside " + currentInstanceIndex + ", removing");
-            Destroy(animator);
-        }
-
-        // Assign material
-        skinnedMesh.sharedMaterial = DataVisualizationMaterial;
-
-        bool playingState = instanceAnimation.Playing;
-
-        dataLayerInstanceAnimation.Playing = false;
-        instanceAnimation.Playing = false;
-
-        instanceAnimation.CurrentTime = 0.0f;
-        dataLayerInstanceAnimation.CurrentTime = instanceAnimation.CurrentTime;
-        instanceAnimation.Playing = playingState;
-        dataLayerInstanceAnimation.Playing = playingState;
-        RefreshUserInterface();
-    }
-
-    // Load new animated shape.
-    // newInstanceIndex is an index to ModelsCollection.
-    public void LoadInstance(int newInstanceIndex, bool newIsPreview)
-    {
-        UnloadInstance(false);
-
-        GameObject template = ModelsCollection.Singleton.BundleLoad(newInstanceIndex, newIsPreview);
-
-        /* Instantiate BoundingBoxRig dynamically, as in the next frame (when BoundingBoxRig.Start is run)
-         * it will assume that bounding box of children is not empty.
-         * So we cannot create BoundingBoxRig (for rotations) earlier.
-         * We also cannot create it later, right before calling Activate, as then BoundingBoxRig.Activate would
-         * happen before BoundingBoxRig.Start.
-         */
-        rotationBoxRig = Instantiate<GameObject>(RotationBoxRigTemplate, InstanceParent.transform);
-
-        instanceTransformation = new GameObject("InstanceTransformation");
-        instanceTransformation.transform.parent = rotationBoxRig.transform;
-
-        instance = Instantiate<GameObject>(template, instanceTransformation.transform);
-
-        SkinnedMeshRenderer skinnedMesh = instance.GetComponent<SkinnedMeshRenderer>();
-        // Note that we use bounds, not localBounds, because we want to preserve local rotations
-        Bounds b = skinnedMesh.bounds;
-        float scale = 1f;
-        float maxSize = Mathf.Max(new float[] { b.size.x, b.size.y, b.size.z });
-        if (maxSize > Mathf.Epsilon) {
-            scale = instanceMaxSize / maxSize;
-        }
-        instanceTransformation.transform.localScale = new Vector3(scale, scale, scale);        
-        instanceTransformation.transform.localPosition = -b.center * scale + instanceMove;
-
-        // set proper BoxCollider bounds
-        BoxCollider rotationBoxCollider = rotationBoxRig.GetComponent<BoxCollider>();
-        rotationBoxCollider.center = instanceMove;
-        rotationBoxCollider.size = b.size * scale;
-        // Disable the component, to not prevent mouse clicking on buttons.
-        // It will be taken into account to calculate bbox in BoundingBoxRig anyway,
-        // since inside BoundingBox.GetColliderBoundsPoints it looks at all GetComponentsInChildren<Collider>() .
-        rotationBoxCollider.enabled = false;
-
-        instanceAnimation = instance.GetComponent<BlendShapeAnimation>();
-        if (instanceAnimation == null) {
-            // TODO: this should be changed into "throw new...", not a warning.
-            // We should settle whether the stored object has or has not BlendShapeAnimation (I vote not,
-            // but any decision is fine, just stick to it).
-            // After new import STL->GameObject is ready.
-            Debug.LogWarning("BlendShapeAnimation component not found inside " + newInstanceIndex + ", adding");
-            instanceAnimation = instance.AddComponent<BlendShapeAnimation>();
-        }
-        // default speed to play in 1 second
-        int blendShapesCount = skinnedMesh.sharedMesh.blendShapeCount;
-        if (blendShapesCount != 0) {
-            instanceAnimation.Speed = skinnedMesh.sharedMesh.blendShapeCount;
-        } else {
-            Debug.LogWarning("Model has no blend shapes " + newInstanceIndex);
-        }        
-        instanceAnimation.Playing = true;
-
-        //reset animation speed slider to value 1
-        SliderAnimationSpeed.GetComponent<SliderGestureControl>().SetSliderValue(1f);
-
-        // TODO: this should be changed into "throw new...", not a warning.
-        // After new import STL->GameObject is ready.
-        Animator animator = instance.GetComponent<Animator>();
-        if (animator != null) {
-            Debug.LogWarning("Animator component found but not wanted inside " + newInstanceIndex + ", removing");
-            Destroy(animator);
-        }
-
-        // Assign material
-        skinnedMesh.sharedMaterial = DefaultModelMaterial;
-
-        instanceIndex = newInstanceIndex;
-        instanceIsPreview = newIsPreview;
-        RefreshUserInterface();        
-    }
+    const float buttonLayerHeight = 1.6f;
 
     private bool plateVisible;
     private bool PlateVisible
@@ -506,7 +423,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
          * and it woud actually break Activate (because you cannot call Activate in the same
          * frame as setting enabled=true for the 1st frame, this causes problems in BoundingBoxRig
          * as private "objectToBound" is only assigned in BoundingBoxRig.Start).
-         * 
+         *
         rotationBoxRig.enabled = newState == TransformationState.Rotate;
         */
         // call rotationBoxRig.Activate or Deactivate
@@ -533,12 +450,175 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         }
     }
 
+    /* Does this button toggles some layer (returns null if not), and which one. */
+    private ModelLayer ButtonOfLayer(GameObject buttonGameObject)
+    {
+        if (layersButtons != null) {
+            foreach (var pair in layersButtons) {
+                if (pair.Value.gameObject == buttonGameObject) {
+                    return pair.Key;
+                }
+            }
+        }
+        return null;
+    }
+
+    /* Load new model.
+     *
+     * newInstanceIndex is an index to ModelsCollection bundle.
+     *
+     * No layer is initially loaded -- you usually want to call
+     * LoadLayer immediately after this.
+     *
+     * After calling this, remember to call RefreshUserInterface at some point.
+     */
+    private void LoadInstance(int newInstanceIndex, bool newIsPreview)
+    {
+        UnloadInstance();
+
+        instanceLoaded = true;
+        instanceIndex = newInstanceIndex;
+        instanceBundle = ModelsCollection.Singleton.BundleLoad(instanceIndex.Value);
+        instanceIsPreview = newIsPreview;
+        layersLoaded = new Dictionary<ModelLayer, LayerLoaded>();
+
+        /* Instantiate BoundingBoxRig dynamically, as in the next frame (when BoundingBoxRig.Start is run)
+         * it will assume that bounding box of children is not empty.
+         * So we cannot create BoundingBoxRig (for rotations) earlier.
+         * We also cannot create it later, right before calling Activate, as then BoundingBoxRig.Activate would
+         * happen before BoundingBoxRig.Start.
+         */
+        rotationBoxRig = Instantiate<GameObject>(RotationBoxRigTemplate, InstanceParent.transform);
+
+        instanceTransformation = new GameObject("InstanceTransformation");
+        instanceTransformation.transform.parent = rotationBoxRig.transform;
+       
+        Vector3 boundsSize = Vector3.one;
+        float scale = 1f;
+        if (instanceBundle.Bounds.HasValue) { 
+            Bounds b = instanceBundle.Bounds.Value;
+            boundsSize = b.size;            
+            float maxSize = Mathf.Max(new float[] { boundsSize.x, boundsSize.y, boundsSize.z });
+            if (maxSize > Mathf.Epsilon) {
+                scale = instanceMaxSize / maxSize;
+            }
+            instanceTransformation.transform.localScale = new Vector3(scale, scale, scale);
+            instanceTransformation.transform.localPosition = -b.center * scale + instanceMove;
+        }
+
+        // set proper BoxCollider bounds
+        BoxCollider rotationBoxCollider = rotationBoxRig.GetComponent<BoxCollider>();
+        rotationBoxCollider.center = instanceMove;
+        rotationBoxCollider.size = boundsSize * scale;
+        // Disable the component, to not prevent mouse clicking on buttons.
+        // It will be taken into account to calculate bbox in BoundingBoxRig anyway,
+        // since inside BoundingBox.GetColliderBoundsPoints it looks at all GetComponentsInChildren<Collider>() .
+        rotationBoxCollider.enabled = false;
+
+        // reset animation speed slider to value 1
+        speedSlider = 1f;
+        SliderAnimationSpeed.GetComponent<SliderGestureControl>().SetSliderValue(speedSlider);
+
+        // add buttons to toggle layers
+        layersButtons = new Dictionary<ModelLayer, CompoundButton>();
+        int buttonIndex = 0;
+        foreach (ModelLayer layer in instanceBundle.Layers)
+        {
+            // add button to scene
+            GameObject buttonGameObject = Instantiate<GameObject>(ButtonLayerTemplate, LayersSection.transform);
+            buttonGameObject.transform.localPosition =
+                buttonGameObject.transform.localPosition + new Vector3(0f, 0f, buttonLayerHeight * buttonIndex);
+            buttonIndex++;
+
+            // configure button text
+            CompoundButton button = buttonGameObject.GetComponent<CompoundButton>();
+            if (button == null) {
+                Debug.LogWarning("Missing component CompoundButton in ButtonLayerTemplate");
+                continue;
+            }
+            button.GetComponent<CompoundButtonText>().Text = layer.Caption;
+
+            // extend ButtonsClickReceiver.interactables
+            ButtonsClickReceiver clickReceiver = GetComponent<ButtonsClickReceiver>();
+            clickReceiver.interactables.Add(buttonGameObject);
+
+            // update layersButtons dictionary
+            layersButtons[layer] = button;
+        }
+    }
+
+    private void LoadInitialLayers()
+    {
+        if (!instanceLoaded)
+        {
+            throw new Exception("Cannot call TodoLoadMeshLayer before LoadInstance");
+        }
+
+        Assert.IsTrue(instanceIndex.HasValue);
+        ModelLayer layer = instanceBundle.Layers.First<ModelLayer>(l => !l.Simulation);
+        LoadLayer(layer);
+        HoloUtilities.SetButtonStateText(layersButtons[layer], true);
+    }
+
+    /* Instantiate new animated layer from currently loaded model.
+     * If the layer is already instantiated, does nothing
+     * (for now it makes a warning, but we can disable the warning if it's useful).
+     *
+     * This can only be used after LoadInstance (and before corresponding UnloadInstance).
+     *
+     * After calling this, remember to call RefreshUserInterface at some point.
+     */
+    private void LoadLayer(ModelLayer layer)
+    {
+        if (!instanceLoaded)
+        {
+            throw new Exception("Cannot call LoadLayer before LoadInstance");
+        }
+        if (layersLoaded.ContainsKey(layer))
+        {
+            Debug.LogWarning("Layer already loaded");
+            return;
+        }
+
+        LayerLoaded firstLayer = FirstLayerLoaded();
+        bool currentlyPlaying = firstLayer != null && firstLayer.Animation != null ? firstLayer.Animation.Playing : true;
+        float currentlyTime = firstLayer != null && firstLayer.Animation != null ? firstLayer.Animation.CurrentTime : 0f;
+
+        LayerLoaded l = new LayerLoaded();
+        l.Instance = layer.InstantiateGameObject(instanceTransformation.transform);
+
+        l.Animation = l.Instance.GetComponent<BlendShapeAnimation>();
+        if (l.Animation != null)
+        { 
+            l.Animation.InitializeBlendShapes();
+            l.Animation.Playing = currentlyPlaying;
+            l.Animation.CurrentTime = currentlyTime;
+            l.Animation.SpeedNormalized = speedSlider;
+        }
+
+        // Assign material to all MeshRenderer and SkinnedMeshRenderer inside
+        foreach (var renderer in l.Instance.GetComponentsInChildren<Renderer>()) { 
+            renderer.sharedMaterial = layer.Simulation ? DataVisualizationMaterial : DefaultModelMaterial;
+        }
+
+        // update layersLoaded dictionary
+        layersLoaded[layer] = l;
+    }
+
     private void UpdateAnimationSpeed()
     {
-        float value = SliderAnimationSpeed.GetComponent<SliderGestureControl>().SliderValue;
-        if (instanceAnimation != null)
-            instanceAnimation.Speed = value * instance.GetComponent<SkinnedMeshRenderer>().sharedMesh.blendShapeCount;
-        if (dataLayerInstanceAnimation != null)
-            dataLayerInstanceAnimation.Speed = instanceAnimation.Speed;
+        speedSlider = SliderAnimationSpeed.GetComponent<SliderGestureControl>().SliderValue;
+
+        if (layersLoaded != null) {
+            foreach (LayerLoaded l in layersLoaded.Values) {
+                if (l.Animation != null) { 
+                    l.Animation.SpeedNormalized = speedSlider;
+                }
+            }
+            RefreshUserInterface();
+        }
+        else {
+            Debug.LogWarning("Play / Stop button clicked, but no model loaded");
+        }
     }
 }

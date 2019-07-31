@@ -1,0 +1,20 @@
+{
+    Caption: "Test Model",
+    Layers: [
+        {
+            Caption: "Body",
+            Simulation: false,
+            Directory: "test_body"
+        },
+        {
+            Caption: "Fibre Simulation",
+            Simulation: true,
+            Directory: "testfibre_simulation"
+        },
+        {
+            Caption: "Flow Simulation",
+            Simulation: true,
+            Directory: "testflow_simulation"
+        }
+    ]
+}

@@ -31,7 +31,7 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
     public ClipPlaneState ClippingPlaneState {
         get { return clippingPlaneState; }
         set {
-            if (!ModelWithPlate.Instance)
+            if (!ModelWithPlate.InstanceLoaded)
             {
                 // This is normal if you try to turn on clipping plane before a model is loaded
                 Debug.Log("No model loaded for clipping plane");

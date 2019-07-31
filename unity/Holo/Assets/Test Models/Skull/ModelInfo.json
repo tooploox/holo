@@ -1,0 +1,11 @@
+{
+    Caption: "Skull",
+    Layers: [
+        {
+            Caption: "Body",
+            Simulation: false,
+            Directory: "skull_body",
+            AssetFileName: "skull_rotated.prefab"
+        }
+    ]
+}

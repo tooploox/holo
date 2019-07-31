@@ -77,12 +77,14 @@ public class SharingSceneData : NetworkBehaviour
                 hostClippingPlaneTransform = ModelManager.ModelClipPlane.transform;                
                 hostColorMap = ModelManager.DataVisualizationMaterial.GetTexture("_ColorMap").name;
 
-                hostAnimationState = ModelManager.instanceAnimation.Playing;
-                hostAnimationTime = ModelManager.instanceAnimation.CurrentTime;
-                hostAnimationSpeed = ModelManager.instanceAnimation.Speed;
+                // TODO: not synched now
+                //hostAnimationState = ModelManager.instanceAnimation.Playing;
+                //hostAnimationTime = ModelManager.instanceAnimation.CurrentTime;
+                //hostAnimationSpeed = ModelManager.instanceAnimation.Speed;
             }
+            // TODO: not synched now
             //temporary solution for dataflow
-            hostDataLayerActive = ModelManager.dataLayerInstance != null;
+            //hostDataLayerActive = ModelManager.dataLayerInstance != null;
         }
         else if(isClient)
         {
@@ -94,14 +96,15 @@ public class SharingSceneData : NetworkBehaviour
             {
                 if (hostInstanceIndex >= 0)
                 {
-                    ModelManager.LoadInstance(hostInstanceIndex, false);
-                    if (hostDataLayerActive)
-                    {
-                        ModelManager.LoadDataLayerInstance(hostInstanceIndex, "dataflow");
-                    }
+                    ModelManager.SetInstance(hostInstanceIndex);
+                    // TODO not synched now
+                    //if (hostDataLayerActive)
+                    //{
+                    //    ModelManager.LoadDataLayerInstance(hostInstanceIndex, "dataflow");
+                    //}
                 }
                 else
-                    ModelManager.UnloadInstance();
+                    ModelManager.SetInstance(null);
             }
 
             if (hostInstanceIndex >= 0)
@@ -113,10 +116,15 @@ public class SharingSceneData : NetworkBehaviour
                     ClipPlaneManager.ClippingPlaneState = (hostClippingPlaneActive) ? ModelClippingPlaneControl.ClipPlaneState.Active : ModelClippingPlaneControl.ClipPlaneState.Disabled;
                 ModelManager.ModelClipPlane.transform.SetPositionAndRotation(hostClippingPlaneTransform.localPosition, hostClippingPlaneTransform.localRotation);
                 
-                ModelManager.instanceAnimation.Playing = hostAnimationState;
+                // TODO: not synched now
+                //ModelManager.instanceAnimation.Playing = hostAnimationState;
+                // TODO: should we sync?
               //ModelManager.instanceAnimation.CurrentTime = hostAnimationTime;
-                ModelManager.instanceAnimation.Speed = hostAnimationSpeed;
+                // TODO: not synched now
+                //ModelManager.instanceAnimation.Speed = hostAnimationSpeed;
 
+                // TODO: not synched now
+                /*
                 //temporary solution for dataflow
                 bool isDataLayerLocallyActive = ModelManager.dataLayerInstance != null;
                 if (isDataLayerLocallyActive)
@@ -139,6 +147,7 @@ public class SharingSceneData : NetworkBehaviour
                     else
                         ModelManager.UnloadDataLayerInstance();
                 }
+                */
             }
         }
     }

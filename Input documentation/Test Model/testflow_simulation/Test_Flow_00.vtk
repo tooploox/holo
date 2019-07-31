@@ -1,0 +1,18 @@
+# vtk DataFile Version 4.2
+test_flow vtk output
+ASCII
+DATASET POLYDATA
+
+POINTS 3 float
+20.00 -3.00 0.00
+20.00 0.00 0.00
+20.00 3.00 0.00
+CELL_DATA 8152 float
+COLOR_SCALARS Colors 3
+1.0 0.0 0.0
+0.0 1.0 0.0
+0.0 0.0 1.0
+Vectors fn float
+-3.0 0.0 0.0
+-3.0 0.0 0.0
+-3.0 0.0 0.0
