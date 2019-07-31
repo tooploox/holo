@@ -28,14 +28,14 @@ public class SharingSceneData : NetworkBehaviour
     [SyncVar]
     string hostColorMap;
 
-    //[SyncVar]
-    //bool hostAnimationState;
+    [SyncVar]
+    bool hostAnimationPlaying;
 
-    //[SyncVar]
-    //float hostAnimationTime; // maybe we should set it only when pause or any state change
+    [SyncVar]
+    float hostAnimationTime;
 
-    ///[SyncVar]
-    //float hostAnimationSpeed;
+    [SyncVar]
+    float hostAnimationSpeed;
 
 #pragma warning restore CS0618 // using deprecated Unity stuff (TODO: upgrade in Holo project in the future)
 
@@ -72,15 +72,10 @@ public class SharingSceneData : NetworkBehaviour
                 hostModelRotation = ModelManager.ModelRotation;
                 hostClippingPlaneTransform = ModelManager.ModelClipPlane.transform;                
                 hostColorMap = ModelManager.DataVisualizationMaterial.GetTexture("_ColorMap").name;
-
-                // TODO: not synched now
-                //hostAnimationState = ModelManager.instanceAnimation.Playing;
-                //hostAnimationTime = ModelManager.instanceAnimation.CurrentTime;
-                //hostAnimationSpeed = ModelManager.instanceAnimation.Speed;
+                hostAnimationPlaying = ModelManager.AnimationPlaying;
+                hostAnimationTime = ModelManager.AnimationTime;
+                hostAnimationSpeed = ModelManager.AnimationSpeed;
             }
-            // TODO: not synched now
-            //temporary solution for dataflow
-            //hostDataLayerActive = ModelManager.dataLayerInstance != null;
         }
         else if(isClient)
         {
@@ -110,12 +105,12 @@ public class SharingSceneData : NetworkBehaviour
                     ClipPlaneManager.ClippingPlaneState = (hostClippingPlaneActive) ? ModelClippingPlaneControl.ClipPlaneState.Active : ModelClippingPlaneControl.ClipPlaneState.Disabled;
                 ModelManager.ModelClipPlane.transform.SetPositionAndRotation(hostClippingPlaneTransform.localPosition, hostClippingPlaneTransform.localRotation);
                 
-                // TODO: not synched now
-                //ModelManager.instanceAnimation.Playing = hostAnimationState;
-                // TODO: should we sync?
-              //ModelManager.instanceAnimation.CurrentTime = hostAnimationTime;
-                // TODO: not synched now
-                //ModelManager.instanceAnimation.Speed = hostAnimationSpeed;
+                ModelManager.AnimationPlaying = hostAnimationPlaying;
+                // synchronize AnimationTime only when paused,  otherwise it would make jittering animation on clients
+                if (hostAnimationSpeed == 0f || !hostAnimationPlaying) { 
+                    ModelManager.AnimationTime = hostAnimationTime;
+                }
+                ModelManager.AnimationSpeed = hostAnimationSpeed;
 
                 // TODO: not synched now
                 /*
@@ -123,7 +118,7 @@ public class SharingSceneData : NetworkBehaviour
                 bool isDataLayerLocallyActive = ModelManager.dataLayerInstance != null;
                 if (isDataLayerLocallyActive)
                 {
-                    ModelManager.dataLayerInstanceAnimation.Playing = hostAnimationState;
+                    ModelManager.dataLayerInstanceAnimation.Playing = hostAnimationPlaying;
                   //ModelManager.dataLayerInstanceAnimation.CurrentTime = hostAnimationTime;
                     ModelManager.dataLayerInstanceAnimation.Speed = hostAnimationSpeed;
 

@@ -73,8 +73,6 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     // Created only when instance != null, as it initializes bbox in Start and assumes it's not empty
     private GameObject rotationBoxRig;
 
-    private float speedSlider = 1f;
-
     /* Currently loaded bundle name, null if none. */
     public string InstanceName
     {
@@ -119,7 +117,11 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         ClickChangeTransformationState(TransformationState.None);
 
         // Animation speed slider
-        SliderAnimationSpeed.GetComponent<SliderGestureControl>().OnUpdateEvent.AddListener(delegate { UpdateAnimationSpeed(); });
+        SliderAnimationSpeed.GetComponent<SliderGestureControl>().OnUpdateEvent.AddListener(
+            delegate { 
+                AnimationSpeed = SliderAnimationSpeed.GetComponent<SliderGestureControl>().SliderValue;
+            }
+        );
     }
 
     /* Number of "add" buttons we have in the scene. */
@@ -223,30 +225,12 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
     public void ClickTogglePlay()
     {
-        if (layersLoaded != null) {
-            foreach (LayerLoaded l in layersLoaded.Values) {
-                if (l.Animation != null) { 
-                    l.Animation.TogglePlay();
-                }
-            }
-            RefreshUserInterface();
-        } else {
-            Debug.LogWarning("Play / Stop button clicked, but no model loaded");
-        }
+        AnimationPlaying = !AnimationPlaying;
     }
 
     public void ClickRewind()
     {
-        if (layersLoaded != null) {
-            foreach (LayerLoaded l in layersLoaded.Values) {
-                if (l.Animation != null) { 
-                    l.Animation.CurrentTime = 0f;
-                }
-            }
-            RefreshUserInterface();
-        } else {
-            Debug.LogWarning("Rewind button clicked, but no model loaded");
-        }
+        AnimationTime = 0f;
     }
 
     private void ClickRemove()
@@ -316,12 +300,6 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         HoloUtilities.SetButtonStateText(layersButtons[layer], addLayer);
     }
 
-    // First LayerLoaded, of any layer is loaded now.
-    private LayerLoaded FirstLayerLoaded()
-    {
-        return layersLoaded != null && layersLoaded.Count != 0 ? layersLoaded.Values.First<LayerLoaded>() : null;
-    }
-
     private void RefreshUserInterface()
     {
         ButtonsModel.SetActive(instanceLoaded && !instanceIsPreview);
@@ -329,11 +307,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         PlateVisible = (!instanceLoaded) || instanceIsPreview;
 
         // update ButtonTogglePlay caption and icon
-        LayerLoaded firstLayer = FirstLayerLoaded();
-        bool playing = 
-            firstLayer != null && 
-            firstLayer.Animation != null &&
-            firstLayer.Animation.Playing;
+        bool playing = AnimationPlaying;
         string playOrPauseText = playing ? "PAUSE" : "PLAY";
         ButtonTogglePlay.GetComponent<CompoundButtonText>().Text = playOrPauseText;
         Texture2D playOrPatseIcon = playing ? ButtonIconPause : ButtonIconPlay;
@@ -536,8 +510,8 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         rotationBoxCollider.enabled = false;
 
         // reset animation speed slider to value 1
-        speedSlider = 1f;
-        SliderAnimationSpeed.GetComponent<SliderGestureControl>().SetSliderValue(speedSlider);
+        animationSpeed = 1f;
+        SliderAnimationSpeed.GetComponent<SliderGestureControl>().SetSliderValue(animationSpeed);
 
         // add buttons to toggle layers
         layersButtons = new Dictionary<ModelLayer, CompoundButton>();
@@ -600,10 +574,6 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             return;
         }
 
-        LayerLoaded firstLayer = FirstLayerLoaded();
-        bool currentlyPlaying = firstLayer != null && firstLayer.Animation != null ? firstLayer.Animation.Playing : true;
-        float currentlyTime = firstLayer != null && firstLayer.Animation != null ? firstLayer.Animation.CurrentTime : 0f;
-
         LayerLoaded l = new LayerLoaded();
         l.Instance = layer.InstantiateGameObject(instanceTransformation.transform);
 
@@ -611,9 +581,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         if (l.Animation != null)
         { 
             l.Animation.InitializeBlendShapes();
-            l.Animation.Playing = currentlyPlaying;
-            l.Animation.CurrentTime = currentlyTime;
-            l.Animation.SpeedNormalized = speedSlider;
+            l.Animation.Playing = AnimationPlaying;
+            l.Animation.CurrentTime = AnimationTime;
+            l.Animation.SpeedNormalized = AnimationSpeed;
         }
 
         // Assign material to all MeshRenderer and SkinnedMeshRenderer inside
@@ -625,20 +595,90 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         layersLoaded[layer] = l;
     }
 
-    private void UpdateAnimationSpeed()
+    /* Returns BlendShapeAnimation within any LayerLoaded with Animation component != null 
+     * (that is, from any layer animated using out blend shape mechanism).
+     * Returns null if no such layer exists (e.g. because there's no model loaded,
+     * or it has no layers instantiated, or no layers instantiated with BlendShapeAnimation).
+     */
+    private BlendShapeAnimation AnyAnimatedLayer()
     {
-        speedSlider = SliderAnimationSpeed.GetComponent<SliderGestureControl>().SliderValue;
-
-        if (layersLoaded != null) {
-            foreach (LayerLoaded l in layersLoaded.Values) {
-                if (l.Animation != null) { 
-                    l.Animation.SpeedNormalized = speedSlider;
+        if (layersLoaded != null) { 
+            foreach (LayerLoaded layerLoaded in layersLoaded.Values) {
+                if (layerLoaded.Animation != null) {
+                    return layerLoaded.Animation;
                 }
             }
-            RefreshUserInterface();
         }
-        else {
-            Debug.LogWarning("Play / Stop button clicked, but no model loaded");
+        return null;
+    }
+
+    /* Is the animation currently playing.
+     * When there are no instantiated animated layers 
+     * (including when there is no instantiated model at all),
+     * this always returns true and setting it is ignored.
+     */
+    public bool AnimationPlaying
+    {
+        get {
+            BlendShapeAnimation animatedLayer = AnyAnimatedLayer();
+            return animatedLayer != null ? animatedLayer.Playing : true;
+        }
+        set
+        {
+            if (layersLoaded != null) {
+                foreach (LayerLoaded l in layersLoaded.Values) {
+                    if (l.Animation != null) { 
+                        l.Animation.Playing = value;
+                    }
+                }
+                RefreshUserInterface();
+            } else {
+                Debug.LogWarning("AnimationPlaying changed, but no animated layer loaded");
+            }
+        }
+    }
+
+    /* Current time within an animation.
+     * When there are no instantiated animated layers 
+     * (including when there is no instantiated model at all),
+     * this always returns 0f and setting it is ignored.
+     */
+    public float AnimationTime
+    {
+        get {
+            BlendShapeAnimation animatedLayer = AnyAnimatedLayer();
+            return animatedLayer != null ? animatedLayer.CurrentTime : 0f;
+        }
+        set
+        {
+            if (layersLoaded != null) {
+                foreach (LayerLoaded l in layersLoaded.Values) {
+                    if (l.Animation != null) { 
+                        l.Animation.CurrentTime = value;
+                    }
+                }
+                RefreshUserInterface();
+            } else {
+                Debug.LogWarning("AnimationTime changed, but no animated layer loaded");
+            }
+        }
+    }
+
+    private float animationSpeed = 1f;
+    public float AnimationSpeed
+    {
+        get { return animationSpeed; }
+        set {
+            animationSpeed = value;
+
+            if (layersLoaded != null) {
+                foreach (LayerLoaded l in layersLoaded.Values) {
+                    if (l.Animation != null) { 
+                        l.Animation.SpeedNormalized = value;
+                    }
+                }
+                RefreshUserInterface();
+            }
         }
     }
 }
