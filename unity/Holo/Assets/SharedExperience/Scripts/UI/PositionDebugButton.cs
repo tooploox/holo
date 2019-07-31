@@ -15,7 +15,7 @@ public class PositionDebugButton : SingleInstance<PositionDebugButton> {
 	void Start ()
     {
 	    // Do not change parent, keep debug button inside side menu, this way it is also not hidden after "Start"
-        //transform.SetParent(DisconnectedPosition.transform,false);
+        transform.SetParent(DisconnectedPosition.transform, true);
         networkDisco = NetworkDiscoveryWithAnchors.Instance;
         networkDisco.ConnectionStatusChanged += NetworkDisco_ConnectionStatusChanged;
 	}
@@ -34,7 +34,7 @@ public class PositionDebugButton : SingleInstance<PositionDebugButton> {
             return;
         }
 
-        transform.SetParent(parent.transform, false);
+        transform.SetParent(parent.transform, true);
         // this is a little hack because our parent might have disabled our renderers/colliders. 
         SetChildren(true);
     }
