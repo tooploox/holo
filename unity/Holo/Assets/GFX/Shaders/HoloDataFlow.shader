@@ -5,7 +5,6 @@
 		_MainTex("FX (RGB)", 2D) = "black" {}
 		_ColorMap("Color Map (RGB)", 2D) = "black" {}
 		_ScaleFactor("Scale Factor", Range(.0,5.0)) = 2.0
-		_DisplayMode("Display Mode", Int) = 0
 	}
 	SubShader
 	{
@@ -28,6 +27,8 @@
 			float4 _Plane;
 			#endif
 
+			#define DISPLAY_MODE_1
+
 			struct v2g
 			{
 				float4 vertex : POSITION;
@@ -49,7 +50,6 @@
 			sampler2D _ColorMap;
 			float4 _ColorMap_ST;
 			float _ScaleFactor;
-			float _DisplayMode;
 
 			v2g vert(appdata_tan v)
 			{
@@ -66,6 +66,10 @@
 			{
 				g2f o;
 
+				if(length(IN[0].normal) == 0){
+					return;
+				}
+
 				float3 nNormal = normalize(IN[0].normal); //normalized normal
 				float3 eyePosition = UnityObjectToViewPos(IN[0].vertex.xyz);
 				float directionToCamera = -normalize(eyePosition);
@@ -78,6 +82,7 @@
 				fixed4 startColor = fixed4(.8, .8, .8, 1.);
 
 				float _WeightFactor = _ScaleFactor * 0.45;
+				_ScaleFactor *= length(IN[0].normal);
 
 				/* We perform clipping in the geometry shader,
 				   using the "main vertex" from IN[0].vertex as the position that
@@ -197,10 +202,15 @@
 				fixed4 col = i.col;
 				col.a = i.col.a;
 
-				if(_DisplayMode == 1)
-					col = tex2D(_ColorMap, float2((i.tan.x + 1) / 2,0)) * i.col;
-				else if (_DisplayMode == 2)
-					col = tex2D(_ColorMap, float2((i.tan.y + 1) / 2,0)) * i.col;
+				#ifdef DISPLAY_MODE_0
+				col = i.tan * i.col;
+				#endif
+				#ifdef DISPLAY_MODE_1
+				col = tex2D(_ColorMap, float2((i.tan.x + 1) / 2,0)) * i.col;
+				#endif
+				#ifdef DISPLAY_MODE_2
+				col = tex2D(_ColorMap, float2((i.tan.y + 1) / 2,0)) * i.col;
+				#endif
 
 				col += tex2D(_MainTex, i.uv);
 

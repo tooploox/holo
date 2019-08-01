@@ -19,7 +19,7 @@ To see initial model please load **AnimatedModels** scene located in *Assets/Sce
 
       * You can import models as a series of VTK models. The [input format specification is here](https://github.com/MicroscopeIT/holo/tree/master/Input%20documentation). Example VTK model is inside `Test Model` subdirectory there. This is the advised format, that supports animation using blend shapes.
 
-      * You can import models with each layer loaded from Unity assets (so it can be .obj, .prefab or any other model format supported by Unity). Example is inside `unity/Holo/Assets/Test Models/Skull/` in this repository.
+      * Or you can import models with each layer loaded from Unity assets (so it can be .obj, .prefab or any other model format supported by Unity). Example is inside `unity/Holo/Assets/Test Models/Skull/` in this repository.
 
   * Upload AssetBundles with models into Hololens headset
   * Run application
@@ -41,6 +41,14 @@ Open Unity project from unity/Holo.
 
 ## Usage
 
-Currently HoloModelSeries application loads only AssetBundles uploaded to Hololens headset. Models must be uploaded before application is run (rescanning of the collection's models is not yet implemented).
+After starting the application, choose the "Shared Experience" mode in the UI:
+
+- Click the "Start" button to be the server (like a teacher in the classroom) that dictates the view of other participants.
+
+- Or choose a session name (corresponding to your Hololens name) and then click "Join" to be the student (observing  what teacher sets).
+
+Teacher can then choose a model, choose layers to display inside, transform it and so on.
+
+Note that currently HoloModelSeries application loads only AssetBundles uploaded to Hololens headset. Models must be uploaded before application is run (rescanning of the collection's models is not yet implemented).
 
 **IMPORTANT**: If you upload new models HoloModelSeries must be closed. For the moment you need to run other application for the system to unload completly HoloModelSeries application.

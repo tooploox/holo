@@ -13,6 +13,14 @@ public class AssetBundleLoader
     private Bounds? bounds;
     private int blendShapeCount;
 
+    /* Uniquely identifies this bundle (across all running instances of the application). */
+    public string Name { get; private set; }
+
+    public AssetBundleLoader(string aName)
+    {
+        Name = aName;
+    }
+
     // All layers, available after LoadLayer
     public IEnumerable<ModelLayer> Layers
     {
@@ -126,6 +134,8 @@ public class AssetBundleLoader
                     layer.Caption + ") and simulation (" + 
                     layer.Simulation.ToString() + ")");
             }
+
+            layer.LayerIndex = layers.Count;
 
             // add to layers list
             layers.Add(layer);

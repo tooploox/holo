@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /* Information about layer.
- * TODO: It should be present in asset bundle for each GameObject representing a layer.
- * For now, we "guess" and add it based on layer GameObject name.
+ * It should be present in asset bundle for each GameObject representing a layer.
  */
 public class ModelLayer : MonoBehaviour
 {
@@ -13,6 +12,9 @@ public class ModelLayer : MonoBehaviour
 
     // Is this a simulation layer (using simulation shader etc.)
     public bool Simulation;
+
+    // Each layer in the model can consecutive number, used to calculate ModelWithPlate.LayerMask.
+    public int LayerIndex;
 
     public GameObject InstantiateGameObject(Transform parent)
     {

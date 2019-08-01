@@ -64,8 +64,16 @@ public class ModelsCollection : MonoBehaviour
 
     /* Nice user-friendly name of the model bundle.
      * i is an index of the bundle, 0 <= i < BundlesCount.
-     * */
+     */
     public string BundleCaption(int i)
+    {
+        return BundleName(i); // TODO for now return the filename
+    }
+
+    /* Internal model bundle name (to uniquely identify it in the application).
+     * i is an index of the bundle, 0 <= i < BundlesCount.
+     */
+    public string BundleName(int i)
     {
         if (i < 0 || i >= BundlesCount) {
             throw new Exception("Invalid bundle index " + i.ToString());
@@ -76,7 +84,17 @@ public class ModelsCollection : MonoBehaviour
         return result;
     }
 
-    public AssetBundleLoader BundleLoad(int i)
+    public AssetBundleLoader BundleLoad(string name)
+    {
+        int? index = FindBundle(name);
+        if (!index.HasValue)
+        {
+            throw new Exception("Bundle named " + name + " not found in data. If this happens with shared experience, make sure that *all* devices have the same asset bundle uploaded.");
+        }
+        return BundleLoadByIndex(index.Value);
+    }
+
+    private AssetBundleLoader BundleLoadByIndex(int i)
     {
         if (i < 0 || i >= BundlesCount) {
             throw new Exception("Invalid bundle index " + i.ToString());
@@ -84,11 +102,27 @@ public class ModelsCollection : MonoBehaviour
 
         if (bundles[i] == null)
         {
-            bundles[i] = new AssetBundleLoader();
+            bundles[i] = new AssetBundleLoader(BundleName(i));
             bundles[i].LoadBundle(bundlesFiles[i]);
         }
 
         return bundles[i];
+    }
+
+    /* Find bundle with matching name.
+     * BundleName(result) returns this name,
+     * BundleLoad(result) returns AssetBundleLoader with matching AssetBundleLoader.Name.
+     * 
+     * Returns null if not found.
+     */
+    public int? FindBundle(string name)
+    {
+        for (int i = 0; i < BundlesCount; i++) {
+            if (BundleName(i) == name) {
+                return i;
+            }
+        }
+        return null;
     }
 
     private void Update()

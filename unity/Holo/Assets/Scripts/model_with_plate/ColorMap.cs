@@ -67,16 +67,29 @@ public class ColorMap : MonoBehaviour, IClickHandler
 
     private void ClickSetColorMap(string colorMapName, GameObject currentButton)
     {
-        Texture2D colorMap;
-        colorMap = Resources.Load<Texture2D>("Colormaps/" + colorMapName);
-        DataVisualizationMaterial.SetTexture("_ColorMap", colorMap);
-
+        MapName = colorMapName;
         foreach (GameObject button in colorMapButtons.Keys) {
             HoloUtilities.SetButtonStateText(button.GetComponent<CompoundButton>(), currentButton == button);
         }
-
         PlayerPrefs.SetString("ColorMap", colorMapName);
         PlayerPrefs.Save();
+    }
+
+    private string mapName;
+    public string MapName
+    {
+        get
+        {
+            return mapName;
+        }
+        set
+        {
+            if (mapName != value) { 
+                mapName = value;
+                Texture2D colorMapTexture = Resources.Load<Texture2D>("Colormaps/" + value);
+                DataVisualizationMaterial.SetTexture("_ColorMap", colorMapTexture);
+            }
+        }
     }
 
     public void FocusEnter(GameObject focusEnterObject)

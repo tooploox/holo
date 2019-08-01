@@ -1,13 +1,15 @@
 ﻿using UnityEngine;
 using UnityEditor;
+using System.IO;
 
 public class AssetBundleEditorLoader
 {
     [MenuItem("Holo/Load all layers from an AssetBundle")]
     public static void LoadAssetBundle()
     {
-        AssetBundleLoader assetBundleLoader = new AssetBundleLoader();
         string bundlePath = EditorUtility.OpenFilePanel("Get The Bundle","","");
+        string bundleName = Path.GetFileName(bundlePath);
+        AssetBundleLoader assetBundleLoader = new AssetBundleLoader(bundleName);
         assetBundleLoader.LoadBundle(bundlePath);
         assetBundleLoader.InstantiateAllLayers();
     }
