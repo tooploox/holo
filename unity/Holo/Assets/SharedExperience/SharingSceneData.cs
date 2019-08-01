@@ -26,7 +26,10 @@ public class SharingSceneData : NetworkBehaviour
     bool hostClippingPlaneActive;
 
     [SyncVar]
-    Transform hostClippingPlaneTransform;
+    Vector3 hostClippingPlanePosition;
+
+    [SyncVar]
+    Quaternion hostClippingPlaneRotation;
 
     [SyncVar]
     string hostColorMap;
@@ -58,9 +61,10 @@ public class SharingSceneData : NetworkBehaviour
         hostPlateScale = transform.localScale;
 
         hostClippingPlaneActive = ClipPlaneManager.ClippingPlaneState != ModelClippingPlaneControl.ClipPlaneState.Disabled;
-        hostClippingPlaneTransform = ModelManager.ModelClipPlane.transform;
+        hostClippingPlanePosition = ModelManager.ModelClipPlane.transform.localPosition;
+        hostClippingPlaneRotation = ModelManager.ModelClipPlane.transform.localRotation;
 
-        hostColorMap = ModelManager.DataVisualizationMaterial.GetTexture("_ColorMap").name;
+        hostColorMap = ColorMapManager.MapName;
     }
 
     void Update()
@@ -75,8 +79,9 @@ public class SharingSceneData : NetworkBehaviour
             if (!string.IsNullOrEmpty(ModelManager.InstanceName))
             {
                 hostModelRotation = ModelManager.ModelRotation;
-                hostClippingPlaneTransform = ModelManager.ModelClipPlane.transform;                
-                hostColorMap = ModelManager.DataVisualizationMaterial.GetTexture("_ColorMap").name;
+                hostClippingPlanePosition = ModelManager.ModelClipPlane.transform.localPosition;
+                hostClippingPlaneRotation = ModelManager.ModelClipPlane.transform.localRotation;
+                hostColorMap = ColorMapManager.MapName;
                 hostAnimationPlaying = ModelManager.AnimationPlaying;
                 hostAnimationTime = ModelManager.AnimationTime;
                 hostAnimationSpeed = ModelManager.AnimationSpeed;
@@ -107,9 +112,13 @@ public class SharingSceneData : NetworkBehaviour
                 ModelManager.ModelRotation = hostModelRotation;
 
                 bool isClipingPlaneLocallyActive = ClipPlaneManager.ClippingPlaneState == ModelClippingPlaneControl.ClipPlaneState.Active;
-                if (isClipingPlaneLocallyActive != hostClippingPlaneActive)
-                    ClipPlaneManager.ClippingPlaneState = (hostClippingPlaneActive) ? ModelClippingPlaneControl.ClipPlaneState.Active : ModelClippingPlaneControl.ClipPlaneState.Disabled;
-                ModelManager.ModelClipPlane.transform.SetPositionAndRotation(hostClippingPlaneTransform.localPosition, hostClippingPlaneTransform.localRotation);
+                if (isClipingPlaneLocallyActive != hostClippingPlaneActive) {
+                    ClipPlaneManager.ClippingPlaneState = hostClippingPlaneActive ? 
+                        ModelClippingPlaneControl.ClipPlaneState.Active : 
+                        ModelClippingPlaneControl.ClipPlaneState.Disabled;
+                }
+                ModelManager.ModelClipPlane.transform.localPosition = hostClippingPlanePosition;
+                ModelManager.ModelClipPlane.transform.localRotation = hostClippingPlaneRotation;
                 
                 ModelManager.AnimationPlaying = hostAnimationPlaying;
                 // synchronize AnimationTime only when paused,  otherwise it would make jittering animation on clients
@@ -117,32 +126,7 @@ public class SharingSceneData : NetworkBehaviour
                     ModelManager.AnimationTime = hostAnimationTime;
                 }
                 ModelManager.AnimationSpeed = hostAnimationSpeed;
-
-                // TODO: not synched now
-                /*
-                //temporary solution for dataflow
-                bool isDataLayerLocallyActive = ModelManager.dataLayerInstance != null;
-                if (isDataLayerLocallyActive)
-                {
-                    ModelManager.dataLayerInstanceAnimation.Playing = hostAnimationPlaying;
-                  //ModelManager.dataLayerInstanceAnimation.CurrentTime = hostAnimationTime;
-                    ModelManager.dataLayerInstanceAnimation.Speed = hostAnimationSpeed;
-
-                    if (hostColorMap != ModelManager.DataVisualizationMaterial.GetTexture("_ColorMap").name)
-                    {
-                        Texture2D colorMapTex = Resources.Load<Texture2D>("Colormaps/" + hostColorMap);
-                        ModelManager.DataVisualizationMaterial.SetTexture("_ColorMap", colorMapTex);
-                    }
-                }
-
-                if (isDataLayerLocallyActive != hostDataLayerActive)
-                {
-                    if (hostDataLayerActive)
-                        ModelManager.LoadDataLayerInstance(hostInstanceIndex, "dataflow");
-                    else
-                        ModelManager.UnloadDataLayerInstance();
-                }
-                */
+                ColorMapManager.MapName = hostColorMap;
             }
         }
     }
