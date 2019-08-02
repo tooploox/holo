@@ -43,9 +43,11 @@ Open Unity project from unity/Holo.
 
 After starting the application, choose the "Shared Experience" mode in the UI:
 
-- Click the "Start" button to be the server (like a teacher in the classroom) that dictates the view of other participants.
+- Click the "Start Session" button to be the server (like a teacher in the classroom) that dictates the view of other participants.
 
-- Or choose a session name (corresponding to your Hololens name) and then click "Join" to be the student (observing  what teacher sets).
+- Or choose a session name (corresponding to your Hololens name) and then click "Join Session" to be the student (observing  what teacher sets).
+
+- Or choose "Offline Mode" to test the application on your own, without being any server or client. The effect in principle looks similar to clicking "Start Session", but the application doesn't listen on any port, doesn't synchronize anything etc.
 
 Teacher can then choose a model, choose layers to display inside, transform it and so on.
 
