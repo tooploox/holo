@@ -8,11 +8,11 @@ All data describing a model should place in one root folder. The structure is as
 
 - `XXX` - Root folder.
 
-	- `body`* - Folder with VTK meshes, describing the anatomy. One such folder for each mesh layer can be present. Inside the folder, place each frame in a separate VTK file with a consecutive number.
+    - `body`* - Folder with VTK meshes, describing the anatomy. One such folder for each mesh layer can be present. Inside the folder, place each frame in a separate VTK file with a consecutive number.
 
-	- `simulation`* - Folder with simulation VTK files. One such folder for each simulation layer can be present. Inside the folder, place each frame in a separate VTK file with a consecutive number.
+    - `simulation`* - Folder with simulation VTK files. One such folder for each simulation layer can be present. Inside the folder, place each frame in a separate VTK file with a consecutive number.
 
-	- `ModelInfo.json` - info file with the name of a model (caption to be displayed to user) and additional information about each layer.
+    - `ModelInfo.json` - info file with the name of a model (caption to be displayed to user) and additional information about each layer.
 
 You can choose any names for the root and layer folders. Simply make sure to list the appropriate layer directory names inside `ModelInfo.json`.
 
@@ -65,67 +65,74 @@ Dataset type **UNSTRUCTURED_GRID**
 
 Two fields are required; **POINTS** and **CELLS**.
 
--   **POINTS** defines vertices positions the mesh in one particular frame. No additional vertices should be found there. A vertex is defined by 3 floats, corresponding to its x, y and z coordinates in that particular order. Additionally:
+- **POINTS** define vertices positions the mesh in one particular frame. No additional vertices should be found there. A vertex is defined by 3 floats, corresponding to its x, y and z coordinates in that particular order. Additionally:
 
-	- The integer number after the POINTS flag indicates number of vertices in a mesh.
-	- There should be only one vertex per line.
-	- Number and order of vertices between frames is not supposed to change.
+    - The integer number after the POINTS flag indicates number of vertices in a mesh.
+    - There should be only one vertex per line.
+    - Number and order of vertices between frames is not supposed to change.
 
--   **CELLS** defines mesh facets. Currently we support two types of topology -- lines and triangles. A facet is defined first by the number of connected points which it consists of and then a list of indexes, indicating the vertices which belong to the facet. Furthermore:
+- **CELLS** defines mesh facets. Currently we support two types of topology -- lines and triangles. A facet is defined first by the number of connected vertices followed by the vertices' indexes. Vertex index is interpreted according to the entry order specified in POINTS. Furthermore:
 
-	- The number after the CELLS flag indicates number of facets in a mesh.
-	- There should be only one facet per line.
-	- Number and order of facets between frames is not supposed to change.
-	- In case of triangles, counter-clockwise winding order is required.
+    - The integer number after the CELLS flag indicates the number of facets in a mesh (first number) and the total number of integers in the CELL section (second number).
+    - There should be only one facet per line.
+    - Number and order of facets between frames is not supposed to change.
+    - In case of all polygons, consistent winding order is required. We advise using counter-clockwise winding order (as seen from the outside of the mesh), although the clockwise ordering will also work, as long as it is consistent.
+    - Only one **CELLS** section in the file is supported.
+    - We support only polygons (that is, at least 3 vertexes are necessary in a facet line). We do not support lines in the anatomical data.
+
+- The VTK format also requires **CELL_TYPES**, so you should add it to the VTK file. Although it is ignored by our application: in our application, the first column within each CELLS row indicates whether it's a triangle, quad etc.
 
 ## Simulation data
 Dataset type: **POLYDATA**
 
-Currently, there are two types of data that we can simulate: fibre orientation data and flow simulation data. Both types differ from each other in structure, which is described below. Similarly to the body data, you can find them in the test files within this folder.
+With simulation data we refer to the vector field that we want to visualise on the anatomy described by the mesh in the _anatomical data_ section. Currently,we can only visualize vector fields: fibre orientation and flow data. Both types differ from each other in structure, which is described below. As in the case of the anatomy data, you can find the examples of files and directory structures in this folder.
 
 ### Fibre orientation data
 
 Four fields are mandatory: **POINTS**; **SCALARS alpha float**, **SCALARS beta float** and **Vectors fn float** all three under **POINT_DATA** section.
 
-- **POINTS** are vertices signifying initial vector point.
-	-  The number after the POINTS flag indicates number of vertices in a mesh.
-	- There should be only one vertex per line.
-	- Number and order of vertices between frames is not supposed to change.
+- **POINTS** are vertices specifying vector locations.
+    - The integer number after the POINTS flag indicates number of vertices in a mesh.
+    - There should be only one vertex per line.
+    - Number and order of vertices between frames is not supposed to change.
 
  - **POINT_DATA**
-	- Number by the **CELL_DATA** flag indicates number of colours/vectors and should be consistent with number beside **POINTS** flag.
-	-
-	- **SCALARS alpha float** and **SCALARS beta float** are angles in radians, describing position of the vector orientation in space.
-		- There should be only one angle per line and vertex.
-		- Number and order of angles shouldn't change between the frames.
-		- Each angle in both lists is corresponding to a vertex in **POINTS**, mapped by their order.
-	- Each angle should be a float.
+    - Number by the **POINT_DATA** flag indicates number of colours/vectors and should be consistent with number of points specified in the **POINTS** section.
 
-	- **Vectors fn float** is a list of vectors, signifying orientation of a particular fibre.
-		- Similar to **POINTS**, Vectors are described by 3 (x,y,z) floats.
-		- There should be only one vector per line and vertex.
-		- Each vector is corresponding to a vertex in **POINTS**, mapped by their order.
-		- Number and order of vectors between frames is not supposed to change.
+    - **SCALARS alpha float** and **SCALARS beta float** are angles in radians, describing position of the vector orientation in space.
+        - Each angle should be a float.
+        - These values are used for the colormap visualisation of the vector.
+        - There should be only one angle (scalar) per line and vertex.
+        - Number and order of angles shouldn't change between the frames.
+        - Each angle (scalar) corresponds to a vertex in **POINTS**, mapped by their order.
+
+    - **Vectors fn float** is a list of vectors, defining the orientation of a particular fibre.
+        - Similar to **POINTS**, Vectors are described by 3 (x,y,z) floats.
+        - There should be only one vector per line and vertex.
+        - Each vector is corresponding to a vertex in **POINTS**, mapped by their order.
+        - Number and order of vectors between frames is not supposed to change.
+
+- Note that we ignore the **CELLS** information for the simulation. We don't need this information, as we assume that the simulation data is composed only from points.
 
 ### Flow data
 Four fields are mandatory: **POINTS**; **COLOR_SCALARS** and **Vectors fn float** all two under **CELL_DATA** section.
 
-- **POINTS** are vertices signifying initial vector point.
-	-  The number after the POINTS flag indicates number of vertices in a mesh.
-	- There should be only one vertex per line.
-	- Number and order of vertices between frames is not supposed to change.
+- **POINTS** are vertices that define the initial vector point.
+    - The number after the POINTS flag indicates number of vertices in a mesh.
+    - There should be only one vertex per line.
+    - Number and order of vertices between frames is not supposed to change.
 
 - **CELL_DATA**
-	- Number by the **CELL_DATA** flag indicates number of colours/vectors and should be consistent with number beside **POINTS** flag
+    - Number by the **CELL_DATA** flag indicates number of colours/vectors and should be consistent with number beside **POINTS** flag
 
-	- **COLOR_SCALARS** is a list of 3 dimensional vectors, describing colour of each simulation point in RGB system.
-		- Similar to **POINTS**, Vectors are described by 3 (x,y,z) floats.
-		- There should be only one RGB vector per line and vertex.
-		- Each vector is corresponding to a vertex in **POINTS**, mapped by their order.
-		- Number and order of colors between frames is not supposed to change.
+    - **COLOR_SCALARS** is a list of 3 dimensional vectors, describing colour of each simulation point in RGB system.
+        - Similar to **POINTS**, Vectors are described by 3 (x,y,z) floats.
+        - There should be only one RGB vector per line and vertex.
+        - Each vector is corresponding to a vertex in **POINTS**, mapped by their order.
+        - Number and order of colors between frames is not supposed to change.
 
-	- **Vectors fn float** is a list of vectors, signifying orientation and speed of a particular point in the flow. We use this vector's length and color to visualise the speed of this point in the flow.
-		- Similar to **POINTS**, Vectors are described by 3 (x,y,z) floats.
-		- There should be only one vector per line and vertex.
-		- Each vector is corresponding to a vertex in **POINTS**, mapped by their order.
-		- Number and order of vectors between frames is not supposed to change.
+    - **Vectors fn float** is a list of vectors, signifying orientation and speed of a particular point in the flow. We use this vector's length and color to visualise the speed of this point in the flow.
+        - Similar to **POINTS**, Vectors are described by 3 (x,y,z) floats.
+        - There should be only one vector per line and vertex.
+        - Each vector is corresponding to a vertex in **POINTS**, mapped by their order.
+        - Number and order of vectors between frames is not supposed to change.
