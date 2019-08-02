@@ -21,13 +21,17 @@ namespace ModelLoad.ModelImport.VTKImport
         };
         protected string datasetType;
 
+        private string filePath;
+
         public VTKImporter(string datasetType)
         {
             this.datasetType = datasetType;
         }
 
-        public void ImportFile(string filePath)
+        public void ImportFile(string aFilePath)
         {
+            filePath = aFilePath;
+
             using (StreamReader streamReader = new StreamReader(filePath, Encoding.ASCII))
             {
                 streamReader.ReadLine(); //DataFile version
@@ -51,7 +55,8 @@ namespace ModelLoad.ModelImport.VTKImport
             if (!datasetType.Equals(currentDatasetType))
             {
                 EditorUtility.ClearProgressBar();
-                throw new Exception("Wrong dataset type!");
+                throw new Exception("Wrong dataset type. Expected " + datasetType + 
+                    ", got " + currentDatasetType + ". VTK file: " + filePath);
             }
         }
 
