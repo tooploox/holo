@@ -68,7 +68,12 @@ public class SharingSceneData : NetworkBehaviour
         hostClippingPlaneRotation = ModelManager.ModelClipPlane.transform.localRotation;
 
         hostColorMap = ColorMapManager.MapName;
+
+        singleton = this;
     }
+
+    static private SharingSceneData singleton;
+    static public SharingSceneData Singleton { get { return singleton; } }
 
     void Update()
     {
