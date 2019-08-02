@@ -78,18 +78,17 @@ Two fields are required; **POINTS** and **CELLS**.
     - Number and order of facets between frames is not supposed to change.
     - In case of all polygons, consistent winding order is required. We advise using counter-clockwise winding order (as seen from the outside of the mesh), although the clockwise ordering will also work, as long as it is consistent.
     - Only one **CELLS** section in the file is supported.
-    - We support only polygons (that is, at least 3 vertexes are necessary in a facet line). We do not support lines in the anatomical data.
 
 - The VTK format also requires **CELL_TYPES**, so you should add it to the VTK file. Although it is ignored by our application: in our application, the first column within each CELLS row indicates whether it's a triangle, quad etc.
 
 ## Simulation data
 Dataset type: **POLYDATA**
 
-With simulation data we refer to the vector field that we want to visualise on the anatomy described by the mesh in the _anatomical data_ section. Currently,we can only visualize vector fields: fibre orientation and flow data. Both types differ from each other in structure, which is described below. As in the case of the anatomy data, you can find the examples of files and directory structures in this folder.
+With simulation data we refer to the vector field that we want to visualise on the anatomy described by the mesh in the _Anatomical (mesh) data_ section. Currently,we can only visualize vector fields: fibre orientation and flow data. Both types differ from each other in structure, which is described below. As in the case of the anatomy data, you can find the examples of files and directory structures in this folder.
 
 ### Fibre orientation data
 
-Four fields are mandatory: **POINTS**; **SCALARS alpha float**, **SCALARS beta float** and **Vectors fn float** all three under **POINT_DATA** section.
+Two sections are mandatory: **POINTS** and **POINT_DATA**. Moreover within the **POINT_DATA**, place subsections **SCALARS alpha float**, **SCALARS beta float** and **Vectors fn float**.
 
 - **POINTS** are vertices specifying vector locations.
     - The integer number after the POINTS flag indicates number of vertices in a mesh.
@@ -115,7 +114,8 @@ Four fields are mandatory: **POINTS**; **SCALARS alpha float**, **SCALARS beta f
 - Note that we ignore the **CELLS** information for the simulation. We don't need this information, as we assume that the simulation data is composed only from points.
 
 ### Flow data
-Four fields are mandatory: **POINTS**; **COLOR_SCALARS** and **Vectors fn float** all two under **CELL_DATA** section.
+
+Two sections are mandatory: **POINTS** and **CELL_DATA**. Moreover within the **CELL_DATA**, place subsections **COLOR_SCALARS** and **Vectors fn float**.
 
 - **POINTS** are vertices that define the initial vector point.
     - The number after the POINTS flag indicates number of vertices in a mesh.
