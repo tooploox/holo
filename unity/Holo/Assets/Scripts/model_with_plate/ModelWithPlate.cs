@@ -22,12 +22,14 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public GameObject LayersSection;
     public GameObject AnimationSubmenu;
     public Material DefaultModelMaterial;
+    public Material DefaultModelTransparentMaterial;
     public Material DataVisualizationMaterial;
     public Transform InstanceParent;
     public CompoundButton ButtonTogglePlay;
     public CompoundButton ButtonTranslate;
     public CompoundButton ButtonRotate;
     public CompoundButton ButtonScale;
+    public CompoundButton ButtonTransparency;
     public GameObject ButtonLayerTemplate;
     public Texture2D ButtonIconPlay;
     public Texture2D ButtonIconPause;
@@ -133,6 +135,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         ModelClipPlaneCtrl = ModelClipPlane.GetComponentInChildren<ModelClippingPlaneControl>();
         // Turn off the clipping plane on start
         DefaultModelMaterial.DisableKeyword("CLIPPING_ON");
+        DefaultModelTransparentMaterial.DisableKeyword("CLIPPING_ON");
         DataVisualizationMaterial.DisableKeyword("CLIPPING_ON");
 
         LayersSection.SetActive(false);
@@ -193,11 +196,17 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     /* Handle a click on some button inside. Called by ButtonsClickReceiver. */
     public void Click(GameObject clickObject)
     {
+        if (SharingSceneData.Singleton.isClient &&
+		    !SharingSceneData.Singleton.isServer) {
+            return;
+        }
+
         switch (clickObject.name)
         {
             case "TogglePlay": ClickTogglePlay(); break;
             case "Rewind": ClickRewind(); break;
             case "Remove": ClickRemove(); break;
+            case "Speed": ClickSpeed(); break;
             case "ConfirmPreview": ClickConfirmPreview(); break;
             case "CancelPreview": ClickCancelPreview(); break;
             case "ButtonTranslate": ClickChangeTransformationState(TransformationState.Translate); break;
@@ -205,6 +214,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             case "ButtonScale": ClickChangeTransformationState(TransformationState.Scale); break;
             case "ButtonLayers": ClickToggleLayersState(); break;
             case "ButtonAnimationSpeed": AnimationSubmenu.SetActive(!AnimationSubmenu.activeSelf); break;
+            case "ButtonTransparency": ClickTransparency(); break;
 
             default:
                 {
@@ -267,10 +277,23 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         RefreshUserInterface();
     }
 
+    private void ClickSpeed()
+    {
+        const float MaxSpeed = 5f;
+        float newSpeed = Mathf.Min(MaxSpeed, AnimationSpeed * 2);
+        AnimationSpeed = newSpeed;
+        SliderAnimationSpeed.GetComponent<SliderGestureControl>().SetSliderValue(newSpeed);
+    }
+
     private void ClickCancelPreview()
     {
         UnloadInstance();
         RefreshUserInterface();
+    }
+
+    private void ClickTransparency()
+    {
+        Transparent = !Transparent;
     }
 
     /* Load new model or unload.
@@ -541,6 +564,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         animationSpeed = 1f;
         SliderAnimationSpeed.GetComponent<SliderGestureControl>().SetSliderValue(animationSpeed);
 
+        // reset transparency to false
+        Transparent = false;
+
         // add buttons to toggle layers
         layersButtons = new Dictionary<ModelLayer, CompoundButton>();
         int buttonIndex = 0;
@@ -616,7 +642,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
         // Assign material to all MeshRenderer and SkinnedMeshRenderer inside
         foreach (var renderer in l.Instance.GetComponentsInChildren<Renderer>()) { 
-            renderer.sharedMaterial = layer.Simulation ? DataVisualizationMaterial : DefaultModelMaterial;
+            renderer.sharedMaterial = LayerMaterial(layer);
         }
 
         // update layersLoaded dictionary
@@ -707,6 +733,46 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
                 }
                 RefreshUserInterface();
             }
+        }
+    }
+
+    /* Based on layer properties, and current properties like Transparent,
+     * determine proper material of the layer.
+     */
+    private Material LayerMaterial(ModelLayer layer)
+    {
+        if (layer.Simulation)
+        {
+            return DataVisualizationMaterial;
+        } else
+        if (Transparent)
+        {
+            return DefaultModelTransparentMaterial;
+        } else
+        {
+            return DefaultModelMaterial;
+        }
+    }
+
+    private bool transparent;
+    public bool Transparent {
+        get { return transparent; }
+        set
+        {
+            transparent = value;
+
+            // Transparent value changed, so update materials
+            if (layersLoaded != null) { 
+                foreach (var layerPair in layersLoaded)
+                {
+                    if (!layerPair.Key.Simulation) {
+                        foreach (var renderer in layerPair.Value.Instance.GetComponentsInChildren<Renderer>()) { 
+                            renderer.sharedMaterial = LayerMaterial(layerPair.Key);
+                        }
+                    }
+                }
+            }
+            HoloUtilities.SetButtonState(ButtonTransparency, Transparent);
         }
     }
 }

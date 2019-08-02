@@ -13,7 +13,7 @@ PlayerSettings:
   useOnDemandResources: 0
   accelerometerFrequency: 60
   companyName: MicroscopeIT
-  productName: HoloModelSeries
+  productName: Essential Vision
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
@@ -40,7 +40,8 @@ PlayerSettings:
     width: 1
     height: 1
   m_SplashScreenLogos: []
-  m_VirtualRealitySplashScreen: {fileID: 0}
+  m_VirtualRealitySplashScreen: {fileID: 2800000, guid: 172a29737d5714241bb2059b1a19de6b,
+    type: 3}
   m_HolographicTrackingLossScreen: {fileID: 0}
   defaultScreenWidth: 1024
   defaultScreenHeight: 768
@@ -118,7 +119,7 @@ PlayerSettings:
     16:10: 1
     16:9: 1
     Others: 1
-  bundleVersion: 0.1
+  bundleVersion: 1.0
   preloadedAssets: []
   metroInputSource: 0
   wsaTransparentSwapchain: 0
@@ -261,7 +262,7 @@ PlayerSettings:
   - m_BuildTarget: 
     m_Icons:
     - serializedVersion: 2
-      m_Icon: {fileID: 2800000, guid: 30699e294936bf6489bb1984d770e07e, type: 3}
+      m_Icon: {fileID: 2800000, guid: 172a29737d5714241bb2059b1a19de6b, type: 3}
       m_Width: 128
       m_Height: 128
       m_Kind: 0
@@ -551,16 +552,22 @@ PlayerSettings:
   apiCompatibilityLevelPerPlatform: {}
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
-  metroPackageName: HoloModelSeries
+  metroPackageName: EssentialVision
   metroPackageVersion: 1.0.0.0
   metroCertificatePath: Assets\WSATestCertificate.pfx
   metroCertificatePassword: 
   metroCertificateSubject: DefaultCompany
   metroCertificateIssuer: DefaultCompany
   metroCertificateNotAfter: 80319977b4f7d501
-  metroApplicationDescription: Holoe Model Series
-  wsaImages: {}
-  metroTileShortName: Holo
+  metroApplicationDescription: Visualize animated 3D medical data, with shared experience.
+  wsaImages:
+    131172: Assets/GFX/Logos/essential_620_300.png
+    2031716: Assets/GFX/Logos/essential_44.png
+    2097252: Assets/GFX/Logos/essential_71.png
+    2162788: Assets/GFX/Logos/essential_150.png
+    2228324: Assets/GFX/Logos/essential_310.png
+    2293860: Assets/GFX/Logos/essential_310_150.png
+  metroTileShortName: EssentialVision
   metroTileShowName: 0
   metroMediumTileShowName: 0
   metroLargeTileShowName: 0
