@@ -641,9 +641,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
         // Assign material to all MeshRenderer and SkinnedMeshRenderer inside
         foreach (var renderer in l.Instance.GetComponentsInChildren<Renderer>()) { 
-            renderer.sharedMaterial = layer.Simulation ? 
-                DataVisualizationMaterial : 
-                DefaultModelMaterial;
+            renderer.sharedMaterial = LayerMaterial(layer);
         }
 
         // update layersLoaded dictionary
@@ -737,18 +735,38 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         }
     }
 
+    /* Based on layer properties, and current properties like Transparent,
+     * determine proper material of the layer.
+     */
+    private Material LayerMaterial(ModelLayer layer)
+    {
+        if (layer.Simulation)
+        {
+            return DataVisualizationMaterial;
+        } else
+        if (Transparent)
+        {
+            return DefaultModelTransparentMaterial;
+        } else
+        {
+            return DefaultModelMaterial;
+        }
+    }
+
     private bool transparent;
     public bool Transparent {
         get { return transparent; }
         set
         {
             transparent = value;
+
+            // Transparent value changed, so update materials
             if (layersLoaded != null) { 
                 foreach (var layerPair in layersLoaded)
                 {
                     if (!layerPair.Key.Simulation) {
                         foreach (var renderer in layerPair.Value.Instance.GetComponentsInChildren<Renderer>()) { 
-                            renderer.sharedMaterial = value ? DefaultModelTransparentMaterial : DefaultModelMaterial;
+                            renderer.sharedMaterial = LayerMaterial(layerPair.Key);
                         }
                     }
                 }
