@@ -196,7 +196,8 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     /* Handle a click on some button inside. Called by ButtonsClickReceiver. */
     public void Click(GameObject clickObject)
     {
-        if (SharingSceneData.Singleton.isClient) {
+        if (SharingSceneData.Singleton.isClient &&
+		    !SharingSceneData.Singleton.isServer) {
             return;
         }
 
