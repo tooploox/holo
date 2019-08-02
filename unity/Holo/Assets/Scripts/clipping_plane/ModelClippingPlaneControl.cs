@@ -53,6 +53,7 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
             if (value == ClipPlaneState.Disabled)
             {
                 ModelWithPlate.DefaultModelMaterial.DisableKeyword("CLIPPING_ON");
+				ModelWithPlate.DefaultModelTransparentMaterial.DisableKeyword("CLIPPING_ON");
                 ModelWithPlate.DataVisualizationMaterial.DisableKeyword("CLIPPING_ON");
 
                 ButtonClippingPlaneTranslation.gameObject.SetActive(false);
@@ -62,6 +63,7 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
             else
             {
                 ModelWithPlate.DefaultModelMaterial.EnableKeyword("CLIPPING_ON");
+				ModelWithPlate.DefaultModelTransparentMaterial.EnableKeyword("CLIPPING_ON");
                 ModelWithPlate.DataVisualizationMaterial.EnableKeyword("CLIPPING_ON");
 
                 ButtonClippingPlaneTranslation.gameObject.SetActive(true);

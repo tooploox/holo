@@ -43,6 +43,9 @@ public class SharingSceneData : NetworkBehaviour
     [SyncVar]
     float hostAnimationSpeed;
 
+    [SyncVar]
+    bool hostTransparent;
+
 #pragma warning restore CS0618 // using deprecated Unity stuff (TODO: upgrade in Holo project in the future)
 
     ModelWithPlate ModelManager;
@@ -82,6 +85,7 @@ public class SharingSceneData : NetworkBehaviour
                 hostClippingPlanePosition = ModelManager.ModelClipPlane.transform.localPosition;
                 hostClippingPlaneRotation = ModelManager.ModelClipPlane.transform.localRotation;
                 hostColorMap = ColorMapManager.MapName;
+                hostTransparent = ModelManager.Transparent;
                 hostAnimationPlaying = ModelManager.AnimationPlaying;
                 hostAnimationTime = ModelManager.AnimationTime;
                 hostAnimationSpeed = ModelManager.AnimationSpeed;
@@ -119,7 +123,7 @@ public class SharingSceneData : NetworkBehaviour
                 }
                 ModelManager.ModelClipPlane.transform.localPosition = hostClippingPlanePosition;
                 ModelManager.ModelClipPlane.transform.localRotation = hostClippingPlaneRotation;
-                
+                ModelManager.Transparent =  hostTransparent;
                 ModelManager.AnimationPlaying = hostAnimationPlaying;
                 // synchronize AnimationTime only when paused,  otherwise it would make jittering animation on clients
                 if (hostAnimationSpeed == 0f || !hostAnimationPlaying) { 
