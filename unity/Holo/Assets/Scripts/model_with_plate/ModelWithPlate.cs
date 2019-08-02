@@ -198,6 +198,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             case "TogglePlay": ClickTogglePlay(); break;
             case "Rewind": ClickRewind(); break;
             case "Remove": ClickRemove(); break;
+            case "Speed": ClickSpeed(); break;
             case "ConfirmPreview": ClickConfirmPreview(); break;
             case "CancelPreview": ClickCancelPreview(); break;
             case "ButtonTranslate": ClickChangeTransformationState(TransformationState.Translate); break;
@@ -265,6 +266,14 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     {
         UnloadInstance();
         RefreshUserInterface();
+    }
+
+    private void ClickSpeed()
+    {
+        const float MaxSpeed = 5f;
+        float newSpeed = Mathf.Min(MaxSpeed, AnimationSpeed * 2);
+        AnimationSpeed = newSpeed;
+        SliderAnimationSpeed.GetComponent<SliderGestureControl>().SetSliderValue(newSpeed);
     }
 
     private void ClickCancelPreview()
