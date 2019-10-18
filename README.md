@@ -5,9 +5,9 @@ Application to visualize animated 3D medical data using Hololens, with shared ex
 ## Installation
 
 ### Prerequisites
-  * Setup Hololens with Windows Device Portal enabled: https://docs.microsoft.com/en-us/windows/mixed-reality/using-the-windows-device-portal
+  * Setup Hololens with Windows Device Portal enabled: https://docs.microsoft.com/en-us/windows/iot-core/manage-your-device/deviceportal
   * Install _Essential Vision_ application on Hololens (use relasese versions: https://github.com/MicroscopeIT/holo/releases)
-    Application instalation: https://docs.microsoft.com/en-us/hololens/hololens-install-apps#use-the-windows-device-portal-to-install-apps-on-hololens
+    Application instalation: https://docs.microsoft.com/pl-pl/hololens/holographic-custom-apps
 
   **IMPORTANT**
       If you got *.NET CoreRuntime* invalid or missing version error please install application with additional dependencies. To do this select option: *Allow me to select framework packages*, and in next step select the *Microsoft.NET.CoreRuntime.1.1.appx* file from release archive (Dependencies -> x86).
