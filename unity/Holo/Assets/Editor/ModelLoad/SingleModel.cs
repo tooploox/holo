@@ -26,6 +26,7 @@ namespace ModelLoad
                 //Debug.Log("Reading layer " + layerInfo.Caption + " " + layerInfo.Directory + " " + layerInfo.Simulation.ToString());
                 ImportLayer(layerInfo);
             }
+			ImportIcon();
         }
 
         protected string GetRootDirectory()
@@ -71,15 +72,21 @@ namespace ModelLoad
                 string json = r.ReadToEnd();
                 Info = JsonConvert.DeserializeObject<ModelInfo>(json);
             }
+
+            // convert some paths to be absolute filenames
             foreach (ModelLayerInfo layerInfo in Info.Layers)
             {
                 layerInfo.Directory = rootDirectory + @"\" + layerInfo.Directory;
+            }
+            if (!string.IsNullOrEmpty(Info.IconFileName))
+            {
+                Info.IconFileName = rootDirectory + @"\" + Info.IconFileName;
             }
 
             // simple validation of the structure
             if (Info.Layers.Count == 0)
             {
-                throw new Exception("No layers found in ModelInfo.{json,txt} file");
+                throw new Exception("No layers found in ModelInfo.json file");
             }
         }
 
@@ -98,6 +105,16 @@ namespace ModelLoad
         {
             string[] simulationVariants = { "true", "fibre", "flow"};
             return simulationVariants.Contains(simulationFlag);
+        }
+
+        // Load icon from Info.IconFileName, add it to AssetsPath
+        private void ImportIcon()
+        {
+            if (!string.IsNullOrEmpty(Info.IconFileName))
+            {
+                Debug.Log("loading " + Info.IconFileName);
+                // TODO
+            }
         }
     }
 }

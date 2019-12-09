@@ -1,3 +1,7 @@
 The model obtained from Open Anatomy Project, see https://www.openanatomy.org/atlas-pages/ .
 
 The license: https://github.com/Slicer/Slicer/blob/master/License.txt (BSD style license with slight modifications).
+
+Icon from https://commons.wikimedia.org/wiki/File:Calmuck_(Front).png
+  by Thomas Henry Huxley [Public domain], via Wikimedia Commons
+  See https://commons.wikimedia.org/wiki/File:Calmuck_(Front).png
