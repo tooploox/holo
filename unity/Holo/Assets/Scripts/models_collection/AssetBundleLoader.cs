@@ -12,6 +12,7 @@ public class AssetBundleLoader
     private List<ModelLayer> layers;
     private Bounds? bounds;
     private int blendShapeCount;
+    public Texture2D Icon { get; private set; }
 
     /* Uniquely identifies this bundle (across all running instances of the application). */
     public string Name { get; private set; }
@@ -45,6 +46,7 @@ public class AssetBundleLoader
         }
         assetBundle = loadedAssetBundle;
         LoadLayers();
+        LoadIcon();
     }
 
     // Enlarge bounds to contain newBounds.
@@ -162,5 +164,10 @@ public class AssetBundleLoader
         {
             layer.InstantiateGameObject(null);
         }
+    }
+
+    public void LoadIcon()
+    {
+        Icon = assetBundle.LoadAsset<Texture2D>("icon.png");
     }
 }

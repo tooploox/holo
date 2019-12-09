@@ -25,6 +25,7 @@ namespace ModelLoad
                 //Debug.Log("Reading layer " + layerInfo.Caption + " " + layerInfo.Directory + " " + layerInfo.Simulation.ToString());
                 ImportLayer(layerInfo);
             }
+			ImportIcon();
         }
 
         // Gets root directory of the model.
@@ -64,15 +65,21 @@ namespace ModelLoad
                 string json = r.ReadToEnd();
                 Info = JsonConvert.DeserializeObject<ModelInfo>(json);
             }
+
+            // convert some paths to be absolute filenames
             foreach (ModelLayerInfo layerInfo in Info.Layers)
             {
                 layerInfo.Directory = rootDirectory + @"\" + layerInfo.Directory;
+            }
+            if (!string.IsNullOrEmpty(Info.IconFileName))
+            {
+                Info.IconFileName = rootDirectory + @"\" + Info.IconFileName;
             }
 
             // simple validation of the structure
             if (Info.Layers.Count == 0)
             {
-                throw new Exception("No layers found in ModelInfo.{json,txt} file");
+                throw new Exception("No layers found in ModelInfo.json file");
             }
         }
 
@@ -86,6 +93,15 @@ namespace ModelLoad
             layer.Caption = layerInfo.Caption;
             layer.Simulation = layerInfo.Simulation;
         }
-
+		
+		// Load icon from Info.IconFileName, add it to AssetsPath
+		private void ImportIcon()
+		{
+            if (!string.IsNullOrEmpty(Info.IconFileName))
+            {
+                Debug.Log("loading " + Info.IconFileName);
+                // TODO
+            }
+		}
     }
 }
