@@ -13,8 +13,8 @@ public class AssetBundleEditorLoader
             return;
         }
         string bundleName = Path.GetFileName(bundlePath);
-        AssetBundleLoader assetBundleLoader = new AssetBundleLoader(bundleName);
-        assetBundleLoader.LoadBundle(bundlePath);
+        AssetBundleLoader assetBundleLoader = new AssetBundleLoader(bundleName, bundlePath);
+        assetBundleLoader.LoadBundle();
         assetBundleLoader.InstantiateAllLayers();
     }
 

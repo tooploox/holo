@@ -36,5 +36,13 @@ public class AssetBundleCreator
         AssetDatabase.DeleteAsset("Assets/StreamingAssets/StreamingAssets");
         AssetDatabase.DeleteAsset("Assets/StreamingAssets/StreamingAssets.manifest");
         //TODO: The .mesh and .prefab files are left for debugging purposes but should be removed in the final version.
+
+        // this is necessary to clear references to this asset
+        Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/icon.asset");
+        UnityEngine.Object.DestroyImmediate(texture, true);
+
+        // this is still necessary even after above DestroyImmediate.
+        AssetDatabase.DeleteAsset("Assets/icon.asset");  
+
     }
 }

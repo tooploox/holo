@@ -179,10 +179,14 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         // set add buttons captions and existence, for the buttons that correspond to some bundles
         for (int i = 0; i < activeButtonsCount; i++)
         {
-            string modelName = ModelsCollection.Singleton.BundleCaption(i);
             GameObject button = FindAddButton(i);
-            button.GetComponent<CompoundButtonText>().Text = modelName;
             button.SetActive(true);
+
+            string modelName = ModelsCollection.Singleton.BundleCaption(i);
+            button.GetComponent<CompoundButtonText>().Text = modelName;
+
+            Texture2D icon = ModelsCollection.Singleton.BundleIcon(i);
+            button.GetComponent<CompoundButtonIcon>().SetIconOverride(icon);
         }
 
         // hide the rest of the buttons, when there are less models than buttons

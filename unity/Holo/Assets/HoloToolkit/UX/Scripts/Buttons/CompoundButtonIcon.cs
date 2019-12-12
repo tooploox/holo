@@ -99,6 +99,16 @@ namespace HoloToolkit.Unity.Buttons
                 return targetIconRenderer != null ? targetIconRenderer.GetComponent<MeshFilter>() : null;
             }
         }
+
+        public void SetIconOverride(Texture2D newIcon)
+        {
+            OverrideIcon = true;
+
+            iconOverride = newIcon;
+            if (instantiatedMaterial != null) {
+                instantiatedMaterial.mainTexture = newIcon;
+            }
+        }
         
         #if UNITY_EDITOR
         /// <summary>

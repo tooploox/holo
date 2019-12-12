@@ -5,6 +5,12 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 
+public enum LoadState {
+    None,
+    Metadata,
+    Full
+}
+
 public class AssetBundleLoader
 {
     private AssetBundle assetBundle;
@@ -17,10 +23,14 @@ public class AssetBundleLoader
     /* Uniquely identifies this bundle (across all running instances of the application). */
     public string Name { get; private set; }
 
-    public AssetBundleLoader(string aName)
+    public AssetBundleLoader(string aName, string aBundlePath)
     {
         Name = aName;
+        bundlePath = aBundlePath;
+        LoadState = LoadState.None;
     }
+    
+    public LoadState LoadState;
 
     // All layers, available after LoadLayer
     public IEnumerable<ModelLayer> Layers
@@ -35,18 +45,33 @@ public class AssetBundleLoader
 
     public int BlendShapeCount { get { return blendShapeCount;  } }
 
-    public void LoadBundle(string aBundlePath)
+    public void LoadBundleMetadata()
     {
-        bundlePath = aBundlePath;
-        var loadedAssetBundle = AssetBundle.LoadFromFile(bundlePath);
-        if (loadedAssetBundle == null)
-        {
-            Debug.LogError("Failed to load AssetBundle!");
+        /* Do nothing if LoadState is already at least Metadata.
+         * This way this can be called multiple times. */
+        if (LoadState >= LoadState.Metadata) {
             return;
         }
-        assetBundle = loadedAssetBundle;
-        LoadLayers();
+
+        assetBundle = AssetBundle.LoadFromFile(bundlePath);
+        if (assetBundle == null)
+        {
+            throw new Exception("Failed to load AssetBundle from " + bundlePath);
+        }
         LoadIcon();
+        LoadState = LoadState.Metadata;
+    }
+
+    public void LoadBundle()
+    {        
+        /* Do nothing if LoadState is already Full.
+         * This way this can be called multiple times. */
+        if (LoadState >= LoadState.Full) {
+            return;
+        }
+        LoadBundleMetadata();
+        LoadLayers();
+        LoadState = LoadState.Full;
     }
 
     // Enlarge bounds to contain newBounds.
@@ -169,9 +194,11 @@ public class AssetBundleLoader
     public void LoadIcon()
     {
         Icon = assetBundle.LoadAsset<Texture2D>("icon.asset");
+        /*
         if (Icon != null)
         {
             Debug.Log("Found icon inside bundle, size " + Icon.width + " x " + Icon.height);
         }
+        */
     }
 }
