@@ -21,7 +21,7 @@ public class AssetBundleCreator
         
         AssetBundleBuild buildMap = new AssetBundleBuild();
         buildMap.assetBundleName = importedModel.Info.Caption + "_bundle";
-        buildMap.assetNames = importedModel.AssetsPath.Values.ToArray();
+        buildMap.assetNames = importedModel.AssetPaths.ToArray();
 
         return new AssetBundleBuild[1] {buildMap};
     }

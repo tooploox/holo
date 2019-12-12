@@ -168,6 +168,10 @@ public class AssetBundleLoader
 
     public void LoadIcon()
     {
-        Icon = assetBundle.LoadAsset<Texture2D>("icon.png");
+        Icon = assetBundle.LoadAsset<Texture2D>("icon.asset");
+        if (Icon != null)
+        {
+            Debug.Log("Found icon inside bundle, size " + Icon.width + " x " + Icon.height);
+        }
     }
 }

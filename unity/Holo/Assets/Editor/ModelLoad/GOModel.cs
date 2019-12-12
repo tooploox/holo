@@ -32,8 +32,9 @@ namespace ModelLoad
             {
                 AssetDatabase.CreateFolder("Assets/Resources", Info.Caption);
             }
-            AssetsPath.Add(objectName + "_GameObject", rootAssetsDir + @"/" + objectName + ".prefab");
-            PrefabUtility.SaveAsPrefabAsset(modelGameObject, AssetsPath[objectName + "_GameObject"]);
+			string prefabPath = rootAssetsDir + @"/" + objectName + ".prefab";
+			AssetPaths.Add(prefabPath);
+            PrefabUtility.SaveAsPrefabAsset(modelGameObject, prefabPath);
         }
     }
 }

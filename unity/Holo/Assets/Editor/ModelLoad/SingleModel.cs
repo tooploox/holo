@@ -10,14 +10,14 @@ namespace ModelLoad
     public abstract class SingleModel
     {
         public ModelInfo Info { get; protected set; }
-        public Dictionary<string, string> AssetsPath { get; protected set; } = new Dictionary<string, string>();
+        public List<string> AssetPaths { get; protected set; } = new List<string>();
 
         //Loads a single model, with its body and/or simulationData.
         public void GetModelData()
         {
             string rootDirectory = GetRootDirectory();
 
-            AssetsPath.Clear();
+            AssetPaths.Clear();
             ReadInfoFile(rootDirectory);
             //Debug.Log("Reading model " + Info.Caption);
             foreach (ModelLayerInfo layerInfo in Info.Layers)
@@ -93,14 +93,29 @@ namespace ModelLoad
             layer.Caption = layerInfo.Caption;
             layer.Simulation = layerInfo.Simulation;
         }
-		
-		// Load icon from Info.IconFileName, add it to AssetsPath
+        
+		// Load icon from Info.IconFileName, add it to AssetPaths
 		private void ImportIcon()
 		{
             if (!string.IsNullOrEmpty(Info.IconFileName))
             {
-                Debug.Log("loading " + Info.IconFileName);
-                // TODO
+                /* Note: At one point I tried to optimize it, by detecting when
+                 * icon is already in the assets
+                 * ( Info.IconFileName.StartsWith(Application.dataPath) )
+                 * and then just adding the existing asset-relative path to AssetPaths.
+                 * 
+                 * But it doesn't work: we need the file to be called "icon.asset"
+                 * ("icon.png" is ignored by Unity bundle building, as it has unrecognized
+                 * extension). So we need to read + write the file anyway.
+                 */
+
+                byte[] data = File.ReadAllBytes(Info.IconFileName);
+                Texture2D texture = new Texture2D(1, 1);
+                texture.LoadImage(data);
+
+                string iconAssetPath = "Assets/icon.asset";
+                AssetDatabase.CreateAsset(texture, iconAssetPath);
+                AssetPaths.Add(iconAssetPath);
             }
 		}
     }

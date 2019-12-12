@@ -26,11 +26,13 @@ namespace ModelLoad
             {
                 AssetDatabase.CreateFolder("Assets", Info.Caption);
             }
-            AssetsPath.Add(objectName + "_mesh", rootAssetsDir + @"/" + objectName + ".asset");
-            AssetDatabase.CreateAsset(modelMesh, AssetsPath[objectName + "_mesh"]);
+			string meshPath = rootAssetsDir + @"/" + objectName + ".asset";
+			AssetPaths.Add(meshPath);
+            AssetDatabase.CreateAsset(modelMesh, meshPath);
 
-            AssetsPath.Add(objectName + "_GameObject", rootAssetsDir + @"/" + objectName + ".prefab");
-            PrefabUtility.SaveAsPrefabAsset(modelGameObject, AssetsPath[objectName + "_GameObject"]);
+            string gameObjectPath = rootAssetsDir + @"/" + objectName + ".prefab";
+            AssetPaths.Add(gameObjectPath);
+            PrefabUtility.SaveAsPrefabAsset(modelGameObject, gameObjectPath);
         }
     }
 }
