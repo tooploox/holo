@@ -35,6 +35,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public Texture2D ButtonIconPause;
     // Drop here "Prefabs/ModelWithPlateRotationRig"
     public GameObject RotationBoxRigTemplate;
+    public float IconScale = 1f;
 
     public enum TransformationState
     {
@@ -187,6 +188,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
             Texture2D icon = ModelsCollection.Singleton.BundleIcon(i);
             if (icon != null) { 
+                button.GetComponent<CompoundButtonIcon>().IconScale = IconScale;
                 button.GetComponent<CompoundButtonIcon>().SetIconOverride(icon);
             }
         }

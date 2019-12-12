@@ -136,6 +136,8 @@ namespace HoloToolkit.Unity.Buttons
             }
         }
 
+        public float IconScale = 1f;
+
         private void SetIconName(string newName)
         {
             // Avoid exploding if possible
@@ -177,7 +179,7 @@ namespace HoloToolkit.Unity.Buttons
                 // Use the default mesh for override icons
                 targetIconRenderer.enabled = true;
                 IconMeshFilter.sharedMesh = Profile.IconMesh;
-                IconMeshFilter.transform.localScale = Vector3.one;
+                IconMeshFilter.transform.localScale = new Vector3(IconScale, IconScale, 1f);
                 instantiatedMaterial.mainTexture = iconOverride;
                 return;
             }
