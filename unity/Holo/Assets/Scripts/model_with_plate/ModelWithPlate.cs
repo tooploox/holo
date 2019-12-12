@@ -186,7 +186,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             button.GetComponent<CompoundButtonText>().Text = modelName;
 
             Texture2D icon = ModelsCollection.Singleton.BundleIcon(i);
-            button.GetComponent<CompoundButtonIcon>().SetIconOverride(icon);
+            if (icon != null) { 
+                button.GetComponent<CompoundButtonIcon>().SetIconOverride(icon);
+            }
         }
 
         // hide the rest of the buttons, when there are less models than buttons
