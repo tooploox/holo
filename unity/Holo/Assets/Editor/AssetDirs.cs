@@ -11,14 +11,6 @@ public static class AssetDirs
      * code in LoadModel. */
     public const string TempAssetsDir = "Assets/Temporary";
 
-    /* Place temporary resources here (to load using Resources.Load).
-	 * This path starts with "Assets/" .
-	 * Never ends with path delimiter (/ or \).
-     *
-     * Internal note: when changing this constant, adjust also directory creation
-     * code in LoadModel. */
-    public const string TempAssetsResorcesDir = "Assets/Resources/Temporary";
-
     /* Create the directory within assets if necessary.
 	 * The directory to create is the last component of given path.
 	 */
