@@ -26,7 +26,7 @@ namespace ModelLoad
                 //Debug.Log("Reading layer " + layerInfo.Caption + " " + layerInfo.Directory + " " + layerInfo.Simulation.ToString());
                 ImportLayer(layerInfo);
             }
-			ImportIcon();
+            ImportIcon();
         }
 
         protected string GetRootDirectory()
@@ -94,35 +94,7 @@ namespace ModelLoad
 
         protected void LayerAutomaticIconGenerate(UnityEngine.Object obj)
         { 
-            try {
-                while (
-                    (AssetPreview.GetAssetPreview(obj) == null ||
-                     AssetPreview.IsLoadingAssetPreview(obj.GetInstanceID())
-                    ) && 
-                    !EditorUtility.DisplayCancelableProgressBar("Generating preview",
-                        "Waiting for icon to be generated", 0f))
-                {
-                    /* TODO: this is a hack, busy waiting here.
-                     * We can't use coroutine here to wait, without complicating the outside code.
-                     */
-                }
-            } finally
-            {
-                EditorUtility.ClearProgressBar();
-            }
-            Texture2D preview = AssetPreview.GetAssetPreview(obj);
-
-            /* Simply using AssetPreview.GetAssetPreview(obj) for layerAutomaticIcon
-             * results in Unity errors at later CreateAsset,
-             * 
-             * Assertion failed on expression: '!(o->TestHideFlag(Object::kDontSaveInEditor) && (options & kAllowDontSaveObjectsToBePersistent) == 0)'
-             * Unrecognized assets cannot be included in AssetBundles: "Assets/icon.asset".
-             *
-             * Instead we copy this texture.
-             */
-            Color[] pixels = preview.GetPixels();
-            layerAutomaticIcon = new Texture2D(preview.width, preview.height, TextureFormat.ARGB32, false);
-            layerAutomaticIcon.SetPixels(pixels);
+            layerAutomaticIcon = IconGenerator.GetIcon(obj);
         }
 
         // Imports layer (with body or simulation blendshapes).
@@ -142,10 +114,6 @@ namespace ModelLoad
             string[] simulationVariants = { "true", "fibre", "flow"};
             return simulationVariants.Contains(simulationFlag);
         }
-
-        // Load icon from Info.IconFileName, add it to AssetsPath
-        private void ImportIcon()
-        {
 
         // Load icon from Info.IconFileName, add it to AssetPaths
         private void ImportIcon()
