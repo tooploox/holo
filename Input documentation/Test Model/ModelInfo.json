@@ -4,7 +4,8 @@
         {
             Caption: "Body",
             Simulation: false,
-            Directory: "test_body"
+            Directory: "test_body",
+            UseAsIcon: true
         },
         {
             Caption: "Fibre Simulation",
