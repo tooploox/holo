@@ -2,7 +2,26 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-public static class IconGenerator {
+public static class IconGenerator 
+{
+    // Process icon to be nicely displayed on our Holohgraphic button.
+    // This adds proper alpha channel.
+    private static void ProcessIcon(int w, int h, Color32[] pixels)
+    {
+        for (int i = 0; i < w * h; i++)
+        {
+            Color32 c = pixels[i];
+            if (c.r == 82 &&
+                c.g == 82 &&
+                c.b == 82)
+            {
+                c.a = 0;
+                pixels[i] = c;
+            }
+        }
+    }
+
+    // Reliably generate icon for any Unity asset.
     public static Texture2D GetIcon(UnityEngine.Object obj)
     {
         try {
@@ -30,10 +49,12 @@ public static class IconGenerator {
          * Unrecognized assets cannot be included in AssetBundles: "Assets/icon.asset".
          *
          * Instead we copy this texture.
+         * Later: we actually use this opportunity to do some preprocessing of the texture.
          */
-        Color[] pixels = preview.GetPixels();
+        Color32[] pixels = preview.GetPixels32();
+        ProcessIcon(preview.width, preview.height, pixels);
         Texture2D result = new Texture2D(preview.width, preview.height, TextureFormat.ARGB32, false);
-        result.SetPixels(pixels);
+        result.SetPixels32(pixels);
 
         return result;
     }
