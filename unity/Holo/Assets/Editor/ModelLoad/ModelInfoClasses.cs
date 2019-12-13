@@ -30,5 +30,6 @@ namespace ModelLoad
         // In case of using the importer to load GameObject from Unity Assets,
         // this indicates the GameObject filename (appended to the Directory).
         public string AssetFileName;
+        public bool UseAsIcon;
     }
 }

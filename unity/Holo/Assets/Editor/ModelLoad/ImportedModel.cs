@@ -33,6 +33,10 @@ namespace ModelLoad
             string gameObjectPath = rootAssetsDir + @"/" + objectName + ".prefab";
             AssetPaths.Add(gameObjectPath);
             PrefabUtility.SaveAsPrefabAsset(modelGameObject, gameObjectPath);
+
+            if (layerInfo.UseAsIcon) {
+                LayerAutomaticIconGenerate(modelGameObject);
+            }
         }
     }
 }

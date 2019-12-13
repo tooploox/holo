@@ -20,6 +20,9 @@ namespace ModelLoad
             GameObject modelInstance = Object.Instantiate(modelGameObject);
             AddLayerComponent(modelInstance, layerInfo);
             CreatePrefab(layerInfo, modelInstance, objectName);
+            if (layerInfo.UseAsIcon) {
+                LayerAutomaticIconGenerate(modelInstance);
+            }
             GameObject.DestroyImmediate(modelInstance);
         }
 
