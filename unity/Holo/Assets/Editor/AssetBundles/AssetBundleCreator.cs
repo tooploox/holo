@@ -5,7 +5,7 @@ using UnityEngine;
 using ModelLoad;
 
 public class AssetBundleCreator
-{  
+{
     //Creates AssetBundle
     public void Create(SingleModel importedModel)
     {
@@ -16,7 +16,7 @@ public class AssetBundleCreator
     // Create the array of bundle build details.
     private AssetBundleBuild[] BuildMapABs(SingleModel importedModel)
     {
-        
+
         AssetBundleBuild buildMap = new AssetBundleBuild();
         buildMap.assetBundleName = importedModel.Info.Caption + "_bundle";
         buildMap.assetNames = importedModel.AssetPaths.ToArray();
@@ -26,21 +26,17 @@ public class AssetBundleCreator
     //Creates appropriate AssetBundle for the model.
     private void CreateAssetBundle(AssetBundleBuild[] buildMapArray)
     {
-        if (!AssetDatabase.IsValidFolder(@"Assets\StreamingAssets"))
-        {
-            AssetDatabase.CreateFolder("Assets", "StreamingAssets");
-        }
+	    AssetDirs.CreateDirectory("Assets/StreamingAssets");
         BuildPipeline.BuildAssetBundles(Application.dataPath + "/StreamingAssets", buildMapArray, BuildAssetBundleOptions.None, BuildTarget.WSAPlayer);
         AssetDatabase.DeleteAsset("Assets/StreamingAssets/StreamingAssets");
         AssetDatabase.DeleteAsset("Assets/StreamingAssets/StreamingAssets.manifest");
         //TODO: The .mesh and .prefab files are left for debugging purposes but should be removed in the final version.
 
         // this is necessary to clear references to this asset
-        Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/icon.asset");
+        Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(AssetDirs.TempAssetsDir + "/icon.asset");
         UnityEngine.Object.DestroyImmediate(texture, true);
 
         // this is still necessary even after above DestroyImmediate.
-        AssetDatabase.DeleteAsset("Assets/icon.asset");  
-
+        AssetDatabase.DeleteAsset(AssetDirs.TempAssetsDir + "/icon.asset");
     }
 }

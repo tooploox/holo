@@ -20,17 +20,14 @@ namespace ModelLoad
         // Saves imported model to a Unity-friendly files, to be put in AssetBundles.
         private void SaveFilesForExport(ModelLayerInfo layerInfo, string objectName, Mesh modelMesh, GameObject modelGameObject)
         {
-            string rootAssetsDir = @"Assets/" + Info.Caption;
-            
-            if (!AssetDatabase.IsValidFolder(rootAssetsDir))
-            {
-                AssetDatabase.CreateFolder("Assets", Info.Caption);
-            }
-			string meshPath = rootAssetsDir + @"/" + objectName + ".asset";
+            string rootAssetsDir = AssetDirs.TempAssetsDir + "/" + Info.Caption;
+			AssetDirs.CreateDirectory(rootAssetsDir);
+		
+        	string meshPath = rootAssetsDir + "/" + objectName + ".asset";
 			AssetPaths.Add(meshPath);
             AssetDatabase.CreateAsset(modelMesh, meshPath);
 
-            string gameObjectPath = rootAssetsDir + @"/" + objectName + ".prefab";
+            string gameObjectPath = rootAssetsDir + "/" + objectName + ".prefab";
             AssetPaths.Add(gameObjectPath);
             PrefabUtility.SaveAsPrefabAsset(modelGameObject, gameObjectPath);
 

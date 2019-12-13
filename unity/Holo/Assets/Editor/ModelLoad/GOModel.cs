@@ -29,13 +29,11 @@ namespace ModelLoad
         // Exports finished GameObject to a .prefab
         private void CreatePrefab(ModelLayerInfo layerInfo, GameObject modelGameObject, string objectName)
         {
-            string rootAssetsDir = @"Assets/Resources/" + Info.Caption;
+			AssetDirs.CreateDirectory(AssetDirs.TempAssetsResorcesDir);
+            string rootAssetsDir = AssetDirs.TempAssetsResorcesDir + "/" + Info.Caption;
+			AssetDirs.CreateDirectory(rootAssetsDir);
 
-            if (!AssetDatabase.IsValidFolder(rootAssetsDir))
-            {
-                AssetDatabase.CreateFolder("Assets/Resources", Info.Caption);
-            }
-			string prefabPath = rootAssetsDir + @"/" + objectName + ".prefab";
+			string prefabPath = rootAssetsDir + "/" + objectName + ".prefab";
 			AssetPaths.Add(prefabPath);
             PrefabUtility.SaveAsPrefabAsset(modelGameObject, prefabPath);
         }

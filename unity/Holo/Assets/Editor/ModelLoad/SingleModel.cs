@@ -173,7 +173,7 @@ namespace ModelLoad
                     texture = layerAutomaticIcon;
                 }
 
-                string iconAssetPath = "Assets/icon.asset";
+                string iconAssetPath = AssetDirs.TempAssetsDir + "/icon.asset";
                 AssetDatabase.CreateAsset(texture, iconAssetPath);
                 AssetPaths.Add(iconAssetPath);
             }
