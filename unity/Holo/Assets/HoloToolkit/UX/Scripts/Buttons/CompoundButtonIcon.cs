@@ -136,7 +136,10 @@ namespace HoloToolkit.Unity.Buttons
             }
         }
 
+        [System.NonSerialized]
         public float IconScale = 1f;
+
+        [System.NonSerialized]
         public float IconShiftY = 0f;
 
         private void SetIconName(string newName)
