@@ -8,7 +8,6 @@ using ModelLoad.ModelImport.VTKImport;
 
 namespace ModelLoad.ModelImport
 {
-    //A class for importing a file series from a directory.
     public class FileSeriesImporter
     {
         public GameObject ModelGameObject { get; private set; }
@@ -17,7 +16,6 @@ namespace ModelLoad.ModelImport
         private Dictionary<string, Vector3> boundingVertices = new Dictionary<string, Vector3>();
         private bool simulationData = false;
 
-        //Imports data from file series.
         public void ImportData(ModelLayerInfo layerInfo, string gameObjectName)
         {
             ModelGameObject = new GameObject(gameObjectName);
@@ -29,7 +27,6 @@ namespace ModelLoad.ModelImport
             AddMeshToGameObject();
         }
 
-        //Gets filepaths of particular frames and their extension
         private void GetFilepaths(string rootDirectory)
         {
             filePaths = Directory.GetFiles(rootDirectory + @"\");
