@@ -1,43 +1,27 @@
-﻿using System.IO;
-using Kitware.VTK;
+﻿using Kitware.VTK;
 
 
 namespace VTKConverter
 {
     class FileConverter
     {
-        public void Convert(string path, bool simulation)
+        public void Convert(string path, bool simulationFlag)
         {
-            using (vtkDataSetReader reader = new vtkDataSetReader())
-            using (vtkDataSetWriter writer = new vtkDataSetWriter())
-            {
-                reader.SetFileName(path);
-                vtkPolyData readerOutput = reader.GetPolyDataOutput();
-                if (readerOutput.GetMaxCellSize() != 3)
-                {
-                    readerOutput = Triangulate(readerOutput);
-                }
-                vtkUnstructuredGrid unstructuredGrid = Polydata2UnstructuredGrid(readerOutput);
-                writer.SetInput(unstructuredGrid);
-                string outputPath = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path)) + "_gottem.vtu";
-                writer.WriteToOutputStringOn();
-                writer.SetHeader("");
-                writer.Update();
-                string vtkfile = writer.RegisterAndGetOutputString();
-                StringConverter stringConverter = new StringConverter();
-                vtkfile = stringConverter.ConvertString(vtkfile);
-                File.WriteAllText(outputPath, vtkfile);
-            }
+            vtkUnstructuredGrid vtkModel = ReadVTKData(path);
+            ModelData modelData = new ModelData(vtkModel, simulationFlag);
+            WriteModelToFile(modelData);
         }
 
-        private vtkPolyData Triangulate(vtkPolyData input)
+        private vtkUnstructuredGrid ReadVTKData(string path)
         {
-            vtkTriangleFilter triangleFilter = new vtkTriangleFilter();
-            triangleFilter.SetInput(input);
-
-            vtkPolyData output = triangleFilter.GetOutput();
-
-            return output;
+            using (vtkDataSetReader reader = new vtkDataSetReader())
+            {
+                //TODO: Can I use vtkDataSet and leave it at that or Do I need to use PolyData/UnstructuredGridReader
+                reader.SetFileName(path);
+                vtkPolyData readerOutput = reader.GetPolyDataOutput();
+                return Polydata2UnstructuredGrid(readerOutput);
+            }
+            
         }
 
         private vtkUnstructuredGrid Polydata2UnstructuredGrid(vtkPolyData input)
@@ -48,6 +32,11 @@ namespace VTKConverter
             vtkUnstructuredGrid unstructuredGrid = appendFilter.GetOutput();
 
             return unstructuredGrid;
+        }
+
+        private void WriteModelToFile(ModelData modelData)
+        { 
+            //TODO: Write model properties into a temp txt file.
         }
     }
 }
