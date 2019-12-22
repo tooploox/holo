@@ -15,9 +15,9 @@ namespace VTKConverter
                 throw new ArgumentException("Wrong number of parameters at the input!");
             }
             string path = args[0];
-            bool simulation = Convert.ToBoolean(args[1]);
+            string dataType = args[1];
             FileConverter fileConverter = new FileConverter();
-            fileConverter.Convert(path, simulation);
+            fileConverter.Convert(path, dataType);
         }
     }
 }

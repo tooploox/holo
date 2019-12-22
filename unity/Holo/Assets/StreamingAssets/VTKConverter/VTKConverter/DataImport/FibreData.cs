@@ -1,6 +1,4 @@
-﻿using System.Linq;
-using System.Collections;
-using Kitware.VTK;
+﻿using Kitware.VTK;
 
 namespace VTKConverter.DataImport
 {
@@ -12,16 +10,10 @@ namespace VTKConverter.DataImport
         {
             BoundingBox = vtkModel.GetBounds();
             numberOfPoints = vtkModel.GetNumberOfPoints();
+            SetPointIndices(numberOfPoints);
             GetVertices(vtkModel);
-            GetIndices(vtkModel);
             GetVectors(vtkModel);
             GetAngles(vtkModel);
-        }
-
-        protected override void GetIndices(vtkDataSet vtkModel)
-        {
-            
-            Indices = Enumerable.Range(0, numberOfPoints).ToArray();
         }
 
         private void GetVectors(vtkDataSet vtkModel)

@@ -1,4 +1,5 @@
-﻿using Kitware.VTK;
+﻿using System.Linq;
+using Kitware.VTK;
 
 namespace VTKConverter.DataImport
 {
@@ -30,6 +31,11 @@ namespace VTKConverter.DataImport
             {
                 currentIndexNumber = GetCellIndices(currentIndexNumber, vtkModel.GetCell(i).GetPointIds());
             }
+        }
+
+        protected void SetPointIndices(int numberOfPoints)
+        {
+            Indices = Enumerable.Range(0, numberOfPoints).ToArray();
         }
 
         private int GetCellIndices(int currentIndexNumber, vtkIdList cellIndices)

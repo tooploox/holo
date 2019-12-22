@@ -5,19 +5,19 @@ namespace VTKConverter
 {
     class FileConverter
     {
-        public void Convert(string path, bool simulationFlag)
+        public void Convert(string path, string dataType)
         {
             vtkDataSet vtkModel = ReadVTKData(path);
-            ModelData modelData = ImportModelData(vtkModel, simulationFlag);
+            ModelData modelData = ImportModelData(vtkModel, dataType);
             WriteModelToFile(modelData);
         }
 
         private vtkDataSet ReadVTKData(string path)
         {
             using (vtkDataSetReader reader = new vtkDataSetReader())
-            {
-                //TODO: Can I use vtkDataSet and leave it at that or Do I need to use PolyData/UnstructuredGridReader
+            { 
                 reader.ReadAllScalarsOn();
+                reader.GetReadAllColorScalars();
                 reader.SetFileName(path);
                 reader.Update();
                 vtkDataSet vtkModel = reader.GetOutput();
@@ -26,16 +26,19 @@ namespace VTKConverter
             
         }
 
-        private ModelData ImportModelData(vtkDataSet vtkModel, bool simulationFlag)
+        private ModelData ImportModelData(vtkDataSet vtkModel, string dataType)
         {
             ModelData modelData;
-            switch (simulationFlag)
+            switch (dataType)
             {
-                case true:
+                case "anatomy":
+                    modelData = new AnatomyData(vtkModel);
+                    return modelData;
+                case "fibre":
                     modelData = new FibreData(vtkModel);
                     return modelData;
-                case false:
-                    modelData = new AnatomyData(vtkModel);
+                case "flow":
+                    modelData = new FlowData(vtkModel);
                     return modelData;
                 default:
                     throw new System.Exception("Wrong model type!");
