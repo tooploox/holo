@@ -1,5 +1,5 @@
 ﻿using Kitware.VTK;
-
+using VTKConverter.DataImport;
 
 namespace VTKConverter
 {
@@ -8,7 +8,7 @@ namespace VTKConverter
         public void Convert(string path, bool simulationFlag)
         {
             vtkDataSet vtkModel = ReadVTKData(path);
-            ModelData modelData = new ModelData(vtkModel, simulationFlag);
+            ModelData modelData = ImportModelData(vtkModel, simulationFlag);
             WriteModelToFile(modelData);
         }
 
@@ -23,6 +23,22 @@ namespace VTKConverter
                 return readerOutput;
             }
             
+        }
+
+        private ModelData ImportModelData(vtkDataSet vtkModel, bool simulationFlag)
+        {
+            ModelData modelData;
+            switch (simulationFlag)
+            {
+                case true:
+                    modelData = new AnatomyData(vtkModel, simulationFlag);
+                    return modelData;
+                case false:
+                    modelData = new AnatomyData(vtkModel, simulationFlag);
+                    return modelData;
+                default:
+                    throw new System.Exception("Wrong model type!");
+            }
         }
 
         private void WriteModelToFile(ModelData modelData)

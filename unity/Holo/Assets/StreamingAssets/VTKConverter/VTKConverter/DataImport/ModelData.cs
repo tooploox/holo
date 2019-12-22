@@ -1,28 +1,26 @@
 ﻿using Kitware.VTK;
 
-namespace VTKConverter
+namespace VTKConverter.DataImport
 {
-    class ModelData
+    abstract class ModelData
     {
-        public double[] BoundingBox { get; private set; }
-        public float[] Vertices { get; private set; }
-        public int[] Indices { get; private set; }
-        public float[] Vectors { get; private set; }
-        public float[] Scalars { get; private set; }
+        public double[] BoundingBox { get; protected set; }
+        public double[][] Vertices { get; protected set; }
+        public int[] Indices { get; protected set; }
+        public float[] Vectors { get; protected set; }
+        public float[] Scalars { get; protected set; }
 
-        public ModelData(vtkDataSet vtkModel, bool simulationFlag)
+        protected void SetVertices(vtkDataSet vtkModel)
         {
-            //TODO: Implement reading vertices cells if simulation - vectors and colours
-            BoundingBox = vtkModel.GetBounds();
-            SetIndices(vtkModel);
+            int numberOfPoints = vtkModel.GetNumberOfPoints();
+            Vertices = new double[numberOfPoints][];
+            for (int i = 0; i < numberOfPoints; i++)
+            {
+                Vertices[i] = vtkModel.GetPoint(i);
+            }
         }
 
-        private void SetVertices()
-        {
-
-        }
-
-        private void SetIndices(vtkDataSet vtkModel)
+        protected void SetIndices(vtkDataSet vtkModel)
         {
             int numberOfCells = vtkModel.GetNumberOfCells();
             int cellSize = vtkModel.GetMaxCellSize();
