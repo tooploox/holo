@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace VTKConverter.DataImport
 {
-    class FiberData
+    class FlowData : ModelData
     {
+
     }
 }

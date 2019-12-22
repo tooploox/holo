@@ -7,10 +7,10 @@ namespace VTKConverter.DataImport
         public double[] BoundingBox { get; protected set; }
         public double[][] Vertices { get; protected set; }
         public int[] Indices { get; protected set; }
-        public float[] Vectors { get; protected set; }
-        public float[] Scalars { get; protected set; }
+        public double[][] Vectors { get; protected set; }
+        public double[][] Scalars { get; protected set; }
 
-        protected void SetVertices(vtkDataSet vtkModel)
+        protected void GetVertices(vtkDataSet vtkModel)
         {
             int numberOfPoints = vtkModel.GetNumberOfPoints();
             Vertices = new double[numberOfPoints][];
@@ -20,7 +20,7 @@ namespace VTKConverter.DataImport
             }
         }
 
-        protected void SetIndices(vtkDataSet vtkModel)
+        protected virtual void GetIndices(vtkDataSet vtkModel)
         {
             int numberOfCells = vtkModel.GetNumberOfCells();
             int cellSize = vtkModel.GetMaxCellSize();

@@ -4,11 +4,11 @@ namespace VTKConverter.DataImport
 {
     class AnatomyData : ModelData
     {
-        public AnatomyData(vtkDataSet vtkModel, bool simulationFlag)
+        public AnatomyData(vtkDataSet vtkModel)
         {
             BoundingBox = vtkModel.GetBounds();
-            SetVertices(vtkModel);
-            SetIndices(vtkModel);
+            GetVertices(vtkModel);
+            GetIndices(vtkModel);
         }
     }
 }

@@ -17,10 +17,11 @@ namespace VTKConverter
             using (vtkDataSetReader reader = new vtkDataSetReader())
             {
                 //TODO: Can I use vtkDataSet and leave it at that or Do I need to use PolyData/UnstructuredGridReader
+                reader.ReadAllScalarsOn();
                 reader.SetFileName(path);
                 reader.Update();
-                vtkDataSet readerOutput = reader.GetOutput();
-                return readerOutput;
+                vtkDataSet vtkModel = reader.GetOutput();
+                return vtkModel;
             }
             
         }
@@ -31,10 +32,10 @@ namespace VTKConverter
             switch (simulationFlag)
             {
                 case true:
-                    modelData = new AnatomyData(vtkModel, simulationFlag);
+                    modelData = new FibreData(vtkModel);
                     return modelData;
                 case false:
-                    modelData = new AnatomyData(vtkModel, simulationFlag);
+                    modelData = new AnatomyData(vtkModel);
                     return modelData;
                 default:
                     throw new System.Exception("Wrong model type!");
