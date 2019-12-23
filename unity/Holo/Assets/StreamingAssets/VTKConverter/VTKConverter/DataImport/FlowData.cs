@@ -25,6 +25,7 @@ namespace VTKConverter.DataImport
             {
                 Vertices[currentVertexNumber] = vtkModel.GetPoint(i);
                 Vectors[currentVertexNumber] = vtkModel.GetPoint(i+1);
+                currentVertexNumber += 1;
             }
         }
 

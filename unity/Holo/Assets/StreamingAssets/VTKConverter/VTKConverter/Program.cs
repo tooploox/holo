@@ -10,14 +10,15 @@ namespace VTKConverter
     {
         static void Main(string[] args)
         {
-            if (args.Length != 2)
+            if (args.Length != 3)
             {
                 throw new ArgumentException("Wrong number of parameters at the input!");
             }
-            string path = args[0];
-            string dataType = args[1];
+            string inputPath = args[0];
+            string outputPath = args[1];
+            string dataType = args[2];
             FileConverter fileConverter = new FileConverter();
-            fileConverter.Convert(path, dataType);
+            fileConverter.Convert(inputPath, outputPath, dataType);
         }
     }
 }

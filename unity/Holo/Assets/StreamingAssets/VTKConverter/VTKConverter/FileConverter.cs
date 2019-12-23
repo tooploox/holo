@@ -1,21 +1,23 @@
-﻿using Kitware.VTK;
+﻿using System;
+using System.Linq;
+using Kitware.VTK;
 using VTKConverter.DataImport;
 
 namespace VTKConverter
 {
     class FileConverter
     {
-        public void Convert(string path, string dataType)
+        public void Convert(string inputPath, string outputPath, string dataType)
         {
-            vtkDataSet vtkModel = ReadVTKData(path);
+            vtkDataSet vtkModel = ReadVTKData(inputPath);
             ModelData modelData = ImportModelData(vtkModel, dataType);
-            WriteModelToFile(modelData);
+            WriteModelToFile(modelData, outputPath);
         }
 
         private vtkDataSet ReadVTKData(string path)
         {
             using (vtkDataSetReader reader = new vtkDataSetReader())
-            { 
+            {
                 reader.ReadAllScalarsOn();
                 reader.GetReadAllColorScalars();
                 reader.SetFileName(path);
@@ -23,7 +25,7 @@ namespace VTKConverter
                 vtkDataSet vtkModel = reader.GetOutput();
                 return vtkModel;
             }
-            
+
         }
 
         private ModelData ImportModelData(vtkDataSet vtkModel, string dataType)
@@ -45,9 +47,13 @@ namespace VTKConverter
             }
         }
 
-        private void WriteModelToFile(ModelData modelData)
-        { 
-            //TODO: Write model properties into a temp txt file.
+        private void WriteModelToFile(ModelData modelData, string outputPath)
+        {
+            string modelString = modelData.GetModelAsString();
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter(outputPath))
+            {
+                file.Write(modelString);
+            }
         }
     }
 }
