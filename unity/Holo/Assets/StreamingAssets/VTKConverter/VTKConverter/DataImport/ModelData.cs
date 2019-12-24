@@ -16,15 +16,15 @@ namespace VTKConverter.DataImport
         {
             string modelString = "";
             modelString += "BOUNDS\n" + ConvertArrayToString(BoundingBox) + "\n";
-            modelString += "VERTICES\n" + ConvertArrayToString(Vertices) + "\n";
+            modelString += "VERTICES " + Vertices.Length.ToString() + "\n" + ConvertArrayToString(Vertices) + "\n";
             modelString += "INDICES\n" + ConvertArrayToString(Indices) + "\n";
             if (Vectors != null)
             {
-                modelString += "VECTORS\n" + ConvertArrayToString(Vectors) + "\n";
+                modelString += "VECTORS " + Vectors.Length.ToString() + "\n" + ConvertArrayToString(Vectors) + "\n";
             }
             if (Scalars != null)
             {
-                modelString += "SCALARS\n" + ConvertArrayToString(Scalars) + "\n";
+                modelString += "SCALARS " + Scalars.Length.ToString() + "\n" + ConvertArrayToString(Scalars) + "\n";
             }
             return modelString;
         }

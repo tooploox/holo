@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using UnityEngine;
-using UnityEditor;
 
 
 namespace ModelLoad.ModelImport.VTKConvertedImport
@@ -35,15 +35,60 @@ namespace ModelLoad.ModelImport.VTKConvertedImport
 
         private void ImportData(StreamReader streamReader)
         {
-            /***
-            TODO: Import 
-            1. Boundaries 
-            2.Vertices 
-            3. Indices
-            If simulation:
-            4. Vectors
-            5. Colours/Scalars
-            ***/
+            while (!streamReader.EndOfStream)
+            {
+                string line = streamReader.ReadLine();
+                if (line.IndexOf("BOUNDS") >= 0)
+                {
+                    ImportBoundingVertices(streamReader.ReadLine());
+                }
+                if (line.IndexOf("VERTICES") >= 0)
+                {
+                    Vertices = ImportVector3Array(streamReader.ReadLine(), GetNumberOfVectors(line));
+                }
+                if (line.IndexOf("INDICES") >= 0)
+                {
+                    ImportIndices(streamReader.ReadLine());
+                }
+                if (line.IndexOf("VECTORS") >= 0)
+                {
+                    Normals = ImportVector3Array(streamReader.ReadLine(), GetNumberOfVectors(line));
+                }
+                if (line.IndexOf("SCALARS") >= 0)
+                {
+                    DeltaTangents = ImportVector3Array(streamReader.ReadLine(), GetNumberOfVectors(line));
+                }
+            }
+        }
+
+        private void ImportBoundingVertices(string boundsStr)
+        {
+            float[] coordinates = Array.ConvertAll(boundsStr.Split(' '), s => float.Parse(s, CultureInfo.InvariantCulture.NumberFormat));
+            BoundingVertices["minVertex"].Set(coordinates[0], coordinates[1], coordinates[2]);
+            BoundingVertices["minVertex"].Set(coordinates[3], coordinates[4], coordinates[5]);
+        }
+        private Vector3[] ImportVector3Array(string vectorsStr, int NumberOfVectors)
+        {
+            Vector3[] vectorArray = new Vector3[NumberOfVectors];
+            float[] coordinates = Array.ConvertAll(vectorsStr.Split(' '), s => float.Parse(s, CultureInfo.InvariantCulture.NumberFormat));
+            int currentVector = 0;
+            for(int i = 0; i < coordinates.Length; i+=3)
+            {
+                vectorArray[currentVector].Set(coordinates[i], coordinates[i + 1], coordinates[i + 2]);
+                currentVector++;
+            }
+            return vectorArray;
+        }
+
+        private void ImportIndices(string indicesStr)
+        {
+            Indices = Array.ConvertAll(indicesStr.Split(' '), int.Parse);
+        }
+
+        private int GetNumberOfVectors(string line)
+        {
+            string[] cellsData = line.Split(' ');
+            return int.Parse(cellsData[1]);
         }
     }
 }
