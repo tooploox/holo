@@ -34,7 +34,6 @@ namespace VTKConverter.DataImport
             // Kitware.VTK.dll automatically scales colours to 0-255 range.
             Scalars = new double[numberOfVertices][];
             vtkDataArray colors = vtkModel.GetCellData().GetScalars("Colors");
-            int aa = colors.GetNumberOfTuples();
             for(int i = 0; i < numberOfVertices; i++)
             {
                 Scalars[i] = colors.GetTuple3(i);

@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Linq;
+using System.IO;
 using Kitware.VTK;
 using VTKConverter.DataImport;
 
@@ -7,11 +7,13 @@ namespace VTKConverter
 {
     class FileConverter
     {
-        public void Convert(string inputPath, string outputPath, string dataType)
+        public void Convert(string inputPath, string outputRootDir, string dataType)
         {
             vtkDataSet vtkModel = ReadVTKData(inputPath);
             ModelData modelData = ImportModelData(vtkModel, dataType);
-            WriteModelToFile(modelData, outputPath);
+            string fileName = Path.GetFileNameWithoutExtension(inputPath);
+            WriteModelToFile(modelData, fileName, outputRootDir);
+            Console.WriteLine(fileName + " converted sucessfully.");
         }
 
         private vtkDataSet ReadVTKData(string path)
@@ -43,14 +45,15 @@ namespace VTKConverter
                     modelData = new FlowData(vtkModel);
                     return modelData;
                 default:
-                    throw new System.Exception("Wrong model type!");
+                    throw new Exception("Wrong model type!");
             }
         }
 
-        private void WriteModelToFile(ModelData modelData, string outputPath)
+        private void WriteModelToFile(ModelData modelData, string fileName, string outputRootDir)
         {
             string modelString = modelData.GetModelAsString();
-            using (System.IO.StreamWriter file = new System.IO.StreamWriter(outputPath))
+            string outputPath = outputRootDir + @"\" + fileName + ".txt";
+            using (StreamWriter file = new StreamWriter(outputPath))
             {
                 file.Write(modelString);
             }
