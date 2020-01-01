@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
 using Kitware.VTK;
 
 namespace VTKConverter.DataImport
@@ -69,13 +70,14 @@ namespace VTKConverter.DataImport
 
         private string ConvertArrayToString(double[][] jaggedArray)
         {
-            string txtArray = "";
+            StringBuilder stringBuilder = new StringBuilder();
             for (int i = 0; i < jaggedArray.Length; i++)
             {
                 string vertexStr = string.Join(" ", jaggedArray[i].Select(p => Math.Round(p, 5).ToString()).ToArray());
-                txtArray += vertexStr + " ";
+                stringBuilder.Append(vertexStr + " ");
+                
             }
-            return txtArray;
+            return stringBuilder.ToString();
         }
 
         private string ConvertArrayToString(int[] indicesArray)

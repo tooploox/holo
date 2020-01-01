@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using Kitware.VTK;
 using VTKConverter.DataImport;
 
@@ -21,6 +22,10 @@ namespace VTKConverter
             using (vtkDataSetReader reader = new vtkDataSetReader())
             {
                 reader.ReadAllScalarsOn();
+                reader.GetReadAllScalars();
+                reader.ReadAllVectorsOn();
+                reader.GetReadAllVectors();
+                reader.ReadAllColorScalarsOn();
                 reader.GetReadAllColorScalars();
                 reader.SetFileName(path);
                 reader.Update();
@@ -37,23 +42,24 @@ namespace VTKConverter
             {
                 case "anatomy":
                     modelData = new AnatomyData(vtkModel);
-                    return modelData;
+                    break;
                 case "fibre":
                     modelData = new FibreData(vtkModel);
-                    return modelData;
+                    break;
                 case "flow":
                     modelData = new FlowData(vtkModel);
-                    return modelData;
+                    break;
                 default:
                     throw new Exception("Wrong model type!");
             }
+            return modelData;
         }
 
         private void WriteModelToFile(ModelData modelData, string fileName, string outputRootDir)
         {
             string modelString = modelData.GetModelAsString();
             string outputPath = outputRootDir + @"\" + fileName + ".txt";
-            using (StreamWriter file = new StreamWriter(outputPath))
+            using (StreamWriter file = new StreamWriter(outputPath, false, Encoding.ASCII, 65536))
             {
                 file.Write(modelString);
             }

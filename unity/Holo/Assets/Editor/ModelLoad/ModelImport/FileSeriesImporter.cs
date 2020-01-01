@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
 
 using ModelLoad.ModelImport.VTKImport;
+using ModelLoad.ModelImport.VTKConvertedImport;
 
 namespace ModelLoad.ModelImport
 {
@@ -19,12 +21,25 @@ namespace ModelLoad.ModelImport
         public void ImportData(ModelLayerInfo layerInfo, string gameObjectName)
         {
             ModelGameObject = new GameObject(gameObjectName);
-            simulationData = layerInfo.Simulation;
-            ModelMesh = new ModelMesh(layerInfo.Simulation);
+            simulationData = CheckIfSimulation(layerInfo.Simulation);
+            ModelMesh = new ModelMesh(simulationData);
             
             GetFilepaths(layerInfo.Directory);
             ImportFiles();
             AddMeshToGameObject();
+        }
+
+        private bool CheckIfSimulation(string simulationFlag)
+        {
+            string[] simulationVariants = {"true", "fibre", "flow"};
+            if (simulationVariants.Contains(simulationFlag))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            };
         }
 
         private void GetFilepaths(string rootDirectory)
@@ -97,12 +112,16 @@ namespace ModelLoad.ModelImport
                     {
                         fileImporter = new UnstructuredGridImporter("UNSTRUCTURED_GRID");
                     }
-                    return fileImporter;
+                    break;
+                case ".txt":
+                    fileImporter = new VTKConvertedImporter();
+                    break;
                 //case ".stl"
                 //    break;
                 default:
                     throw new Exception("Type not supported!");
             }
+            return fileImporter;
         }
 
         //Function for aborting the import of a model
