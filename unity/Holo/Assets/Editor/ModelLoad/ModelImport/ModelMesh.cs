@@ -64,7 +64,6 @@ namespace ModelLoad.ModelImport
                 tangents[i].w = 1;
             }
             mesh.tangents = tangents;
-            mesh.uv = new Vector2[numberOfVertices];
         }
 
         //Checks if topology stays the same between current and first file, sending a warning if it doesn't.
