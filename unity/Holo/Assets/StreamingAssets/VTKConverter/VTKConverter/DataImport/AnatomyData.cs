@@ -4,9 +4,8 @@ namespace VTKConverter.DataImport
 {
     class AnatomyData : ModelData
     {
-        public AnatomyData(vtkDataSet vtkModel)
+        public AnatomyData(vtkDataSet vtkModel) : base(vtkModel)
         {
-            BoundingBox = vtkModel.GetBounds();
             GetVertices(vtkModel);
             GetIndices(vtkModel);
         }

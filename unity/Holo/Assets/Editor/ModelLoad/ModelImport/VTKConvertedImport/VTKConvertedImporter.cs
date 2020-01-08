@@ -1,7 +1,8 @@
 ﻿using System;
-using System.Globalization;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 using UnityEngine;
 
@@ -42,6 +43,10 @@ namespace ModelLoad.ModelImport.VTKConvertedImport
                 {
                     ImportBoundingVertices(streamReader.ReadLine());
                 }
+                if (line.IndexOf("NUMBER OF FACET EDGES") >= 0)
+                {
+                    VerticesInFacet = int.Parse(line.Split(' ').Last());
+                }
                 if (line.IndexOf("VERTICES") >= 0)
                 {
                     Vertices = ImportVector3Array(streamReader.ReadLine(), GetNumberOfVectors(line));
@@ -63,14 +68,14 @@ namespace ModelLoad.ModelImport.VTKConvertedImport
 
         private void ImportBoundingVertices(string boundsStr)
         {
-            float[] coordinates = Array.ConvertAll(boundsStr.Split(' '), s => float.Parse(s, CultureInfo.InvariantCulture.NumberFormat));
-            BoundingVertices["minVertex"].Set(coordinates[0], coordinates[1], coordinates[2]);
-            BoundingVertices["minVertex"].Set(coordinates[3], coordinates[4], coordinates[5]);
+            float[] coordinates = Array.ConvertAll(boundsStr.Split(' '), s => float.Parse(s, NumberStyles.Any, CultureInfo.InvariantCulture.NumberFormat));
+            BoundingVertices["minVertex"] = new Vector3(coordinates[0], coordinates[1], coordinates[2]);
+            BoundingVertices["maxVertex"] = new Vector3(coordinates[3], coordinates[4], coordinates[5]);
         }
         private Vector3[] ImportVector3Array(string vectorsStr, int NumberOfVectors)
         {
             Vector3[] vectorArray = new Vector3[NumberOfVectors];
-            float[] coordinates = Array.ConvertAll(vectorsStr.Split(' '), s => float.Parse(s, CultureInfo.InvariantCulture.NumberFormat));
+            float[] coordinates = Array.ConvertAll(vectorsStr.Split(' '), s => float.Parse(s, NumberStyles.Any, CultureInfo.InvariantCulture.NumberFormat));
             int currentVector = 0;
             for(int i = 0; i < coordinates.Length; i+=3)
             {

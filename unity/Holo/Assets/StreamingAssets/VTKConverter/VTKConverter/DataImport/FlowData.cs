@@ -6,11 +6,9 @@ namespace VTKConverter.DataImport
     {
         private int numberOfVertices;
 
-        public FlowData(vtkDataSet vtkModel)
+        public FlowData(vtkDataSet vtkModel) : base(vtkModel)
         {
-            BoundingBox = vtkModel.GetBounds();
             numberOfVertices = vtkModel.GetNumberOfPoints() / 2;
-
             GetLineVerticesAndVectors(vtkModel);
             SetPointIndices(numberOfVertices);
             GetFlowColors(vtkModel);

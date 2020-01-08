@@ -6,9 +6,8 @@ namespace VTKConverter.DataImport
     {
         private int numberOfPoints;
 
-        public FibreData(vtkDataSet vtkModel)
+        public FibreData(vtkDataSet vtkModel) : base(vtkModel)
         {
-            BoundingBox = vtkModel.GetBounds();
             numberOfPoints = vtkModel.GetNumberOfPoints();
             SetPointIndices(numberOfPoints);
             GetVertices(vtkModel);
@@ -23,7 +22,8 @@ namespace VTKConverter.DataImport
             vtkDataArray vtkVectors = vtkModel.GetPointData().GetVectors("fn");
             for (int i = 0; i < numberOfPoints; i++)
             {
-               Vectors[i] = vtkVectors.GetTuple3(i);   
+                Vectors[i] = vtkVectors.GetTuple3(i);
+                Vectors[i][2] = Vectors[i][2];
             }
         }
 
@@ -36,7 +36,7 @@ namespace VTKConverter.DataImport
             vtkDataArray betaAngles = pointData.GetScalars("beta");
             for (int i = 0; i < numberOfPoints; i++)
             {
-                double[] currentScalars = { alphaAngles.GetTuple1(i), betaAngles.GetTuple1(i)};
+                double[] currentScalars = { alphaAngles.GetTuple1(i), betaAngles.GetTuple1(i), 0.0};
                 Scalars[i] = currentScalars;
             }
         }
