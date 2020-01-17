@@ -61,6 +61,10 @@ namespace ModelLoad.ModelImport
                 for (int i = 0; i < filePaths.Length; i++)
                 {
                     cancelImport = EditorUtility.DisplayCancelableProgressBar("Conversion in progress: " + ModelGameObject.name, "Converting file nr: " + i.ToString(), i * progressChunk);
+                    if (Path.GetExtension(filePaths[i]).Equals(".meta"))
+                    {
+                        continue;
+                    }
                     if (cancelImport)
                     {
                         AbortImport();

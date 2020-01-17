@@ -7,12 +7,12 @@ public class ModelLoader
 {
     /* Loads a model in batchmode or multiple models in Editor and converts them into an AssetBundle.
      * To use in batchmode: "<Path to Unity.exe>" -quit -batchmode -logFile "<Path to the logfile>"  
-    * -executeMethod ModelLoader.LoadModel -rootDirectory "<Directory of the folder which stores the meshes>" 
+    * -executeMethod ModelLoader.LoadVTKModel -rootDirectory "<Directory of the folder which stores the meshes>" 
     */
-    [MenuItem("Holo/Convert VTK model to an AssetBundle's GameObject")]
+    [MenuItem("Holo/Convert edited VTK model to an AssetBundle's GameObject")]
     public static void LoadVTKModel()
     {
-        SingleModel importedModel = new ImportedModel();
+        SingleModel importedModel = new ImportedModel(false);
         LoadModel(importedModel);
     }
 
@@ -20,6 +20,12 @@ public class ModelLoader
     public static void LoadGameObjectModel()
     {
         SingleModel importedModel = new GOModel();
+        LoadModel(importedModel);
+    }
+    [MenuItem("Holo/Convert native VTK model to an AssetBundle's GameObject")]
+    public static void LoadVTKWithConversion()
+    {
+        SingleModel importedModel = new ImportedModel(true);
         LoadModel(importedModel);
     }
 
@@ -32,9 +38,14 @@ public class ModelLoader
         {
             importedModel.GetModelData();
             assetBundleCreator.Create(importedModel);
+            if (importedModel is ImportedModel)
+            {
+                ImportedModel model = (ImportedModel) importedModel;
+                model.DeleteTmpData();
+            }
             if (Application.isBatchMode)
             {
-                loadModel = true;
+                loadModel = false;
             }
             else
             {

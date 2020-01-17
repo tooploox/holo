@@ -12,14 +12,18 @@ namespace ModelLoad
     {
         public ModelInfo Info { get; protected set; }
         public Dictionary<string, string> AssetsPath { get; protected set; } = new Dictionary<string, string>();
+        public string RootDirectory { get; protected set; }
 
         //Loads a single model, with its body and/or simulationData.
+        public SingleModel()
+        {
+            string RootDirectory = GetRootDirectory();
+        }
+
         public void GetModelData()
         {
-            string rootDirectory = GetRootDirectory();
-
             AssetsPath.Clear();
-            ReadInfoFile(rootDirectory);
+            ReadInfoFile();
             //Debug.Log("Reading model " + Info.Caption);
             foreach (ModelLayerInfo layerInfo in Info.Layers)
             {
@@ -30,20 +34,19 @@ namespace ModelLoad
 
         protected string GetRootDirectory()
         {
-            string rootDirectory = "";
             if (Application.isBatchMode)
             {
-                rootDirectory = GetBatchModeRootDir();
+                RootDirectory = GetBatchModeRootDir();
             }
             else
             {
-                rootDirectory = EditorUtility.OpenFolderPanel("Select model root folder with ModelInfo.json", Application.dataPath, "");
+                RootDirectory = EditorUtility.OpenFolderPanel("Select model root folder with ModelInfo.json", Application.dataPath, "");
             }
-            if (String.IsNullOrEmpty(rootDirectory))
+            if (string.IsNullOrEmpty(RootDirectory))
             {
                 throw new ArgumentException("Path cannot be null!");
             }
-            return rootDirectory;
+            return RootDirectory;
         }
 
         protected string GetBatchModeRootDir()
@@ -59,21 +62,21 @@ namespace ModelLoad
             return rootDirectory;
         }
 
-        protected void ReadInfoFile(string rootDirectory)
+        protected void ReadInfoFile()
         {
-            if (!File.Exists(rootDirectory + @"\" + "ModelInfo.json"))
+            if (!File.Exists(RootDirectory + @"\" + "ModelInfo.json"))
             {
                 throw new Exception("No ModelInfo.json found in root folder!");
             }
 
-            using (StreamReader r = new StreamReader(rootDirectory + @"\" + "ModelInfo.json"))
+            using (StreamReader r = new StreamReader(RootDirectory + @"\" + "ModelInfo.json"))
             {
                 string json = r.ReadToEnd();
                 Info = JsonConvert.DeserializeObject<ModelInfo>(json);
             }
             foreach (ModelLayerInfo layerInfo in Info.Layers)
             {
-                layerInfo.Directory = rootDirectory + @"\" + layerInfo.Directory;
+                layerInfo.Directory = RootDirectory + @"\" + layerInfo.Directory;
             }
 
             // simple validation of the structure
