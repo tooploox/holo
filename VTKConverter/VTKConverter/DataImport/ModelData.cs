@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.Linq;
 using System.Text;
+
 using Kitware.VTK;
 
 namespace VTKConverter.DataImport
@@ -17,27 +18,14 @@ namespace VTKConverter.DataImport
 
         public ModelData(vtkDataSet vtkModel)
         {
+            GetBounds(vtkModel);
+        }
+
+        private void GetBounds(vtkDataSet vtkModel)
+        {
             double[] boundingCoordinates = vtkModel.GetBounds();
             BoundingBox = new double[6] {boundingCoordinates[0], boundingCoordinates[2], -boundingCoordinates[4],
             boundingCoordinates[1], boundingCoordinates[3], -boundingCoordinates[5]};
-        }
-
-        public string GetModelAsString()
-        {
-            string modelString = "";
-            modelString += "BOUNDS\n" + ConvertArrayToString(BoundingBox) + "\n";
-            modelString += "NUMBER OF FACET EDGES " + NumberOfFacetEdges.ToString() + "\n";
-            modelString += "VERTICES " + Vertices.Length.ToString() + "\n" + ConvertArrayToString(Vertices) + "\n";
-            modelString += "INDICES\n" + ConvertArrayToString(Indices) + "\n";
-            if (Vectors != null)
-            {
-                modelString += "VECTORS " + Vectors.Length.ToString() + "\n" + ConvertArrayToString(Vectors) + "\n";
-            }
-            if (Scalars != null)
-            {
-                modelString += "SCALARS " + Scalars.Length.ToString() + "\n" + ConvertArrayToString(Scalars) + "\n";
-            }
-            return modelString;
         }
 
         protected void GetVertices(vtkDataSet vtkModel)
@@ -87,6 +75,24 @@ namespace VTKConverter.DataImport
                 currentIndexNumber += 1;
             }
             return currentIndexNumber;
+        }
+
+        public string GetModelAsString()
+        {
+            string modelString = "";
+            modelString += "BOUNDS\n" + ConvertArrayToString(BoundingBox) + "\n";
+            modelString += "NUMBER OF FACET EDGES " + NumberOfFacetEdges.ToString() + "\n";
+            modelString += "VERTICES " + Vertices.Length.ToString() + "\n" + ConvertArrayToString(Vertices) + "\n";
+            modelString += "INDICES\n" + ConvertArrayToString(Indices) + "\n";
+            if (Vectors != null)
+            {
+                modelString += "VECTORS " + Vectors.Length.ToString() + "\n" + ConvertArrayToString(Vectors) + "\n";
+            }
+            if (Scalars != null)
+            {
+                modelString += "SCALARS " + Scalars.Length.ToString() + "\n" + ConvertArrayToString(Scalars) + "\n";
+            }
+            return modelString;
         }
 
         private string ConvertArrayToString(double[][] jaggedArray)

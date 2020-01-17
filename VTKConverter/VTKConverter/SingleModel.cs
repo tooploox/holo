@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+
 using Newtonsoft.Json;
+
 
 namespace VTKConverter
 {
@@ -23,10 +23,9 @@ namespace VTKConverter
                 throw new Exception("No ModelInfo.json found in root folder!");
             }
 
-            using (StreamReader r = new StreamReader(rootDirectory + @"\" + "ModelInfo.json"))
+            using (StreamReader streamReader = new StreamReader(rootDirectory + @"\" + "ModelInfo.json"))
             {
-                string json = r.ReadToEnd();
-                Info = JsonConvert.DeserializeObject<ModelInfo>(json);
+                GetJsonInfo(streamReader);
             }
             foreach (ModelLayerInfo layerInfo in Info.Layers)
             {
@@ -36,8 +35,14 @@ namespace VTKConverter
             // simple validation of the structure
             if (Info.Layers.Count == 0)
             {
-                throw new Exception("No layers found in ModelInfo.{json,txt} file");
+                throw new Exception("No layers found in ModelInfo.json file");
             }
+        }
+
+        private void GetJsonInfo(StreamReader streamReader)
+        {
+            string json = streamReader.ReadToEnd();
+            Info = JsonConvert.DeserializeObject<ModelInfo>(json);
         }
     }
 }

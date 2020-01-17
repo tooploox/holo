@@ -1,8 +1,4 @@
 ﻿using System;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace VTKConverter
 {
@@ -12,7 +8,8 @@ namespace VTKConverter
         {
             if (args.Length != 2)
             {
-                throw new ArgumentException("Wrong number of parameters at the input!");
+                throw new ArgumentException("Wrong number of parameters at the input!\n" +
+                    "VTKconverter.exe <path/to/model/root/folder> <path/to/the/root/folder>");
             }
             string inputRootDir = args[0];
             string outputFolder = args[1];

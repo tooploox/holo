@@ -15,7 +15,7 @@ namespace VTKConverter
     public class ModelLayerInfo
     {
         public string Caption;
-        public string Simulation;
+        public string DataType;
         // Directory with VTK or GameObject models inside.
         // Initially (when deserialized) this is relative to ModelInfo.json,
         // but will be converted to an absolute path in the process.

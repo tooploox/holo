@@ -23,11 +23,12 @@ namespace VTKConverter
 
         private void ConvertSingleModel(SingleModel singleModel)
         {
+            Console.WriteLine("Conversion started!");
             foreach (ModelLayerInfo layerInfo in singleModel.Info.Layers)
             {
                 string outputLayerDir = outputRootDir + @"\" + Path.GetFileName(layerInfo.Directory);
                 Directory.CreateDirectory(outputLayerDir);
-                ConvertLayer(layerInfo.Directory, outputLayerDir, layerInfo.Simulation);
+                ConvertLayer(layerInfo.Directory, outputLayerDir, layerInfo.DataType);
             }
         }
 
