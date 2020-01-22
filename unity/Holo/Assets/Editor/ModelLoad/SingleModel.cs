@@ -96,15 +96,8 @@ namespace ModelLoad
 
         private bool CheckIfSimulation(string simulationFlag)
         {
-            string[] simulationVariants = { "true", "fibre", "flow" };
-            if (simulationVariants.Contains(simulationFlag))
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            };
+            string[] simulationVariants = { "true", "fibre", "flow"};
+            return simulationVariants.Contains(simulationFlag);
         }
-    }
+    }s
 }

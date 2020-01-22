@@ -13,22 +13,22 @@ namespace VTKConverter.DataImport
         public double[][] Vertices { get; protected set; }
         public int NumberOfFacetEdges { get; protected set; }
         public int[] Indices { get; protected set; }
-        public double[][] Vectors { get; protected set; }
-        public double[][] Scalars { get; protected set; }
+        public double[][] Vectors { get; protected set; } = null;
+        public double[][] Scalars { get; protected set; } = null;
 
         public ModelData(vtkDataSet vtkModel)
         {
-            GetBounds(vtkModel);
+            LoadBounds(vtkModel);
         }
 
-        private void GetBounds(vtkDataSet vtkModel)
+        private void LoadBounds(vtkDataSet vtkModel)
         {
             double[] boundingCoordinates = vtkModel.GetBounds();
             BoundingBox = new double[6] {boundingCoordinates[0], boundingCoordinates[2], -boundingCoordinates[4],
             boundingCoordinates[1], boundingCoordinates[3], -boundingCoordinates[5]};
         }
 
-        protected void GetVertices(vtkDataSet vtkModel)
+        protected void LoadVertices(vtkDataSet vtkModel)
         {
             int numberOfPoints = vtkModel.GetNumberOfPoints();
             Vertices = new double[numberOfPoints][];
@@ -39,7 +39,7 @@ namespace VTKConverter.DataImport
             }
         }
 
-        protected virtual void GetIndices(vtkDataSet vtkModel)
+        protected virtual void LoadIndices(vtkDataSet vtkModel)
         {
             int numberOfCells = vtkModel.GetNumberOfCells();
             NumberOfFacetEdges = vtkModel.GetMaxCellSize();
@@ -47,11 +47,11 @@ namespace VTKConverter.DataImport
             int currentIndexNumber = 0;
             for (int i = 0; i < numberOfCells; i++)
             {
-                currentIndexNumber = GetCellIndices(currentIndexNumber, vtkModel.GetCell(i).GetPointIds());
+                currentIndexNumber = LoadCellIndices(currentIndexNumber, vtkModel.GetCell(i).GetPointIds());
             }
         }
 
-        protected void SetPointIndices(int numberOfPoints)
+        protected void ComputePointIndices(int numberOfPoints)
         {
             NumberOfFacetEdges = 3;
             Indices = new int[numberOfPoints * 3];
@@ -66,7 +66,7 @@ namespace VTKConverter.DataImport
             }
         }
 
-        private int GetCellIndices(int currentIndexNumber, vtkIdList cellIndices)
+        private int LoadCellIndices(int currentIndexNumber, vtkIdList cellIndices)
         {
             int numberOfIndices = cellIndices.GetNumberOfIds();
             for (int j = 0; j < numberOfIndices; j++)
@@ -79,20 +79,20 @@ namespace VTKConverter.DataImport
 
         public string GetModelAsString()
         {
-            string modelString = "";
-            modelString += "BOUNDS\n" + ConvertArrayToString(BoundingBox) + "\n";
-            modelString += "NUMBER OF FACET EDGES " + NumberOfFacetEdges.ToString() + "\n";
-            modelString += "VERTICES " + Vertices.Length.ToString() + "\n" + ConvertArrayToString(Vertices) + "\n";
-            modelString += "INDICES\n" + ConvertArrayToString(Indices) + "\n";
+            StringBuilder modelString = new StringBuilder();
+            modelString.Append("BOUNDS\n" + ConvertArrayToString(BoundingBox) + "\n");
+            modelString.Append("NUMBER OF FACET EDGES " + NumberOfFacetEdges.ToString() + "\n");
+            modelString.Append("VERTICES " + Vertices.Length.ToString() + "\n" + ConvertArrayToString(Vertices) + "\n");
+            modelString.Append("INDICES\n" + ConvertArrayToString(Indices) + "\n");
             if (Vectors != null)
             {
-                modelString += "VECTORS " + Vectors.Length.ToString() + "\n" + ConvertArrayToString(Vectors) + "\n";
+                modelString.Append("VECTORS " + Vectors.Length.ToString() + "\n" + ConvertArrayToString(Vectors) + "\n");
             }
             if (Scalars != null)
             {
-                modelString += "SCALARS " + Scalars.Length.ToString() + "\n" + ConvertArrayToString(Scalars) + "\n";
+                modelString.Append("SCALARS " + Scalars.Length.ToString() + "\n" + ConvertArrayToString(Scalars) + "\n");
             }
-            return modelString;
+            return modelString.ToString();
         }
 
         private string ConvertArrayToString(double[][] jaggedArray)
@@ -104,10 +104,7 @@ namespace VTKConverter.DataImport
                 stringBuilder.Append(vertexStr + " ");  
             }
             string finalString = stringBuilder.ToString();
-            if (finalString[finalString.Length - 1].Equals(' '))
-            {
-                finalString = finalString.Remove(finalString.Length - 1);
-            }
+            finalString.TrimEnd(' ');
             return finalString;
         }
 

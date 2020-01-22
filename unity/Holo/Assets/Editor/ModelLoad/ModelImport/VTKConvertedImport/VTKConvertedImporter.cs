@@ -41,7 +41,9 @@ namespace ModelLoad.ModelImport.VTKConvertedImport
                 string line = streamReader.ReadLine();
                 if (line.IndexOf("BOUNDS") >= 0)
                 {
-                    ImportBoundingVertices(streamReader.ReadLine());
+                    float[] boundingCoordinates = ImportBoundingVertices(streamReader.ReadLine());
+                    BoundingVertices["minVertex"] = new Vector3(boundingCoordinates[0], boundingCoordinates[1], boundingCoordinates[2]);
+                    BoundingVertices["maxVertex"] = new Vector3(boundingCoordinates[3], boundingCoordinates[4], boundingCoordinates[5]);
                 }
                 if (line.IndexOf("NUMBER OF FACET EDGES") >= 0)
                 {
@@ -66,11 +68,10 @@ namespace ModelLoad.ModelImport.VTKConvertedImport
             }
         }
 
-        private void ImportBoundingVertices(string boundsStr)
+        private float[] ImportBoundingVertices(string boundsStr)
         {
-            float[] coordinates = Array.ConvertAll(boundsStr.Split(' '), s => float.Parse(s, NumberStyles.Any, CultureInfo.InvariantCulture.NumberFormat));
-            BoundingVertices["minVertex"] = new Vector3(coordinates[0], coordinates[1], coordinates[2]);
-            BoundingVertices["maxVertex"] = new Vector3(coordinates[3], coordinates[4], coordinates[5]);
+            return Array.ConvertAll(boundsStr.Split(' '), s => float.Parse(s, NumberStyles.Any, CultureInfo.InvariantCulture.NumberFormat));
+            
         }
         private Vector3[] ImportVector3Array(string vectorsStr, int NumberOfVectors)
         {

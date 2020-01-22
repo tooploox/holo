@@ -9,8 +9,8 @@ namespace VTKConverter.DataImport
         public FibreData(vtkDataSet vtkModel) : base(vtkModel)
         {
             numberOfPoints = vtkModel.GetNumberOfPoints();
-            SetPointIndices(numberOfPoints);
-            GetVertices(vtkModel);
+            ComputePointIndices(numberOfPoints);
+            LoadVertices(vtkModel);
             GetVectors(vtkModel);
             GetAngles(vtkModel);
         }

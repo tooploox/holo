@@ -34,9 +34,6 @@ namespace ModelLoad.ModelImport.VTKImport
 
             using (StreamReader streamReader = new StreamReader(this.filePath, Encoding.ASCII))
             {
-                //streamReader.ReadLine(); //DataFile version
-                //streamReader.ReadLine(); //vtk output
-                //CheckType(streamReader);
                 ImportData(streamReader);
             }
         }

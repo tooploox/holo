@@ -10,7 +10,7 @@ namespace VTKConverter
         public void Convert(string inputRootDir, string outputFolder)
         {
             CreateOutputRoot(inputRootDir, outputFolder);
-            SingleModel singleModel = new SingleModel(inputRootDir);
+            var singleModel = new SingleModel(inputRootDir);
             ConvertSingleModel(singleModel);
         }
 
@@ -34,7 +34,7 @@ namespace VTKConverter
 
         private void ConvertLayer(string inputFolder, string outputLayerDir, string dataType)
         {
-            FileConverter fileConverter = new FileConverter();
+            var fileConverter = new FileConverter();
             string[] inputPaths = GetFilepaths(inputFolder);
             foreach (string inputPath in inputPaths)
             {

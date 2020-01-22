@@ -10,7 +10,7 @@ namespace VTKConverter.DataImport
         {
             numberOfVertices = vtkModel.GetNumberOfPoints() / 2;
             GetLineVerticesAndVectors(vtkModel);
-            SetPointIndices(numberOfVertices);
+            ComputePointIndices(numberOfVertices);
             GetFlowColors(vtkModel);
         }
 

@@ -25,7 +25,8 @@ namespace VTKConverter
 
             using (StreamReader streamReader = new StreamReader(rootDirectory + @"\" + "ModelInfo.json"))
             {
-                GetJsonInfo(streamReader);
+                string json = streamReader.ReadToEnd();
+                Info = JsonConvert.DeserializeObject<ModelInfo>(json);
             }
             foreach (ModelLayerInfo layerInfo in Info.Layers)
             {
@@ -37,12 +38,6 @@ namespace VTKConverter
             {
                 throw new Exception("No layers found in ModelInfo.json file");
             }
-        }
-
-        private void GetJsonInfo(StreamReader streamReader)
-        {
-            string json = streamReader.ReadToEnd();
-            Info = JsonConvert.DeserializeObject<ModelInfo>(json);
         }
     }
 }

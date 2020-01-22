@@ -58,7 +58,7 @@ namespace VTKConverter
         {
             string modelString = modelData.GetModelAsString();
             string outputPath = outputRootDir + @"\" + fileName + ".txt";
-            using (StreamWriter file = new StreamWriter(outputPath, false, Encoding.ASCII, 65536))
+            using (StreamWriter file = new StreamWriter(outputPath, false, Encoding.ASCII, ushort.MaxValue))
             {
                 file.Write(modelString);
             }
