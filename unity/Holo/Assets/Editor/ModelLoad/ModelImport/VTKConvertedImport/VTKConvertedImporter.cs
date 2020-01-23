@@ -12,8 +12,8 @@ namespace ModelLoad.ModelImport.VTKConvertedImport
     public class VTKConvertedImporter : IFileImporter
     {
         public Vector3[] Vertices { get; protected set; }
-        public Vector3[] Normals { get; protected set; }
-        public Vector3[] DeltaTangents { get; protected set; }
+        public Vector3[] Normals { get; protected set; } = null;
+        public Vector3[] DeltaTangents { get; protected set; } = null;
         public int[] Indices { get; protected set; }
         public int VerticesInFacet { get; protected set; }
         public Dictionary<string, Vector3> BoundingVertices { get; protected set; } = new Dictionary<string, Vector3>()
@@ -51,7 +51,7 @@ namespace ModelLoad.ModelImport.VTKConvertedImport
                 }
                 if (line.IndexOf("VERTICES") >= 0)
                 {
-                    Vertices = ImportVector3Array(streamReader.ReadLine(), GetNumberOfVectors(line));
+                    Vertices = ImportVector3Array(streamReader.ReadLine(), LoadNumberOfVectors(line));
                 }
                 if (line.IndexOf("INDICES") >= 0)
                 {
@@ -59,12 +59,16 @@ namespace ModelLoad.ModelImport.VTKConvertedImport
                 }
                 if (line.IndexOf("VECTORS") >= 0)
                 {
-                    Normals = ImportVector3Array(streamReader.ReadLine(), GetNumberOfVectors(line));
+                    Normals = ImportVector3Array(streamReader.ReadLine(), LoadNumberOfVectors(line));
                 }
                 if (line.IndexOf("SCALARS") >= 0)
                 {
-                    DeltaTangents = ImportVector3Array(streamReader.ReadLine(), GetNumberOfVectors(line));
+                    DeltaTangents = ImportVector3Array(streamReader.ReadLine(), LoadNumberOfVectors(line));
                 }
+            }
+            if (Normals == null & VerticesInFacet == 3)
+            {
+                CalculateMeshNormals();
             }
         }
 
@@ -91,10 +95,51 @@ namespace ModelLoad.ModelImport.VTKConvertedImport
             Indices = Array.ConvertAll(indicesStr.Split(' '), int.Parse);
         }
 
-        private int GetNumberOfVectors(string line)
+        private int LoadNumberOfVectors(string line)
         {
             string[] cellsData = line.Split(' ');
             return int.Parse(cellsData[1]);
+        }
+
+        private void CalculateMeshNormals()
+        {
+            Normals = new Vector3[Vertices.Length];
+            int[] facetIndices = new int[3];
+            for (int i = 0; i < Indices.Length; i += VerticesInFacet)
+            {
+                for (int j = 0; j < VerticesInFacet; j++)
+                {
+                    facetIndices[j] = Indices[i + j];
+                }
+                UpdateNormals(facetIndices);
+            }
+            foreach (Vector3 normal in Normals)
+            {
+                normal.Normalize();
+            }
+        }
+        //Updates normals of the vertices belonging to the input facet.
+        private void UpdateNormals(int[] facetIndices)
+        {
+            Vector3 currentNormal = new Vector3();
+            currentNormal = CalculateFacetNormal(facetIndices);
+            foreach (int index in facetIndices)
+            {
+                Normals[index] += currentNormal;
+            }
+        }
+
+        //Calculates a normal of a facet.
+        private Vector3 CalculateFacetNormal(int[] facetIndices)
+        {
+            Vector3[] facetVertices = new Vector3[3];
+            for (int i = 0; i < 3; i++)
+            {
+                facetVertices[i] = Vertices[facetIndices[i]];
+            }
+            Vector3 normal = Vector3.Cross(facetVertices[0] - facetVertices[2], facetVertices[1] - facetVertices[0]);
+            normal.Normalize();
+            return normal;
         }
     }
 }

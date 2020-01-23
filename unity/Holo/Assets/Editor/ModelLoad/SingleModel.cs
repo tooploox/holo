@@ -91,7 +91,7 @@ namespace ModelLoad
         {
             ModelLayer layer = go.AddComponent<ModelLayer>();
             layer.Caption = layerInfo.Caption;
-            layer.Simulation = CheckIfSimulation(layerInfo.Simulation);
+            layer.Simulation = CheckIfSimulation(layerInfo.DataType);
         }
 
         private bool CheckIfSimulation(string simulationFlag)
@@ -99,5 +99,5 @@ namespace ModelLoad
             string[] simulationVariants = { "true", "fibre", "flow"};
             return simulationVariants.Contains(simulationFlag);
         }
-    }s
+    }
 }

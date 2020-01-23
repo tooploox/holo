@@ -21,7 +21,7 @@ namespace ModelLoad.ModelImport
         public void ImportData(ModelLayerInfo layerInfo, string gameObjectName)
         {
             ModelGameObject = new GameObject(gameObjectName);
-            simulationData = CheckIfSimulation(layerInfo.Simulation);
+            simulationData = CheckIfSimulation(layerInfo.DataType);
             ModelMesh = new ModelMesh(simulationData);
             
             GetFilepaths(layerInfo.Directory);

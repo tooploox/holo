@@ -130,3 +130,5 @@ C:\Users\mit-kuchnowski\repos\holo\unity\Holo\Assets\StreamingAssets\VTKConverte
 C:\Users\mit-kuchnowski\repos\holo\unity\Holo\Assets\StreamingAssets\VTKConverter\VTKConverter\obj\Debug\VTKConverter.csproj.CoreCompileInputs.cache
 C:\Users\mit-kuchnowski\repos\holo\unity\Holo\Assets\StreamingAssets\VTKConverter\VTKConverter\bin\Debug\Newtonsoft.Json.dll
 C:\Users\mit-kuchnowski\repos\holo\unity\Holo\Assets\StreamingAssets\VTKConverter\VTKConverter\bin\Debug\Newtonsoft.Json.xml
+C:\Users\mit-kuchnowski\repos\holo\VTKConverter\VTKConverter\bin\Debug\Newtonsoft.Json.dll
+C:\Users\mit-kuchnowski\repos\holo\VTKConverter\VTKConverter\bin\Debug\Newtonsoft.Json.xml

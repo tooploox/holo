@@ -101,10 +101,10 @@ namespace VTKConverter.DataImport
             for (int i = 0; i < jaggedArray.Length; i++)
             {
                 string vertexStr = string.Join(" ", jaggedArray[i].Select(p => Math.Round(p, 5).ToString(CultureInfo.InvariantCulture)).ToArray());
-                stringBuilder.Append(vertexStr + " ");  
+                stringBuilder.Append(vertexStr + ' ');  
             }
             string finalString = stringBuilder.ToString();
-            finalString.TrimEnd(' ');
+            finalString = finalString.TrimEnd();
             return finalString;
         }
 

@@ -3,17 +3,17 @@
     Layers: [
         {
             Caption: "Body",
-            Simulation: false,
+            DataType: "anatomy",
             Directory: "test_body"
         },
         {
             Caption: "Fibre Simulation",
-            Simulation: true,
+            DataType: "fibre",
             Directory: "testfibre_simulation"
         },
         {
             Caption: "Flow Simulation",
-            Simulation: true,
+            DataType: "flow",
             Directory: "testflow_simulation"
         }
     ]

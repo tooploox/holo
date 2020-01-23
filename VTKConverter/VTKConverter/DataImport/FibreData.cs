@@ -23,7 +23,7 @@ namespace VTKConverter.DataImport
             for (int i = 0; i < numberOfPoints; i++)
             {
                 Vectors[i] = vtkVectors.GetTuple3(i);
-                Vectors[i][2] = Vectors[i][2];
+                Vectors[i][2] = -Vectors[i][2];
             }
         }
 
