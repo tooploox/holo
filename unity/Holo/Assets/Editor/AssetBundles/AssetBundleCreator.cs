@@ -30,6 +30,7 @@ public class AssetBundleCreator
         {
             AssetDatabase.CreateFolder("Assets", "StreamingAssets");
         }
+        AssetDatabase.Refresh();
         BuildPipeline.BuildAssetBundles(Application.dataPath + "/StreamingAssets", buildMapArray, BuildAssetBundleOptions.None, BuildTarget.WSAPlayer);
         AssetDatabase.DeleteAsset("Assets/StreamingAssets/StreamingAssets");
         AssetDatabase.DeleteAsset("Assets/StreamingAssets/StreamingAssets.manifest");

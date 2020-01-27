@@ -9,6 +9,9 @@ public class ModelLoader
      * To use in batchmode: "<Path to Unity.exe>" -quit -batchmode -logFile "<Path to the logfile>"  
     * -executeMethod ModelLoader.LoadVTKModel -rootDirectory "<Directory of the folder which stores the meshes>" 
     */
+
+    private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
     [MenuItem("Holo/Convert edited VTK model to an AssetBundle's GameObject")]
     public static void LoadVTKModel()
     {

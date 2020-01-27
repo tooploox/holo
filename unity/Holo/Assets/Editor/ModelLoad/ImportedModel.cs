@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -9,6 +10,8 @@ namespace ModelLoad
 {
     public class ImportedModel : SingleModel
     {
+        private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         private FileSeriesImporter seriesImporter = new FileSeriesImporter();
         private string pathToTmp;
         public ImportedModel(bool vtkConversion) : base()
@@ -33,9 +36,26 @@ namespace ModelLoad
             string pathToExe = Application.dataPath.Replace(@"/", @"\") + "\\VTKConverter\\";
             string command = pathToExe + "VTKConverter.exe " + RootDirectory + " " + pathToTmp;
             string rootFolderName = Path.GetFileName(RootDirectory);
-            //command = "-NoExit -Command " + command;
-            var process = Process.Start("powershell.exe", command);
+
+            var p = new ProcessStartInfo("powershell.exe", command)
+            {
+                CreateNoWindow = true,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true,
+                UseShellExecute = false
+            };
+
+            var process = Process.Start(p);
+            
+            string error = process.StandardError.ReadToEnd();
+            var message = process.StandardOutput.ReadToEnd();
+            int exitcode = process.ExitCode;
             process.WaitForExit();
+            if (!error.Equals(""))
+            {
+                Log.Error(error);
+                throw new FileNotFoundException();
+            }
             RootDirectory = pathToTmp + @"\" + rootFolderName;
         }
 
