@@ -12,6 +12,8 @@ namespace ModelImport.LayerImport
 {
     public class LayerImporter
     {
+        private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         public GameObject ModelGameObject { get; private set; }
         public ModelMesh ModelMesh { get; private set; }
         private string[] filePaths;
@@ -29,25 +31,28 @@ namespace ModelImport.LayerImport
             AddMeshToGameObject();
         }
 
+        //To be removed.
         private bool CheckIfSimulation(string simulationFlag)
         {
             string[] simulationVariants = { "true", "fibre", "flow" };
             return simulationVariants.Contains(simulationFlag);
         }
 
-        private void GetFilepaths(string rootDirectory)
+        private void GetFilepaths(string layerDirectory)
         {
-            filePaths = Directory.GetFiles(rootDirectory + @"\");
+            filePaths = Directory.GetFiles(layerDirectory + @"\");
             if (filePaths == null)
             {
-                throw new Exception("No files found in: " + ModelGameObject.name);
+                var ex = new FileNotFoundException();
+                Log.Error("No files found in: " + layerDirectory, ex);
+                throw ex;
             }
         }
 
         //Loads meshes from separate files into Mesh Object as BlendShapeFrames
         private void ImportFrames()
         {
-            bool cancelImport = EditorUtility.DisplayCancelableProgressBar("Conversion in progress: " + ModelGameObject.name, "Converting file nr: " + 0.ToString(), 0);
+            bool cancelImport = EditorUtility.DisplayCancelableProgressBar("Import in progress: " + ModelGameObject.name, "Importing file nr: " + 0.ToString(), 0);
             try
             {
                 // the FileImporter constructor can already initialize progress bar,
@@ -60,7 +65,9 @@ namespace ModelImport.LayerImport
                 bool firstMesh = true;
                 for (int i = 0; i < filePaths.Length; i++)
                 {
-                    cancelImport = EditorUtility.DisplayCancelableProgressBar("Conversion in progress: " + ModelGameObject.name, "Converting file nr: " + i.ToString(), i * progressChunk);
+                    string logMessage ="Importing file nr: " + i.ToString();
+                    Log.Debug(ModelGameObject.name + "- Import in progress. " + logMessage);
+                    cancelImport = EditorUtility.DisplayCancelableProgressBar(ModelGameObject.name + " - Import in progress. ", logMessage, i * progressChunk);
                     if (Path.GetExtension(filePaths[i]).Equals(".meta"))
                     {
                         continue;
@@ -86,7 +93,6 @@ namespace ModelImport.LayerImport
                         ModelMesh.mesh.AddBlendShapeFrame(Path.GetFileName(filePaths[i]), 100f, frameImporter.Vertices, frameImporter.Normals, null);
                     }
                     firstMesh = false;
-                    cancelImport = EditorUtility.DisplayCancelableProgressBar("Conversion in progress", "Converting file nr: " + (i + 1).ToString(), (i + 1) * progressChunk);
                 }
             }
             finally
