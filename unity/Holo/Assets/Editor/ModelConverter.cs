@@ -21,8 +21,8 @@ class ModelConverter
 
     private void Convert()
     {
-        string pathToExe = Application.dataPath.Replace(@"/", @"\") + "\\VTKConverter\\";
-        string command = pathToExe + "VTKConverter.exe " + inputRootDir + " " + TmpPath;
+        string pathToExe = Path.GetFullPath(Application.dataPath + "/VTKConverter/");
+        string command = pathToExe + "VTKConverter.exe " + "'" + Path.GetFullPath(inputRootDir) + "' '" + Path.GetFullPath(TmpPath) + "'";
         string rootFolderName = Path.GetFileName(inputRootDir);
 
         var p = new ProcessStartInfo("powershell.exe", command)
