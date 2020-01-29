@@ -1,29 +1,41 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-using ModelLoad;
+using ModelImport;
 
 public class ModelLoader
 {
     /* Loads a model in batchmode or multiple models in Editor and converts them into an AssetBundle.
      * To use in batchmode: "<Path to Unity.exe>" -quit -batchmode -logFile "<Path to the logfile>"  
-    * -executeMethod ModelLoader.LoadModel -rootDirectory "<Directory of the folder which stores the meshes>" 
+    * -executeMethod ModelLoader.LoadVTKModel -rootDirectory "<Directory of the folder which stores the meshes>" 
     */
-    [MenuItem("Holo/Convert VTK model to an AssetBundle's GameObject")]
+
+    private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
+    //to be removed.
+    [MenuItem("Holo/Convert edited VTK model to an AssetBundle's GameObject")]
     public static void LoadVTKModel()
     {
-        SingleModel importedModel = new ImportedModel();
+        ModelImport.ModelImporter importedModel = new ConvertedModel(false);
         LoadModel(importedModel);
     }
 
     [MenuItem("Holo/Convert GameObject model to an AssetBundle's GameObject")]
     public static void LoadGameObjectModel()
     {
-        SingleModel importedModel = new GOModel();
+        Log.Info("Started preprocessing!...");
+        ModelImport.ModelImporter importedModel = new GOModel();
+        LoadModel(importedModel);
+    }
+    [MenuItem("Holo/Convert native VTK model to an AssetBundle's GameObject")]
+    public static void LoadVTKWithConversion()
+    {
+        Log.Info("Started preprocessing!...");
+        ModelImport.ModelImporter importedModel = new ConvertedModel(true);
         LoadModel(importedModel);
     }
 
-    private static void LoadModel(SingleModel importedModel)
+    private static void LoadModel(ModelImport.ModelImporter importedModel)
     {
 	    AssetDirs.CreateDirectory(AssetDirs.TempAssetsDir);
 
@@ -34,9 +46,14 @@ public class ModelLoader
         {
             importedModel.GetModelData();
             assetBundleCreator.Create(importedModel);
+            if (importedModel is ConvertedModel)
+            {
+                ConvertedModel model = (ConvertedModel) importedModel;
+                model.DeleteTmpData();
+            }
             if (Application.isBatchMode)
             {
-                loadModel = true;
+                loadModel = false;
             }
             else
             {
