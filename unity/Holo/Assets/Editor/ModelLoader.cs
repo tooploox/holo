@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-using ModelLoad;
+using ModelImport;
 
 public class ModelLoader
 {
@@ -12,27 +12,30 @@ public class ModelLoader
 
     private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
+    //to be removed.
     [MenuItem("Holo/Convert edited VTK model to an AssetBundle's GameObject")]
     public static void LoadVTKModel()
     {
-        SingleModel importedModel = new ImportedModel(false);
+        ModelImport.ModelImporter importedModel = new ConvertedModel(false);
         LoadModel(importedModel);
     }
 
     [MenuItem("Holo/Convert GameObject model to an AssetBundle's GameObject")]
     public static void LoadGameObjectModel()
     {
-        SingleModel importedModel = new GOModel();
+        Log.Info("Started preprocessing!...");
+        ModelImport.ModelImporter importedModel = new GOModel();
         LoadModel(importedModel);
     }
     [MenuItem("Holo/Convert native VTK model to an AssetBundle's GameObject")]
     public static void LoadVTKWithConversion()
     {
-        SingleModel importedModel = new ImportedModel(true);
+        Log.Info("Started preprocessing!...");
+        ModelImport.ModelImporter importedModel = new ConvertedModel(true);
         LoadModel(importedModel);
     }
 
-    private static void LoadModel(SingleModel importedModel)
+    private static void LoadModel(ModelImport.ModelImporter importedModel)
     {
         AssetBundleCreator assetBundleCreator = new AssetBundleCreator();
 
@@ -41,9 +44,9 @@ public class ModelLoader
         {
             importedModel.GetModelData();
             assetBundleCreator.Create(importedModel);
-            if (importedModel is ImportedModel)
+            if (importedModel is ConvertedModel)
             {
-                ImportedModel model = (ImportedModel) importedModel;
+                ConvertedModel model = (ConvertedModel) importedModel;
                 model.DeleteTmpData();
             }
             if (Application.isBatchMode)

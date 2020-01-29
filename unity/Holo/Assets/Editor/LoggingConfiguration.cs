@@ -15,7 +15,7 @@ public class LoggingConfiguration
         var patternLayout = new PatternLayout
         {
             ConversionPattern = "%date %logger %level - %message%newline%exception",
-            IgnoresException = false,
+            IgnoresException = false
         };
         patternLayout.ActivateOptions();
         
@@ -23,12 +23,10 @@ public class LoggingConfiguration
         var fileAppender = new RollingFileAppender
         {
             AppendToFile = true,
-            DatePattern =  @"dd.MM.yyyy'.log'",
+            DatePattern = @"dd.MM.yyyy/HH.mm.ss'.log'",
             File = Path.GetFullPath(Application.persistentDataPath + "/PreprocessingLogs/"),
             Layout = patternLayout,
-            MaxSizeRollBackups = 5,
-            MaximumFileSize = "10MB",
-            RollingStyle = RollingFileAppender.RollingMode.Composite,
+            RollingStyle = RollingFileAppender.RollingMode.Date,
             StaticLogFileName = false
         };
         fileAppender.ActivateOptions();
@@ -55,9 +53,9 @@ public class LoggingConfiguration
                 // everything that is a warning up to error is logged as warning
                 Debug.LogWarning(message);
             }
-            else
+            else if (Level.Compare(loggingEvent.Level, Level.Debug) >= 0)
             {
-                // everything else we'll just log normally
+                //If it's on the Dubug Level it will show in the Unity console, otherwise it's just in the logs.
                 Debug.Log(message);
             }
         }

@@ -2,19 +2,19 @@
 using UnityEditor;
 using UnityEngine;
 
-using ModelLoad;
+using ModelImport;
 
 public class AssetBundleCreator
 {  
     //Creates AssetBundle
-    public void Create(SingleModel importedModel)
+    public void Create(ModelImport.ModelImporter importedModel)
     {
         AssetBundleBuild[] buildMapArray = BuildMapABs(importedModel);
         CreateAssetBundle(buildMapArray);
     }
 
     // Create the array of bundle build details.
-    private AssetBundleBuild[] BuildMapABs(SingleModel importedModel)
+    private AssetBundleBuild[] BuildMapABs(ModelImport.ModelImporter importedModel)
     {
         
         AssetBundleBuild buildMap = new AssetBundleBuild();
