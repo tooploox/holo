@@ -84,9 +84,9 @@ public class DataPreparator
             case "ConvertedModel":
                 return (modelImporter: new ConvertedModel(rootDirectory), tmpConversionPath: "");
             default:
-                var exception = new IOException();
-                Log.Error("Incorrect model type!", exception);
-                throw exception;
+                var ex = new IOException();
+                Log.Error("Incorrect Model Importer type declared!", ex);
+                throw ex;
         }
     }
 
@@ -104,9 +104,9 @@ public class DataPreparator
         }
         if (string.IsNullOrEmpty(rootDirectory))
         {
-            var exception = new IOException();
-            Log.Error("Path cannot be null!", exception);
-            throw exception;
+            var ex = new IOException();
+            Log.Error("Path cannot be null!", ex);
+            throw ex;
         }
         return rootDirectory;
     }
@@ -115,13 +115,13 @@ public class DataPreparator
     {
         string[] args = Environment.GetCommandLineArgs();
         int directoryFlagIndex = Array.FindIndex(args, a => a.Equals("-rootDirectory"));
-        Log.Info("rootDirectoryIndex:" + directoryFlagIndex.ToString());
+        Log.Debug("rootDirectoryIndex:" + directoryFlagIndex.ToString());
         string rootDirectory = args[directoryFlagIndex + 1];
         if (string.IsNullOrEmpty(rootDirectory))
         {
-            var exception = new IOException();
-            Log.Error("Model's root directory has not been assigned!", exception);
-            throw exception;
+            var ex = new IOException();
+            Log.Error("Model's root directory has not been assigned!", ex);
+            throw ex;
         }
         return rootDirectory;
     }

@@ -37,6 +37,7 @@ class ModelConverter
         string error = process.StandardError.ReadToEnd();
         int exitcode = process.ExitCode;
         process.WaitForExit();
+        //TODO: Log standard output line by line!
         if (!error.Equals(""))
         {
             Log.Error(error);

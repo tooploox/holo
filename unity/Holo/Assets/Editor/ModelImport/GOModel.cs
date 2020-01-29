@@ -6,6 +6,8 @@ namespace ModelImport
 {
     class GOModel : ModelImporter
     {
+        private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         public GOModel(string rootDirectory) : base(rootDirectory) { }
 
         protected override void ImportLayer(ModelLayerInfo layerInfo)
@@ -17,12 +19,14 @@ namespace ModelImport
             GameObject modelGameObject = AssetDatabase.LoadAssetAtPath<GameObject>(objectPath);
             if (modelGameObject == null)
             {
-                throw new System.Exception("Cannot load model from " + objectPath);
+                var ex = new System.Exception();
+                Log.Error("Cannot import model from " + objectPath, ex);
+                throw ex;
             }
             GameObject modelInstance = Object.Instantiate(modelGameObject);
             AddLayerComponent(modelInstance, layerInfo);
             CreatePrefab(layerInfo, modelInstance, objectName);
-            GameObject.DestroyImmediate(modelInstance);
+            Object.DestroyImmediate(modelInstance);
         }
 
         // Exports finished GameObject to a .prefab
@@ -34,6 +38,7 @@ namespace ModelImport
             {
                 AssetDatabase.CreateFolder("Assets/Resources", Info.Caption);
             }
+            AssetDatabase.Refresh();
             AssetsPath.Add(objectName + "_GameObject", rootAssetsDir + @"/" + objectName + ".prefab");
             PrefabUtility.SaveAsPrefabAsset(modelGameObject, AssetsPath[objectName + "_GameObject"]);
         }

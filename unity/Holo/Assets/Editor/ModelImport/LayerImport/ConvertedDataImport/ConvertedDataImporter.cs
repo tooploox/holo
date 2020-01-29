@@ -11,6 +11,8 @@ namespace ModelImport.LayerImport.VTKConvertedImport
 {
     public class ConvertedDataImporter : IFrameImporter
     {
+        private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         public Vector3[] Vertices { get; protected set; }
         public Vector3[] Normals { get; protected set; } = null;
         public Vector3[] DeltaTangents { get; protected set; } = null;
@@ -51,7 +53,7 @@ namespace ModelImport.LayerImport.VTKConvertedImport
                 }
                 if (line.IndexOf("VERTICES") >= 0)
                 {
-                    Vertices = ImportVector3Array(streamReader.ReadLine(), LoadNumberOfVectors(line));
+                    Vertices = ImportVector3Array(streamReader.ReadLine(), LoadNumberOfVectors(line), "Vertices");
                 }
                 if (line.IndexOf("INDICES") >= 0)
                 {
@@ -59,11 +61,11 @@ namespace ModelImport.LayerImport.VTKConvertedImport
                 }
                 if (line.IndexOf("VECTORS") >= 0)
                 {
-                    Normals = ImportVector3Array(streamReader.ReadLine(), LoadNumberOfVectors(line));
+                    Normals = ImportVector3Array(streamReader.ReadLine(), LoadNumberOfVectors(line), "Vectors");
                 }
                 if (line.IndexOf("SCALARS") >= 0)
                 {
-                    DeltaTangents = ImportVector3Array(streamReader.ReadLine(), LoadNumberOfVectors(line));
+                    DeltaTangents = ImportVector3Array(streamReader.ReadLine(), LoadNumberOfVectors(line), "Scalars");
                 }
             }
             if (Normals == null & VerticesInFacet == 3)
@@ -77,28 +79,45 @@ namespace ModelImport.LayerImport.VTKConvertedImport
             return Array.ConvertAll(boundsStr.Split(' '), s => float.Parse(s, NumberStyles.Any, CultureInfo.InvariantCulture.NumberFormat));
             
         }
-        private Vector3[] ImportVector3Array(string vectorsStr, int NumberOfVectors)
+        private Vector3[] ImportVector3Array(string vectorsStr, int NumberOfVectors, string arrayName)
         {
-            Vector3[] vectorArray = new Vector3[NumberOfVectors];
-            float[] coordinates = Array.ConvertAll(vectorsStr.Split(' '), s => float.Parse(s, NumberStyles.Any, CultureInfo.InvariantCulture.NumberFormat));
-            int currentVector = 0;
-            for(int i = 0; i < coordinates.Length; i+=3)
+            try
             {
-                vectorArray[currentVector].Set(coordinates[i], coordinates[i + 1], coordinates[i + 2]);
-                currentVector++;
+                Vector3[] vectorArray = new Vector3[NumberOfVectors];
+                float[] coordinates = Array.ConvertAll(vectorsStr.Split(' '), s => float.Parse(s, NumberStyles.Any, CultureInfo.InvariantCulture.NumberFormat));
+                int currentVector = 0;
+                for (int i = 0; i < coordinates.Length; i += 3)
+                {
+                    vectorArray[currentVector].Set(coordinates[i], coordinates[i + 1], coordinates[i + 2]);
+                    currentVector++;
+                }
+                return vectorArray;
             }
-            return vectorArray;
+            catch (FormatException ex)
+            {
+                Log.Error("Incorrect " + arrayName + " data in: " + filePath, ex);
+                throw;
+            }
         }
 
         private void ImportIndices(string indicesStr)
         {
-            Indices = Array.ConvertAll(indicesStr.Split(' '), int.Parse);
+            try
+            {
+                Indices = Array.ConvertAll(indicesStr.Split(' '), int.Parse);
+            }
+            catch (FormatException ex)
+            {
+                Log.Error("Incorrect indices data in: " + filePath, ex);
+                throw;
+            }
         }
 
         private int LoadNumberOfVectors(string line)
         {
             string[] cellsData = line.Split(' ');
             return int.Parse(cellsData[1]);
+
         }
 
         private void CalculateMeshNormals()

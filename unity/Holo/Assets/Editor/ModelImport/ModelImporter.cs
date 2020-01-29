@@ -26,10 +26,10 @@ namespace ModelImport
         {
             AssetsPath.Clear();
             ReadInfoFile();
-            Log.Info("Converting model: \"" + Info.Caption + "\"");
+            Log.Debug("Converting model: \"" + Info.Caption + "\"");
             foreach (ModelLayerInfo layerInfo in Info.Layers)
             {
-                Log.Info("Converting layer: \"" + layerInfo.Caption + "\" from: " + layerInfo.Directory);
+                Log.Debug("Converting layer: \"" + layerInfo.Caption + "\" from: " + layerInfo.Directory);
                 ImportLayer(layerInfo);
             }
         }
@@ -54,9 +54,9 @@ namespace ModelImport
             // simple validation of the structure
             if (Info.Layers.Count == 0)
             {
-                var exception = new InvalidDataException();
-                Log.Error("No layers found in ModelInfo.json file", exception);
-                throw exception;
+                var ex = new InvalidDataException();
+                Log.Error("No layers found in ModelInfo.json file", ex);
+                throw ex;
                 
             }
         }

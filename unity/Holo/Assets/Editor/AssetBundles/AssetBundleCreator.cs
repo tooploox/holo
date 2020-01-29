@@ -26,7 +26,7 @@ public class AssetBundleCreator
     //Creates appropriate AssetBundle for the model.
     private void CreateAssetBundle(AssetBundleBuild[] buildMapArray)
     {
-        if (!AssetDatabase.IsValidFolder(@"Assets\StreamingAssets"))
+        if (!AssetDatabase.IsValidFolder(@"Assets/StreamingAssets"))
         {
             AssetDatabase.CreateFolder("Assets", "StreamingAssets");
         }
@@ -34,6 +34,5 @@ public class AssetBundleCreator
         BuildPipeline.BuildAssetBundles(Application.dataPath + "/StreamingAssets", buildMapArray, BuildAssetBundleOptions.None, BuildTarget.WSAPlayer);
         AssetDatabase.DeleteAsset("Assets/StreamingAssets/StreamingAssets");
         AssetDatabase.DeleteAsset("Assets/StreamingAssets/StreamingAssets.manifest");
-        //TODO: The .mesh and .prefab files are left for debugging purposes but should be removed in the final version.
     }
 }

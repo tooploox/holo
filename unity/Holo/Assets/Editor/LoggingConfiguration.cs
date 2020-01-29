@@ -53,7 +53,7 @@ public class LoggingConfiguration
                 // everything that is a warning up to error is logged as warning
                 Debug.LogWarning(message);
             }
-            else if (Level.Compare(loggingEvent.Level, Level.Debug) >= 0)
+            else if (Level.Compare(loggingEvent.Level, Level.Info) >= 0)
             {
                 //If it's on the Dubug Level it will show in the Unity console, otherwise it's just in the logs.
                 Debug.Log(message);
