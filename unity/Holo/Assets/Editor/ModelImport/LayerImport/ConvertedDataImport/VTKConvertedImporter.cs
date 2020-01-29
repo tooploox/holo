@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace ModelImport.LayerImport.VTKConvertedImport
 {
-    public class VTKConvertedImporter : IFrameImporter
+    public class ConvertedDataImporter : IFrameImporter
     {
         public Vector3[] Vertices { get; protected set; }
         public Vector3[] Normals { get; protected set; } = null;

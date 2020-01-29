@@ -6,6 +6,8 @@ namespace ModelImport
 {
     class GOModel : ModelImporter
     {
+        public GOModel(string rootDirectory) : base(rootDirectory) { }
+
         protected override void ImportLayer(ModelLayerInfo layerInfo)
         {
             string objectName = Info.Caption + "_" + Path.GetFileName(layerInfo.Directory);
