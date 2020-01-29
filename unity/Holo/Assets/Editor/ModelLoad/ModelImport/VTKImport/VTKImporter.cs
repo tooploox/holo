@@ -28,15 +28,12 @@ namespace ModelLoad.ModelImport.VTKImport
             this.datasetType = datasetType;
         }
 
-        public void ImportFile(string aFilePath)
+        public void ImportFile(string filePath)
         {
-            filePath = aFilePath;
+            this.filePath = filePath;
 
-            using (StreamReader streamReader = new StreamReader(filePath, Encoding.ASCII))
+            using (StreamReader streamReader = new StreamReader(this.filePath, Encoding.ASCII))
             {
-                streamReader.ReadLine(); //DataFile version
-                streamReader.ReadLine(); //vtk output
-                CheckType(streamReader);
                 ImportData(streamReader);
             }
         }

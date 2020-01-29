@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 /* Information about layer.
  * It should be present in asset bundle for each GameObject representing a layer.

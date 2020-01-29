@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
 
 using ModelLoad.ModelImport.VTKImport;
+using ModelLoad.ModelImport.VTKConvertedImport;
 
 namespace ModelLoad.ModelImport
 {
-    //A class for importing a file series from a directory.
     public class FileSeriesImporter
     {
         public GameObject ModelGameObject { get; private set; }
@@ -17,19 +18,23 @@ namespace ModelLoad.ModelImport
         private Dictionary<string, Vector3> boundingVertices = new Dictionary<string, Vector3>();
         private bool simulationData = false;
 
-        //Imports data from file series.
         public void ImportData(ModelLayerInfo layerInfo, string gameObjectName)
         {
             ModelGameObject = new GameObject(gameObjectName);
-            simulationData = layerInfo.Simulation;
-            ModelMesh = new ModelMesh(layerInfo.Simulation);
+            simulationData = CheckIfSimulation(layerInfo.DataType);
+            ModelMesh = new ModelMesh(simulationData);
             
             GetFilepaths(layerInfo.Directory);
             ImportFiles();
             AddMeshToGameObject();
         }
 
-        //Gets filepaths of particular frames and their extension
+        private bool CheckIfSimulation(string simulationFlag)
+        {
+            string[] simulationVariants = { "true", "fibre", "flow" };
+            return simulationVariants.Contains(simulationFlag);
+        }
+
         private void GetFilepaths(string rootDirectory)
         {
             filePaths = Directory.GetFiles(rootDirectory + @"\");
@@ -100,12 +105,16 @@ namespace ModelLoad.ModelImport
                     {
                         fileImporter = new UnstructuredGridImporter("UNSTRUCTURED_GRID");
                     }
-                    return fileImporter;
+                    break;
+                case ".txt":
+                    fileImporter = new VTKConvertedImporter();
+                    break;
                 //case ".stl"
                 //    break;
                 default:
                     throw new Exception("Type not supported!");
             }
+            return fileImporter;
         }
 
         //Function for aborting the import of a model

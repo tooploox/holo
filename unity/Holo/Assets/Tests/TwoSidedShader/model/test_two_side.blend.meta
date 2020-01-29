@@ -4,7 +4,19 @@ ModelImporter:
   serializedVersion: 23
   fileIDToRecycleName:
     100000: //RootNode
+    100002: Camera
+    100004: Light
+    100006: Suzanne
     400000: //RootNode
+    400002: Camera
+    400004: Light
+    400006: Suzanne
+    2000000: Camera
+    2100000: No Name
+    2300000: Suzanne
+    3300000: Suzanne
+    4300000: Suzanne
+    10800000: Light
   externalObjects: {}
   materials:
     importMaterials: 1

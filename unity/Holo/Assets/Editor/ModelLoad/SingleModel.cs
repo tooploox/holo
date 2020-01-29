@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using Newtonsoft.Json;
@@ -27,27 +28,33 @@ namespace ModelLoad
             }
         }
 
-        // Gets root directory of the model.
         protected string GetRootDirectory()
         {
             string rootDirectory = "";
             if (Application.isBatchMode)
             {
-                Debug.Log("It's Batchmode!");
-                string[] args = Environment.GetCommandLineArgs();
-                int directoryFlagIndex = Array.FindIndex(args, a => a.Equals("-rootDirectory"));
-                //Debug.Log("rootDirectoryIndex:" + directoryFlagIndex.ToString());
-                rootDirectory = args[directoryFlagIndex + 1];
-                if (String.IsNullOrEmpty(rootDirectory)) throw new Exception("Model's root directory has not been assigned!");
+                rootDirectory = GetBatchModeRootDir();
             }
             else
             {
-                Debug.Log("It's not Batchmode!");
                 rootDirectory = EditorUtility.OpenFolderPanel("Select model root folder with ModelInfo.json", Application.dataPath, "");
             }
             if (String.IsNullOrEmpty(rootDirectory))
             {
                 throw new ArgumentException("Path cannot be null!");
+            }
+            return rootDirectory;
+        }
+
+        protected string GetBatchModeRootDir()
+        {
+            string[] args = Environment.GetCommandLineArgs();
+            int directoryFlagIndex = Array.FindIndex(args, a => a.Equals("-rootDirectory"));
+            //Debug.Log("rootDirectoryIndex:" + directoryFlagIndex.ToString());
+            string rootDirectory = args[directoryFlagIndex + 1];
+            if (String.IsNullOrEmpty(rootDirectory))
+            {
+                throw new Exception("Model's root directory has not been assigned!");
             }
             return rootDirectory;
         }
@@ -84,8 +91,13 @@ namespace ModelLoad
         {
             ModelLayer layer = go.AddComponent<ModelLayer>();
             layer.Caption = layerInfo.Caption;
-            layer.Simulation = layerInfo.Simulation;
+            layer.Simulation = CheckIfSimulation(layerInfo.DataType);
         }
 
+        private bool CheckIfSimulation(string simulationFlag)
+        {
+            string[] simulationVariants = { "true", "fibre", "flow"};
+            return simulationVariants.Contains(simulationFlag);
+        }
     }
 }

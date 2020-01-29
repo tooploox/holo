@@ -121,10 +121,11 @@ namespace ModelLoad.ModelImport.VTKImport
         {
             DeltaTangents = new Vector3[Vertices.Length];
             streamReader.ReadLine();
-            for (int i = 0; i < DeltaTangents.Length; i++)
+            for (int i = 0; i < DeltaTangents.Length; i+=2)
             {
                 Vector3 currentVertex = streamReader.GetLineVertex();
                 DeltaTangents[i] = currentVertex;
+                DeltaTangents[i + 1] = currentVertex;
             }
             return true;
         }
