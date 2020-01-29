@@ -52,7 +52,7 @@ namespace ModelImport.LayerImport
             {
                 // the FileImporter constructor can already initialize progress bar,
                 // so it's inside try..finally to make sure we clear progress bar in case of error.
-                IFrameImporter frameImporter = ChooseImporter(Path.GetExtension(filePaths[0]));
+                IFrameImporter frameImporter = InitializeImporter(Path.GetExtension(filePaths[0]));
 
                 //Configuring progress bar
                 float progressChunk = (float)1 / filePaths.Length;
@@ -95,7 +95,7 @@ namespace ModelImport.LayerImport
             }
         }
 
-        private IFrameImporter ChooseImporter(string extension)
+        private IFrameImporter InitializeImporter(string extension)
         {
             IFrameImporter frameImporter;
             switch (extension)
@@ -111,7 +111,7 @@ namespace ModelImport.LayerImport
                     }
                     break;
                 case ".txt":
-                    frameImporter = new VTKConvertedImporter();
+                    frameImporter = new ConvertedDataImporter();
                     break;
                 case ".stl":
                 default:

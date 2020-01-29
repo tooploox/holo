@@ -1,6 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
+﻿using System.IO;
 using UnityEditor;
 using UnityEngine;
 
@@ -13,14 +11,17 @@ namespace ModelImport
         private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         private LayerImporter layerImporter = new LayerImporter();
-        private string pathToTmp;
-        public ConvertedModel(bool vtkConversion) : base()
+        private string tmpAssetDirectory;
+
+        public ConvertedModel(string rootDirectory) : base(rootDirectory)
         {
-            pathToTmp = Path.GetFullPath(Application.dataPath + "/tmp/");
-            if (vtkConversion)
+            tmpAssetDirectory = @"Assets/tmp";
+            if (!AssetDatabase.IsValidFolder(tmpAssetDirectory))
             {
-                ConvertVTKToTemp();
+                AssetDatabase.CreateFolder("Assets", "tmp");
             }
+            AssetDatabase.Refresh();
+
         }
 
         protected override void ImportLayer(ModelLayerInfo layerInfo)
@@ -31,41 +32,14 @@ namespace ModelImport
             SaveFilesForExport(layerInfo, objectName, layerImporter.ModelMesh.Get(), layerImporter.ModelGameObject);
         }
 
-        private void ConvertVTKToTemp()
-        {
-            string pathToExe = Application.dataPath.Replace(@"/", @"\") + "\\VTKConverter\\";
-            string command = pathToExe + "VTKConverter.exe " + RootDirectory + " " + pathToTmp;
-            string rootFolderName = Path.GetFileName(RootDirectory);
-
-            var p = new ProcessStartInfo("powershell.exe", command)
-            {
-                CreateNoWindow = false,
-                RedirectStandardError = true,
-                RedirectStandardOutput = true,
-                UseShellExecute = false
-            };
-            var process = Process.Start(p);
-            
-            string error = process.StandardError.ReadToEnd();
-            var message = process.StandardOutput.ReadToEnd();
-            int exitcode = process.ExitCode;
-            process.WaitForExit();
-            if (!error.Equals(""))
-            {
-                Log.Error(error);
-                throw new Exception();
-            }
-            RootDirectory = pathToTmp + @"\" + rootFolderName;
-        }
-
         // Saves imported model to a Unity-friendly files, to be put in AssetBundles.
         private void SaveFilesForExport(ModelLayerInfo layerInfo, string objectName, Mesh modelMesh, GameObject modelGameObject)
         {
-            string rootAssetsDir = @"Assets/tmp/" + Info.Caption;
+            string rootAssetsDir = tmpAssetDirectory + @"/" + Info.Caption;
             
             if (!AssetDatabase.IsValidFolder(rootAssetsDir))
             {
-                AssetDatabase.CreateFolder("Assets/tmp", Info.Caption);
+                AssetDatabase.CreateFolder(tmpAssetDirectory, Info.Caption);
             }
             AssetDatabase.Refresh();
             AssetsPath.Add(objectName + "_mesh", rootAssetsDir + @"/" + objectName + ".asset");
@@ -73,11 +47,6 @@ namespace ModelImport
 
             AssetsPath.Add(objectName + "_GameObject", rootAssetsDir + @"/" + objectName + ".prefab");
             PrefabUtility.SaveAsPrefabAsset(modelGameObject, AssetsPath[objectName + "_GameObject"]);
-        }
-
-        public void DeleteTmpData()
-        {
-            Directory.Delete(pathToTmp, true);
         }
     }
 }

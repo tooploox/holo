@@ -17,9 +17,9 @@ namespace ModelImport
         public string RootDirectory { get; protected set; }
 
         //Loads a single model, with its body and/or simulationData.
-        public ModelImporter()
+        public ModelImporter(string rootDirectory)
         {
-            string RootDirectory = GetRootDirectory();
+            RootDirectory = rootDirectory;
         }
 
         public void GetModelData()
@@ -32,40 +32,6 @@ namespace ModelImport
                 Log.Info("Converting layer: \"" + layerInfo.Caption + "\" from: " + layerInfo.Directory);
                 ImportLayer(layerInfo);
             }
-        }
-
-        protected string GetRootDirectory()
-        {
-            if (Application.isBatchMode)
-            {
-                RootDirectory = GetBatchModeRootDir();
-            }
-            else
-            {
-                RootDirectory = EditorUtility.OpenFolderPanel("Select model root folder with ModelInfo.json", Application.dataPath, "");
-            }
-            if (string.IsNullOrEmpty(RootDirectory))
-            {
-                var exception = new IOException();
-                Log.Error("Path cannot be null!", exception);
-                throw exception;
-            }
-            return RootDirectory;
-        }
-
-        protected string GetBatchModeRootDir()
-        {
-            string[] args = Environment.GetCommandLineArgs();
-            int directoryFlagIndex = Array.FindIndex(args, a => a.Equals("-rootDirectory"));
-            Log.Info("rootDirectoryIndex:" + directoryFlagIndex.ToString());
-            string rootDirectory = args[directoryFlagIndex + 1];
-            if (string.IsNullOrEmpty(rootDirectory))
-            {
-                var exception = new IOException();
-                Log.Error("Model's root directory has not been assigned!", exception);
-                throw exception;
-            }
-            return rootDirectory;
         }
 
         protected void ReadInfoFile()
