@@ -40,7 +40,15 @@ namespace ModelImport.LayerImport
 
         private void GetFilepaths(string layerDirectory)
         {
-            filePaths = Directory.GetFiles(layerDirectory + @"\");
+            try
+            {
+                filePaths = Directory.GetFiles(layerDirectory + @"\");
+            }
+            catch (DirectoryNotFoundException ex)
+            {
+                Log.Error("Directory does not exist at: " + layerDirectory, ex);
+                throw;
+            }
             if (filePaths == null)
             {
                 var ex = new FileNotFoundException();
@@ -131,7 +139,9 @@ namespace ModelImport.LayerImport
         {
             UnityEngine.Object.DestroyImmediate(ModelGameObject);
             EditorUtility.ClearProgressBar();
-            throw new Exception("Convertion aborted");
+            var ex = new OperationCanceledException();
+            Log.Error("Import aborted by the user!", ex);
+            throw ex;
         }
 
         private void AddMeshToGameObject()

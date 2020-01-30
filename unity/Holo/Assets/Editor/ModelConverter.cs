@@ -3,46 +3,65 @@ using System.Diagnostics;
 using System.IO;
 using UnityEngine;
 using UnityEditor;
+using System.Text;
+using System.Globalization;
 
 class ModelConverter
 {
-    public string OutputRootDir { get; private set; }
-    public string TmpPath { get; private set; }
-
-    private string inputRootDir;
     private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-    public ModelConverter(string inputRootDir)
+    public string OutputRootDir { get; private set; }
+    public string TmpPath { get; private set; }
+    private string errormsg = null;
+
+    public ModelConverter()
     {
-        this.inputRootDir = inputRootDir;
         TmpPath = FileUtil.GetUniqueTempPathInProject();
-        Convert();
     }
 
-    private void Convert()
+    public void Convert(string inputRootDir)
+    {
+        OutputRootDir = Path.GetFullPath(TmpPath + "/" + Path.GetFileName(inputRootDir));
+        var process = ConfigureProcess(inputRootDir);
+
+        process.Start();
+        process.BeginOutputReadLine();
+        errormsg = process.StandardError.ReadToEnd();
+        int exitcode = process.ExitCode;
+        process.WaitForExit();
+        if (!string.IsNullOrEmpty(errormsg))
+        {
+            Log.Error(errormsg);
+            throw new Exception();
+        }
+    }
+
+    private Process ConfigureProcess(string inputRootDir)
     {
         string pathToExe = Path.GetFullPath(Application.dataPath + "/VTKConverter/");
         string command = pathToExe + "VTKConverter.exe " + "'" + Path.GetFullPath(inputRootDir) + "' '" + Path.GetFullPath(TmpPath) + "'";
-        string rootFolderName = Path.GetFileName(inputRootDir);
-
-        var p = new ProcessStartInfo("powershell.exe", command)
+        var startInfo = new ProcessStartInfo("powershell.exe", command)
         {
             CreateNoWindow = false,
             RedirectStandardError = true,
-            RedirectStandardOutput = false,
+            RedirectStandardOutput = true,
             UseShellExecute = false
         };
-        var process = Process.Start(p);
 
-        string error = process.StandardError.ReadToEnd();
-        int exitcode = process.ExitCode;
-        process.WaitForExit();
-        //TODO: Log standard output line by line!
-        if (!error.Equals(""))
+        var process = new Process();
+        process.StartInfo = startInfo;
+
+        process.OutputDataReceived += new DataReceivedEventHandler(OutputDataHandler);
+
+        return process;
+    }
+
+    private static void OutputDataHandler(object sendingProcess,
+        DataReceivedEventArgs outLine)
+    {
+        if (!String.IsNullOrEmpty(outLine.Data))
         {
-            Log.Error(error);
-            throw new Exception();
+            Log.Debug(outLine.Data);
         }
-        OutputRootDir = TmpPath + @"\" + rootFolderName;
     }
 }
