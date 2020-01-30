@@ -17,6 +17,7 @@ public class DataPreparator
     [MenuItem("Holo/Create AssetBundle from an external supported format")]
     public static void ImportWithConversion()
     {
+        var logconfig = new LoggingConfiguration();
         var importDispatcher = new DataPreparator();
         importDispatcher.PrepareData("ConversionRequired");
     }
@@ -24,6 +25,7 @@ public class DataPreparator
     [MenuItem("Holo/Create AssetBundle from converted data")]
     public static void ImportConvertedModel()
     {
+        var logconfig = new LoggingConfiguration();
         var importDispatcher = new DataPreparator();
         importDispatcher.PrepareData("ConvertedModel");
     }
@@ -31,6 +33,7 @@ public class DataPreparator
     [MenuItem("Holo/Create AssetBundle from a Unity-supported format")]
     public static void ImportGameObjectModel()
     {
+        var logconfig = new LoggingConfiguration();
         var importDispatcher = new DataPreparator();
         importDispatcher.PrepareData("UnityNative");
     }
@@ -39,7 +42,8 @@ public class DataPreparator
     private void PrepareData(string modelType)
     {
         var assetBundleCreator = new AssetBundleCreator();
-        (var modelImporter, string tmpConversionPath) = InitializeModelImporter(modelType);
+        var modelConverter = new ModelConverter();
+        var modelImporter = InitializeModelImporter(modelType, modelConverter);
         bool loadModel = true;
         try
         {
@@ -59,11 +63,8 @@ public class DataPreparator
         }
         finally
         {
-            if (!string.IsNullOrEmpty(tmpConversionPath))
-            {
-                Directory.Delete(tmpConversionPath, true);
-            }
-            if (modelImporter is ConvertedModel)
+            Directory.Delete(modelConverter.TmpPath, true);
+            if (AssetDatabase.IsValidFolder("Assets/tmp"))
             {
                 FileUtil.DeleteFileOrDirectory("Assets/tmp");
                 AssetDatabase.Refresh();
@@ -71,18 +72,18 @@ public class DataPreparator
         }
     }
 
-    private (ModelImport.ModelImporter modelImporter, string tmpConversionPath) InitializeModelImporter(string modelType)
+    private ModelImport.ModelImporter InitializeModelImporter(string modelType, ModelConverter modelConverter)
     {
         string rootDirectory = GetRootDirectory();
         switch (modelType)
         {
             case "UnityNative":
-                return (modelImporter: new GOModel(rootDirectory), tmpConversionPath: "");
+                return new GOModel(rootDirectory);
             case "ConversionRequired":
-                var modelConverter = new ModelConverter(rootDirectory);
-                return (modelImporter: new ConvertedModel(modelConverter.OutputRootDir), tmpConversionPath: modelConverter.TmpPath);
+                    modelConverter.Convert(rootDirectory);
+                return new ConvertedModel(modelConverter.OutputRootDir);
             case "ConvertedModel":
-                return (modelImporter: new ConvertedModel(rootDirectory), tmpConversionPath: "");
+                return new ConvertedModel(rootDirectory);
             default:
                 var ex = new IOException();
                 Log.Error("Incorrect Model Importer type declared!", ex);

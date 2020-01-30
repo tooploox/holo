@@ -1,41 +1,94 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using log4net.Config;
 using log4net.Appender;
 using log4net.Core;
 using log4net.Layout;
+using log4net.Filter;
 using UnityEngine;
 using UnityEditor;
 
 
-[InitializeOnLoad]
 public class LoggingConfiguration
 {
-    static LoggingConfiguration()
+    public LoggingConfiguration()
     {
-        var patternLayout = new PatternLayout
+        string logFilepath = Path.GetFullPath(Application.persistentDataPath + "/PreprocessingLogs/" + DateTime.Now.ToString(@"dd.MM.yyyy\/HH-mm-ss") + ".log");
+
+        var infoFileLogger = InitializeInfoLogger(logFilepath);
+        var errorFileLogger = InitializeErrorLogger(logFilepath);
+        var unityLogger = InitializeUnityLogger();
+
+        BasicConfigurator.Configure(unityLogger, infoFileLogger, errorFileLogger);
+    }
+
+    private static RollingFileAppender InitializeInfoLogger(string logFilePath)
+    {
+        var infoPatternLayout = new PatternLayout
         {
-            ConversionPattern = "%date %logger %level - %message%newline%exception",
-            IgnoresException = false
+            ConversionPattern = "%date %logger %level - %message%newline",
         };
-        patternLayout.ActivateOptions();
-        
-        // setup the appender that writes to AppData/LocalLow/MicroscopeIT/PreprocessingLogs/
-        var fileAppender = new RollingFileAppender
+        infoPatternLayout.ActivateOptions();
+
+        var filter = new LevelRangeFilter
+        {
+            LevelMin = Level.Debug,
+            LevelMax = Level.Info,
+        };
+        filter.ActivateOptions();
+        var infofileAppender = new RollingFileAppender
         {
             AppendToFile = true,
-            DatePattern = @"dd.MM.yyyy/HH.mm.ss'.log'",
-            File = Path.GetFullPath(Application.persistentDataPath + "/PreprocessingLogs/"),
-            Layout = patternLayout,
-            RollingStyle = RollingFileAppender.RollingMode.Date,
+            File = logFilePath,
+            Layout = infoPatternLayout,
+            LockingModel = new FileAppender.MinimalLock(),
+            MaximumFileSize = "10MB",
+            RollingStyle = RollingFileAppender.RollingMode.Size,
             StaticLogFileName = false
         };
-        fileAppender.ActivateOptions();
+        infofileAppender.AddFilter(filter);
+        infofileAppender.ActivateOptions();
+
+        return infofileAppender;
+    }
+
+    private static RollingFileAppender InitializeErrorLogger(string logFilePath)
+    {
+        var errorPatternLayout = new PatternLayout
+        {
+            ConversionPattern = "%date %logger %level - %message%newline%exception%stacktracedetail",
+            IgnoresException = false,
+        };
+        errorPatternLayout.ActivateOptions();
+        var filter = new LevelRangeFilter
+        {
+            LevelMin = Level.Warn,
+            LevelMax = Level.Fatal
+        };
+        filter.ActivateOptions();
+        var errorFileAppender = new RollingFileAppender
+        {
+            AppendToFile = true,
+            File = logFilePath,
+            LockingModel = new FileAppender.MinimalLock(),
+            Layout = errorPatternLayout,
+            MaximumFileSize = "10MB",
+            RollingStyle = RollingFileAppender.RollingMode.Size,
+            StaticLogFileName = false
+        };
+        errorFileAppender.AddFilter(filter);
+        errorFileAppender.ActivateOptions();
+        return errorFileAppender;
+    }
+
+    private static UnityAppender InitializeUnityLogger()
+    {
         var unityLogger = new UnityAppender
         {
             Layout = new PatternLayout()
         };
         unityLogger.ActivateOptions();
-        BasicConfigurator.Configure(unityLogger, fileAppender);
+        return unityLogger;
     }
 
     private class UnityAppender : AppenderSkeleton
