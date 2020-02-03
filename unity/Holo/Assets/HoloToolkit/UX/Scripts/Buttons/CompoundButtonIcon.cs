@@ -99,6 +99,16 @@ namespace HoloToolkit.Unity.Buttons
                 return targetIconRenderer != null ? targetIconRenderer.GetComponent<MeshFilter>() : null;
             }
         }
+
+        public void SetIconOverride(Texture2D newIcon)
+        {
+            OverrideIcon = true;
+
+            iconOverride = newIcon;
+            if (instantiatedMaterial != null) {
+                instantiatedMaterial.mainTexture = newIcon;
+            }
+        }
         
         #if UNITY_EDITOR
         /// <summary>
@@ -125,6 +135,12 @@ namespace HoloToolkit.Unity.Buttons
                 SetIconName(value);
             }
         }
+
+        [System.NonSerialized]
+        public float IconScale = 1f;
+
+        [System.NonSerialized]
+        public float IconShiftY = 0f;
 
         private void SetIconName(string newName)
         {
@@ -167,7 +183,12 @@ namespace HoloToolkit.Unity.Buttons
                 // Use the default mesh for override icons
                 targetIconRenderer.enabled = true;
                 IconMeshFilter.sharedMesh = Profile.IconMesh;
-                IconMeshFilter.transform.localScale = Vector3.one;
+
+                Vector3 iconPos = IconMeshFilter.transform.localPosition;
+                iconPos.y = IconShiftY;
+                IconMeshFilter.transform.localPosition = iconPos;
+
+                IconMeshFilter.transform.localScale = new Vector3(IconScale, IconScale, 1f);
                 instantiatedMaterial.mainTexture = iconOverride;
                 return;
             }

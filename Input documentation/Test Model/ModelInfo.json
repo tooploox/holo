@@ -5,6 +5,7 @@
             Caption: "Body",
             DataType: "anatomy",
             Directory: "test_body"
+            UseAsIcon: true
         },
         {
             Caption: "Fibre Simulation",

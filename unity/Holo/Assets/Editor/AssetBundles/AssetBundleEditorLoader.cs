@@ -8,9 +8,13 @@ public class AssetBundleEditorLoader
     public static void LoadAssetBundle()
     {
         string bundlePath = EditorUtility.OpenFilePanel("Get The Bundle","","");
+        if (string.IsNullOrEmpty(bundlePath)) {
+            // "cancel" clicked
+            return;
+        }
         string bundleName = Path.GetFileName(bundlePath);
-        AssetBundleLoader assetBundleLoader = new AssetBundleLoader(bundleName);
-        assetBundleLoader.LoadBundle(bundlePath);
+        AssetBundleLoader assetBundleLoader = new AssetBundleLoader(bundleName, bundlePath);
+        assetBundleLoader.LoadBundle();
         assetBundleLoader.InstantiateAllLayers();
     }
 

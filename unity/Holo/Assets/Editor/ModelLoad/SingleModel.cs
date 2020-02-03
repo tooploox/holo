@@ -11,14 +11,14 @@ namespace ModelLoad
     public abstract class SingleModel
     {
         public ModelInfo Info { get; protected set; }
-        public Dictionary<string, string> AssetsPath { get; protected set; } = new Dictionary<string, string>();
+        public List<string> AssetPaths { get; protected set; } = new List<string>();
 
         //Loads a single model, with its body and/or simulationData.
         public void GetModelData()
         {
             string rootDirectory = GetRootDirectory();
 
-            AssetsPath.Clear();
+            AssetPaths.Clear();
             ReadInfoFile(rootDirectory);
             //Debug.Log("Reading model " + Info.Caption);
             foreach (ModelLayerInfo layerInfo in Info.Layers)
@@ -26,6 +26,7 @@ namespace ModelLoad
                 //Debug.Log("Reading layer " + layerInfo.Caption + " " + layerInfo.Directory + " " + layerInfo.Simulation.ToString());
                 ImportLayer(layerInfo);
             }
+            ImportIcon();
         }
 
         protected string GetRootDirectory()
@@ -71,19 +72,33 @@ namespace ModelLoad
                 string json = r.ReadToEnd();
                 Info = JsonConvert.DeserializeObject<ModelInfo>(json);
             }
+
+            // convert some paths to be absolute filenames
             foreach (ModelLayerInfo layerInfo in Info.Layers)
             {
                 layerInfo.Directory = rootDirectory + @"\" + layerInfo.Directory;
+            }
+            if (!string.IsNullOrEmpty(Info.IconFileName))
+            {
+                Info.IconFileName = rootDirectory + @"\" + Info.IconFileName;
             }
 
             // simple validation of the structure
             if (Info.Layers.Count == 0)
             {
-                throw new Exception("No layers found in ModelInfo.{json,txt} file");
+                throw new Exception("No layers found in ModelInfo.json file");
             }
         }
 
+        private Texture2D layerAutomaticIcon;
+
+        protected void LayerAutomaticIconGenerate(UnityEngine.Object obj)
+        { 
+            layerAutomaticIcon = IconGenerator.GetIcon(obj);
+        }
+
         // Imports layer (with body or simulation blendshapes).
+        // May also set layerAutomaticIcon.
         abstract protected void ImportLayer(ModelLayerInfo layerInfo);
 
         // Descendants must use this on all GameObjects representing layers
@@ -98,6 +113,38 @@ namespace ModelLoad
         {
             string[] simulationVariants = { "true", "fibre", "flow"};
             return simulationVariants.Contains(simulationFlag);
+        }
+
+        // Load icon from Info.IconFileName, add it to AssetPaths
+        private void ImportIcon()
+        {
+            bool hasIconFileName = !string.IsNullOrEmpty(Info.IconFileName);
+            if (hasIconFileName || layerAutomaticIcon != null)
+            {
+                /* Note: At one point I tried to optimize it, by detecting when
+                 * icon is already in the assets
+                 * ( Info.IconFileName.StartsWith(Application.dataPath) )
+                 * and then just adding the existing asset-relative path to AssetPaths.
+                 * 
+                 * But it doesn't work: we need the file to be called "icon.asset"
+                 * ("icon.png" is ignored by Unity bundle building, as it has unrecognized
+                 * extension). So we need to read + write the file anyway.
+                 */
+
+                Texture2D texture;
+                if (hasIconFileName) {
+                    byte[] data = File.ReadAllBytes(Info.IconFileName);
+                    texture = new Texture2D(1, 1);
+                    texture.LoadImage(data);
+                } else
+                {
+                    texture = layerAutomaticIcon;
+                }
+
+                string iconAssetPath = AssetDirs.TempAssetsDir + "/icon.asset";
+                AssetDatabase.CreateAsset(texture, iconAssetPath);
+                AssetPaths.Add(iconAssetPath);
+            }
         }
     }
 }

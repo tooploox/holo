@@ -55,6 +55,10 @@ public class ModelsCollection : MonoBehaviour
         // success, we found asset bundles
         Debug.Log("Found " + bundlesFiles.Length.ToString() + " asset bundles in \"" + dir + "\".");                
         bundles = new AssetBundleLoader[bundlesFiles.Length];
+        for (int i = 0; i < bundles.Length; i++)
+        {
+            bundles[i] = new AssetBundleLoader(BundleName(i), bundlesFiles[i]);
+        }
     }
 
     public int BundlesCount
@@ -84,6 +88,16 @@ public class ModelsCollection : MonoBehaviour
         return result;
     }
 
+    // Icon associated with the bundle.
+    public Texture2D BundleIcon(int i)
+    {
+        if (i < 0 || i >= BundlesCount) {
+            throw new Exception("Invalid bundle index " + i.ToString());
+        }
+        bundles[i].LoadBundleMetadata();
+        return bundles[i].Icon;
+    }
+
     public AssetBundleLoader BundleLoad(string name)
     {
         int? index = FindBundle(name);
@@ -99,13 +113,7 @@ public class ModelsCollection : MonoBehaviour
         if (i < 0 || i >= BundlesCount) {
             throw new Exception("Invalid bundle index " + i.ToString());
         }
-
-        if (bundles[i] == null)
-        {
-            bundles[i] = new AssetBundleLoader(BundleName(i));
-            bundles[i].LoadBundle(bundlesFiles[i]);
-        }
-
+        bundles[i].LoadBundle();
         return bundles[i];
     }
 

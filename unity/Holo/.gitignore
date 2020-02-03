@@ -43,3 +43,13 @@ Icon?
 ehthumbs.db
 Thumbs.db
 /.vs
+
+# Specific to Holo project
+/Assets/Resources/localConfig.asset
+/Assets/Resources/localConfig.asset.meta
+/Assets/icon.asset
+/Assets/icon.asset.meta
+/Assets/Temporary
+/Assets/Temporary.meta
+/Assets/StreamingAssets
+/Assets/StreamingAssets.meta

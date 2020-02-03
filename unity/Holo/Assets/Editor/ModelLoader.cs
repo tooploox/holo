@@ -25,6 +25,8 @@ public class ModelLoader
 
     private static void LoadModel(SingleModel importedModel)
     {
+	    AssetDirs.CreateDirectory(AssetDirs.TempAssetsDir);
+
         AssetBundleCreator assetBundleCreator = new AssetBundleCreator();
 
         bool loadModel = true;

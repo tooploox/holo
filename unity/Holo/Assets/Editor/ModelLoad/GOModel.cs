@@ -20,20 +20,21 @@ namespace ModelLoad
             GameObject modelInstance = Object.Instantiate(modelGameObject);
             AddLayerComponent(modelInstance, layerInfo);
             CreatePrefab(layerInfo, modelInstance, objectName);
+            if (layerInfo.UseAsIcon) {
+                LayerAutomaticIconGenerate(modelInstance);
+            }
             GameObject.DestroyImmediate(modelInstance);
         }
 
         // Exports finished GameObject to a .prefab
         private void CreatePrefab(ModelLayerInfo layerInfo, GameObject modelGameObject, string objectName)
         {
-            string rootAssetsDir = @"Assets/Resources/" + Info.Caption;
+            string rootAssetsDir = AssetDirs.TempAssetsDir + "/" + Info.Caption;
+			AssetDirs.CreateDirectory(rootAssetsDir);
 
-            if (!AssetDatabase.IsValidFolder(rootAssetsDir))
-            {
-                AssetDatabase.CreateFolder("Assets/Resources", Info.Caption);
-            }
-            AssetsPath.Add(objectName + "_GameObject", rootAssetsDir + @"/" + objectName + ".prefab");
-            PrefabUtility.SaveAsPrefabAsset(modelGameObject, AssetsPath[objectName + "_GameObject"]);
+			string prefabPath = rootAssetsDir + "/" + objectName + ".prefab";
+			AssetPaths.Add(prefabPath);
+            PrefabUtility.SaveAsPrefabAsset(modelGameObject, prefabPath);
         }
     }
 }

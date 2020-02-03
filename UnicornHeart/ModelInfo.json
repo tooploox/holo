@@ -1,5 +1,6 @@
 {
     Caption: "Unicorn Heart",
+    IconFileName: "unicorn_icon.png",
     Layers: [
         {
             Caption: "Heart",
