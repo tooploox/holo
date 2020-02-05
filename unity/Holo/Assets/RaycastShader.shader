@@ -5,7 +5,11 @@
         _MainTex ("Texture", 3D) = "white" {}
 	    _LeftEye("LeftEye", Vector) = (0,0,0,0)
 		_RightEye("RightEye", Vector) = (0,0,0,0)
-
+		
+		_Channel1("Channel1", Color) = (1,0,0,1)
+		_Channel2("Channel2", Color) = (0,1,0,1)
+		_Channel3("Channel3", Color) = (0,0,1,1)
+		_Channel4("Channel4", Color) = (0.5,0.5,0.5,1)
     }
     SubShader
     {
@@ -39,6 +43,11 @@
 			float4 _RightEye;
 			float4 _MainTex_ST;
 
+			fixed4 _Channel1;
+			fixed4 _Channel2;
+			fixed4 _Channel3;
+			fixed4 _Channel4;
+			
             v3f vert (appdata v) {
                 v3f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
@@ -61,7 +70,13 @@
 				dir /= z_div;
 				float opacity = 1.0;
 				for (int it = 0; it < iter; ++it) {
-					acc += 0.3 * tex3D(_MainTex, origin + float3(0.5, 0.5, 0.5)).rgb;
+					fixed4 color = tex3D(_MainTex, origin + float3(0.5, 0.5, 0.5));
+					float amount = 0.3;
+					// todo: this could be a matrix multiply
+					acc += amount * _Channel1.rgb * color.x * _Channel1.a;
+					acc += amount * _Channel2.rgb * color.y * _Channel2.a;
+					acc += amount * _Channel3.rgb * color.z * _Channel3.a;
+					acc += amount * _Channel4.rgb * color.w * _Channel4.a;
 
 //					acc += 0.01 * v * opacity;
 					//acc *= (1.0 - opacity);
