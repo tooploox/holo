@@ -70,6 +70,9 @@ public class AssetBundleLoader
             return;
         }
         LoadBundleMetadata();
+        // if(medata.datatype == "volumetric")
+        //   LoadVolumetricData()
+        // else if(medatata.datatype == "mesh_timeseries")
         LoadLayers();
         LoadState = LoadState.Full;
     }
