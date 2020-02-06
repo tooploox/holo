@@ -30,6 +30,8 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public CompoundButton ButtonRotate;
     public CompoundButton ButtonScale;
     public CompoundButton ButtonTransparency;
+    public CompoundButton ButtonPlateTransform;
+    public TwoHandManipulatable PlateTransformManipulatable;
     public GameObject ButtonLayerTemplate;
     public Texture2D ButtonIconPlay;
     public Texture2D ButtonIconPause;
@@ -225,6 +227,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             case "ButtonLayers": ClickToggleLayersState(); break;
             case "ButtonAnimationSpeed": AnimationSubmenu.SetActive(!AnimationSubmenu.activeSelf); break;
             case "ButtonTransparency": ClickTransparency(); break;
+            case "ButtonPlateTransform": ClickPlateTransform(); break;
 
             default:
                 {
@@ -304,6 +307,11 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     private void ClickTransparency()
     {
         Transparent = !Transparent;
+    }
+
+    private void ClickPlateTransform()
+    {
+        PlateTransform = !PlateTransform;
     }
 
     /* Load new model or unload.
@@ -783,6 +791,18 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
                 }
             }
             HoloUtilities.SetButtonState(ButtonTransparency, Transparent);
+        }
+    }
+
+    private bool plateTransform;
+    public bool PlateTransform {
+        get { return plateTransform; }
+        set
+        {
+            plateTransform = value;
+            PlateTransformManipulatable.GetComponent<Collider>().enabled = plateTransform;
+            PlateTransformManipulatable.enabled = plateTransform;
+            HoloUtilities.SetButtonState(ButtonPlateTransform, PlateTransform);
         }
     }
 }
