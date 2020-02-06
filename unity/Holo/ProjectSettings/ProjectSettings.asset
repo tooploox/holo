@@ -3,7 +3,7 @@
 --- !u!129 &1
 PlayerSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 15
+  serializedVersion: 18
   productGUID: b8f22ac083fb1e243b4cf19d3f7e4b88
   AndroidProfiler: 0
   AndroidFilterTouchesWhenObscured: 0
@@ -53,8 +53,8 @@ PlayerSettings:
   m_StackTraceTypes: 010000000100000001000000010000000100000001000000
   iosShowActivityIndicatorOnLoading: -1
   androidShowActivityIndicatorOnLoading: -1
-  iosAppInBackgroundBehavior: 0
   displayResolutionDialog: 1
+  iosUseCustomAppBackgroundBehavior: 0
   iosAllowHTTPDownload: 1
   allowedAutorotateToPortrait: 1
   allowedAutorotateToPortraitUpsideDown: 1
@@ -144,6 +144,9 @@ PlayerSettings:
     oculus:
       sharedDepthBuffer: 1
       dashSupport: 1
+      lowOverheadMode: 0
+      protectedContext: 0
+      v2Signing: 0
     enable360StereoCapture: 0
   protectGraphicsMemory: 0
   enableFrameTimingStats: 0
@@ -424,6 +427,7 @@ PlayerSettings:
   switchRatingsInt_9: 0
   switchRatingsInt_10: 0
   switchRatingsInt_11: 0
+  switchRatingsInt_12: 0
   switchLocalCommunicationIds_0: 
   switchLocalCommunicationIds_1: 
   switchLocalCommunicationIds_2: 
@@ -561,12 +565,40 @@ PlayerSettings:
   metroCertificateNotAfter: 80319977b4f7d501
   metroApplicationDescription: Visualize animated 3D medical data, with shared experience.
   wsaImages:
-    131172: Assets/GFX/Logos/essential_620_300.png
-    2031716: Assets/GFX/Logos/essential_44.png
-    2097252: Assets/GFX/Logos/essential_71.png
-    2162788: Assets/GFX/Logos/essential_150.png
-    2228324: Assets/GFX/Logos/essential_310.png
-    2293860: Assets/GFX/Logos/essential_310_150.png
+    65636: Assets/GFX/Logos/StoreLogo.scale-100.png
+    65661: Assets/GFX/Logos/StoreLogo.scale-125.png
+    65686: Assets/GFX/Logos/StoreLogo.scale-150.png
+    65736: Assets/GFX/Logos/StoreLogo.scale-200.png
+    65936: Assets/GFX/Logos/StoreLogo.scale-400.png
+    131172: Assets/GFX/Logos/SplashScreen.scale-100.png
+    131197: Assets/GFX/Logos/SplashScreen.scale-125.png
+    131222: Assets/GFX/Logos/SplashScreen.scale-150.png
+    131272: Assets/GFX/Logos/SplashScreen.scale-200.png
+    131472: Assets/GFX/Logos/SplashScreen.scale-400.png
+    2031632: Assets/GFX/Logos/Square44x44Logo.altform-unplated_targetsize-16.png
+    2031648: Assets/GFX/Logos/Square44x44Logo.altform-unplated_targetsize-32.png
+    2031716: 
+    2031872: Assets/GFX/Logos/Square44x44Logo.altform-unplated_targetsize-256.png
+    2097252: Assets/GFX/Logos/Square71x71Logo.scale-100.png
+    2097277: Assets/GFX/Logos/Square71x71Logo.scale-125.png
+    2097302: Assets/GFX/Logos/Square71x71Logo.scale-150.png
+    2097352: Assets/GFX/Logos/Square71x71Logo.scale-200.png
+    2097552: Assets/GFX/Logos/Square71x71Logo.scale-400.png
+    2162788: Assets/GFX/Logos/Square150x150Logo.scale-100.png
+    2162813: Assets/GFX/Logos/Square150x150Logo.scale-125.png
+    2162838: Assets/GFX/Logos/Square150x150Logo.scale-150.png
+    2162888: Assets/GFX/Logos/Square150x150Logo.scale-200.png
+    2163088: Assets/GFX/Logos/Square150x150Logo.scale-400.png
+    2228324: Assets/GFX/Logos/Square310x310Logo.scale-100.png
+    2228349: Assets/GFX/Logos/Square310x310Logo.scale-125.png
+    2228374: Assets/GFX/Logos/Square310x310Logo.scale-150.png
+    2228424: Assets/GFX/Logos/Square310x310Logo.scale-200.png
+    2228624: Assets/GFX/Logos/Square310x310Logo.scale-400.png
+    2293860: Assets/GFX/Logos/Wide310x150Logo.scale-100.png
+    2293885: Assets/GFX/Logos/Wide310x150Logo.scale-125.png
+    2293910: Assets/GFX/Logos/Wide310x150Logo.scale-150.png
+    2293960: Assets/GFX/Logos/Wide310x150Logo.scale-200.png
+    2294160: Assets/GFX/Logos/Wide310x150Logo.scale-400.png
   metroTileShortName: EssentialVision
   metroTileShowName: 0
   metroMediumTileShowName: 0
