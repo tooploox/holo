@@ -24,6 +24,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public Material DefaultModelMaterial;
     public Material DefaultModelTransparentMaterial;
     public Material DataVisualizationMaterial;
+    public Material DefaultVolumetricMaterial;
     public Transform InstanceParent;
     public CompoundButton ButtonTogglePlay;
     public CompoundButton ButtonTranslate;
@@ -195,6 +196,14 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
                 button.GetComponent<CompoundButtonIcon>().IconShiftY = IconShiftY;
                 button.GetComponent<CompoundButtonIcon>().SetIconOverride(icon);
             }
+        }
+
+        // HACK FOR Microscopy
+        {
+            GameObject button = FindAddButton(activeButtonsCount++);
+            button.SetActive(true);
+
+            button.GetComponent<CompoundButtonText>().Text = "MICROSCOPY";
         }
 
         // hide the rest of the buttons, when there are less models than buttons
@@ -759,6 +768,10 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
      */
     private Material LayerMaterial(ModelLayer layer)
     {
+        if(layer.Caption == "Microscopy")
+        {
+            return DefaultVolumetricMaterial;
+        }
         if (layer.Simulation)
         {
             return DataVisualizationMaterial;

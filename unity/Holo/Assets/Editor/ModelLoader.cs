@@ -23,6 +23,13 @@ public class ModelLoader
         LoadModel(importedModel);
     }
 
+    [MenuItem("Holo/Convert Microscopy model to an AssetBundle's GameObject")]
+    public static void LoadMicroscopyModel()
+    {
+        SingleModel importedModel = new VolumetricModel();
+        LoadModel(importedModel);
+    }
+
     private static void LoadModel(SingleModel importedModel)
     {
 	    AssetDirs.CreateDirectory(AssetDirs.TempAssetsDir);

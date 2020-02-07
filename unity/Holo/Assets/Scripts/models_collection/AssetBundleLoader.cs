@@ -45,6 +45,10 @@ public class AssetBundleLoader
 
     public int BlendShapeCount { get { return blendShapeCount;  } }
 
+    // HACK
+    private bool Microscopy = false;
+
+
     public void LoadBundleMetadata()
     {
         /* Do nothing if LoadState is already at least Metadata.
@@ -58,6 +62,9 @@ public class AssetBundleLoader
         {
             throw new Exception("Failed to load AssetBundle from " + bundlePath);
         }
+
+        Microscopy = assetBundle.GetAllAssetNames().Any(x => x.EndsWith("_data.bytes"));
+
         LoadIcon();
         LoadState = LoadState.Metadata;
     }
@@ -70,10 +77,11 @@ public class AssetBundleLoader
             return;
         }
         LoadBundleMetadata();
-        // if(medata.datatype == "volumetric")
-        //   LoadVolumetricData()
-        // else if(medatata.datatype == "mesh_timeseries")
         LoadLayers();
+        if (Microscopy)
+        {
+            LoadVolumetricData();
+        }
         LoadState = LoadState.Full;
     }
 
@@ -88,6 +96,16 @@ public class AssetBundleLoader
         }
     }
 
+    private void LoadVolumetricData()
+    {
+        var bytesDataAssetName = assetBundle.GetAllAssetNames().First(x => x.EndsWith("_data.bytes"));
+        TextAsset bytesAsset = assetBundle.LoadAsset(bytesDataAssetName) as TextAsset;
+        string new_path = "C:/work/microdata.bytes";
+        File.WriteAllBytes(new_path, bytesAsset.bytes);
+        VolumetricLoader loader = layers[0].gameObject.GetComponent<VolumetricLoader>();
+        loader.LoadRawDataFromFile(new_path);
+    }
+
     private void LoadLayers()
     {
         layers = new List<ModelLayer>();
@@ -95,10 +113,12 @@ public class AssetBundleLoader
         int? newBlendShapesCount = null;
         foreach (string bundleObjectName in assetBundle.GetAllAssetNames())
         {
+
             if (!bundleObjectName.EndsWith(".prefab")) { continue; } // ignore other objects
 
             GameObject layerGameObject = assetBundle.LoadAsset<GameObject>(bundleObjectName);
             string layerDebugName = "Prefab '" + bundleObjectName + "' layer '" + layerGameObject.name + "'";
+            Debug.Log(layerDebugName);
 
             SkinnedMeshRenderer skinnedMesh = layerGameObject.GetComponent<SkinnedMeshRenderer>();
             if (skinnedMesh != null && 
