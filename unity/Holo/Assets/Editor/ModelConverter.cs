@@ -13,6 +13,7 @@ class ModelConverter
     public string OutputRootDir { get; private set; }
     public string TmpPath { get; private set; }
     private string errormsg = null;
+    private static bool errorWritten = false;
 
     public ModelConverter()
     {
@@ -26,13 +27,11 @@ class ModelConverter
 
         process.Start();
         process.BeginOutputReadLine();
-        errormsg = process.StandardError.ReadToEnd();
-        int exitcode = process.ExitCode;
+        process.BeginErrorReadLine();
         process.WaitForExit();
-        if (!string.IsNullOrEmpty(errormsg))
+        if (errorWritten)
         {
-            Log.Error(errormsg);
-            throw new Exception();
+            throw new ConverterException();
         }
     }
 
@@ -52,16 +51,35 @@ class ModelConverter
         process.StartInfo = startInfo;
 
         process.OutputDataReceived += new DataReceivedEventHandler(OutputDataHandler);
-
+        process.ErrorDataReceived += new DataReceivedEventHandler(ErrorDataHandler);
         return process;
     }
 
     private static void OutputDataHandler(object sendingProcess,
         DataReceivedEventArgs outLine)
     {
-        if (!String.IsNullOrEmpty(outLine.Data))
+        if (!string.IsNullOrEmpty(outLine.Data))
         {
             Log.Debug(outLine.Data);
         }
+    }
+
+    private static void ErrorDataHandler(object sendingProcess,
+    DataReceivedEventArgs outLine)
+    {
+        var process = (Process) sendingProcess;
+        if (!string.IsNullOrEmpty(outLine.Data))
+        {
+            var ex = new ConverterException();
+            Log.Error(outLine.Data, ex);
+            errorWritten = true;
+        }
+    }
+
+    class ConverterException : Exception
+    {
+        public ConverterException() : base() { }
+
+        public ConverterException(string msg) : base(msg) { }
     }
 }
