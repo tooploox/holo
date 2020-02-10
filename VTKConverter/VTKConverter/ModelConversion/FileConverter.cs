@@ -8,13 +8,22 @@ namespace VTKConverter
 {
     class FileConverter
     {
+        private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
+        public FileConverter(string outputLogDir)
+        {
+            var vtkOutput = vtkWin32OutputWindow.New();
+            vtkOutput.SendToStdErrOn();
+            vtkOutputWindow.SetInstance(vtkOutput);
+        }
+
         public void Convert(string inputPath, string outputRootDir, string dataType)
         {
             vtkDataSet vtkModel = ReadVTKData(inputPath);
             ModelData modelData = ImportModelData(vtkModel, dataType);
             string fileName = Path.GetFileNameWithoutExtension(inputPath);
             WriteModelToFile(modelData, fileName, outputRootDir);
-            Console.WriteLine(fileName + " converted sucessfully.");
+            Log.Info(fileName + " converted sucessfully.");
         }
 
         private vtkDataSet ReadVTKData(string path)

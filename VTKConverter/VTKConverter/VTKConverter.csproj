@@ -55,6 +55,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LoggingConfiguration.cs" />
     <Compile Include="ModelConversion\DataImport\FlowData.cs" />
     <Compile Include="ModelConversion\FileConverter.cs" />
     <Compile Include="ModelConversion\DataImport\AnatomyData.cs" />
@@ -68,7 +69,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="log4net.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

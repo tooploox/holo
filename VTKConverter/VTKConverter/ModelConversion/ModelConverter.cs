@@ -5,6 +5,8 @@ namespace VTKConverter
 {
     class ModelConverter
     {
+        private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         private string outputRootDir;
 
         public void Convert(string inputRootDir, string outputFolder)
@@ -23,22 +25,22 @@ namespace VTKConverter
 
         private void ConvertSingleModel(SingleModel singleModel)
         {
-            Console.WriteLine("Conversion started!");
+            Log.Info("Conversion started!");
             foreach (ModelLayerInfo layerInfo in singleModel.Info.Layers)
             {
-                string outputLayerDir = outputRootDir + @"\" + Path.GetFileName(layerInfo.Directory);
-                Directory.CreateDirectory(outputLayerDir);
-                ConvertLayer(layerInfo.Directory, outputLayerDir, layerInfo.DataType);
+                ConvertLayer(layerInfo);
             }
         }
 
-        private void ConvertLayer(string inputFolder, string outputLayerDir, string dataType)
+        private void ConvertLayer(ModelLayerInfo layerInfo)
         {
-            var fileConverter = new FileConverter();
-            string[] inputPaths = GetFilepaths(inputFolder);
+            string outputLayerDir = outputRootDir + @"\" + Path.GetFileName(layerInfo.Directory);
+            Directory.CreateDirectory(outputLayerDir);
+            var fileConverter = new FileConverter(outputRootDir);
+            string[] inputPaths = GetFilepaths(layerInfo.Directory);
             foreach (string inputPath in inputPaths)
             {
-                fileConverter.Convert(inputPath, outputLayerDir, dataType);
+                fileConverter.Convert(inputPath, outputLayerDir, layerInfo.DataType);
             }
         }
 
@@ -47,7 +49,9 @@ namespace VTKConverter
             string[] filePaths = Directory.GetFiles(rootDirectory + @"\");
             if (filePaths == null)
             {
-                throw new Exception("No files found in: " + rootDirectory);
+                var ex = new FileNotFoundException();
+                Log.Error("No files found in: " + rootDirectory, ex);
+                throw ex;
             }
             return filePaths;
         }

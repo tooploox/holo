@@ -132,3 +132,5 @@ C:\Users\mit-kuchnowski\repos\holo\VTKConverter\VTKConverter\obj\Release\VTKConv
 C:\Users\mit-kuchnowski\repos\holo\VTKConverter\VTKConverter\obj\Release\VTKConverter.csproj.CopyComplete
 C:\Users\mit-kuchnowski\repos\holo\VTKConverter\VTKConverter\obj\Release\VTKConverter.exe
 C:\Users\mit-kuchnowski\repos\holo\VTKConverter\VTKConverter\obj\Release\VTKConverter.pdb
+C:\Users\mit-kuchnowski\repos\holo\VTKConverter\VTKConverter\bin\Release\log4net.dll
+C:\Users\mit-kuchnowski\repos\holo\VTKConverter\VTKConverter\bin\Release\log4net.xml
