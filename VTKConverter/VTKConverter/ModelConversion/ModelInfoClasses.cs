@@ -20,8 +20,5 @@ namespace VTKConverter
         // Initially (when deserialized) this is relative to ModelInfo.json,
         // but will be converted to an absolute path in the process.
         public string Directory;
-        // In case of using the importer to load GameObject from Unity Assets,
-        // this indicates the GameObject filename (appended to the Directory).
-        public string AssetFileName;
     }
 }

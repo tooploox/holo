@@ -6,7 +6,6 @@ using log4net.Core;
 using log4net.Layout;
 using log4net.Filter;
 using UnityEngine;
-using UnityEditor;
 
 
 public class LoggingConfiguration

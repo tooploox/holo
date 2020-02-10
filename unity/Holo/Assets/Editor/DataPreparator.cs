@@ -17,7 +17,6 @@ public class DataPreparator
     [MenuItem("Holo/Create AssetBundle from an external supported format")]
     public static void ImportWithConversion()
     {
-        var logconfig = new LoggingConfiguration();
         var importDispatcher = new DataPreparator();
         importDispatcher.PrepareData("ConversionRequired");
     }
@@ -25,7 +24,6 @@ public class DataPreparator
     [MenuItem("Holo/Create AssetBundle from converted data")]
     public static void ImportConvertedModel()
     {
-        var logconfig = new LoggingConfiguration();
         var importDispatcher = new DataPreparator();
         importDispatcher.PrepareData("ConvertedModel");
     }
@@ -33,7 +31,6 @@ public class DataPreparator
     [MenuItem("Holo/Create AssetBundle from a Unity-supported format")]
     public static void ImportGameObjectModel()
     {
-        var logconfig = new LoggingConfiguration();
         var importDispatcher = new DataPreparator();
         importDispatcher.PrepareData("UnityNative");
     }
@@ -41,6 +38,8 @@ public class DataPreparator
 
     private void PrepareData(string modelType)
     {
+        Log.Info("Preprocessing started!");
+        var logConfig = new LoggingConfiguration();
         var assetBundleCreator = new AssetBundleCreator();
         var modelConverter = new ModelConverter();
         var modelImporter = InitializeModelImporter(modelType, modelConverter);

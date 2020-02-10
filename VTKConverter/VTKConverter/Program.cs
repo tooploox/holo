@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-
-[assembly: log4net.Config.XmlConfigurator(ConfigFile = "log4net.config")]
+﻿using System.IO;
 
 namespace VTKConverter
 {
@@ -11,6 +8,8 @@ namespace VTKConverter
 
         static void Main(string[] args)
         {
+            var logConfig = new LoggingConfiguration();
+            Log.Info("Program Started!");
             if (args.Length != 2)
             {
                 var exception =  new IOException();
