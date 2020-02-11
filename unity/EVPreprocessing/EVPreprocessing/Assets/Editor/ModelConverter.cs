@@ -3,8 +3,6 @@ using System.Diagnostics;
 using System.IO;
 using UnityEngine;
 using UnityEditor;
-using System.Text;
-using System.Globalization;
 
 class ModelConverter
 {

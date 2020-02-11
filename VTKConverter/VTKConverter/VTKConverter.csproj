@@ -56,16 +56,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="LoggingConfiguration.cs" />
-    <Compile Include="ModelConversion\DataImport\FlowData.cs" />
-    <Compile Include="ModelConversion\FileConverter.cs" />
-    <Compile Include="ModelConversion\DataImport\AnatomyData.cs" />
-    <Compile Include="ModelConversion\DataImport\FibreData.cs" />
+    <Compile Include="ModelConversion\FileImport\%28deprecated%29 STLImport\STLImporter.cs" />
+    <Compile Include="ModelConversion\FileImport\%28deprecated%29 STLImport\STLImportUtils.cs" />
+    <Compile Include="ModelConversion\FileImport\VTKImport\DataImport\FlowData.cs" />
+    <Compile Include="ModelConversion\FileImport\VTKImport\FileConverter.cs" />
+    <Compile Include="ModelConversion\FileImport\VTKImport\DataImport\AnatomyData.cs" />
+    <Compile Include="ModelConversion\FileImport\VTKImport\DataImport\FibreData.cs" />
     <Compile Include="ModelConversion\ModelConverter.cs" />
     <Compile Include="ModelConversion\SingleModel.cs" />
     <Compile Include="ModelConversion\ModelInfoClasses.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ModelConversion\DataImport\ModelData.cs" />
+    <Compile Include="ModelConversion\FileImport\VTKImport\DataImport\ModelData.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

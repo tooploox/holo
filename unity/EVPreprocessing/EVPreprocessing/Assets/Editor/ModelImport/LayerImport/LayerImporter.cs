@@ -5,7 +5,6 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-using ModelImport.LayerImport.VTKImport;
 using ModelImport.LayerImport.VTKConvertedImport;
 
 namespace ModelImport.LayerImport
@@ -112,24 +111,16 @@ namespace ModelImport.LayerImport
         private IFrameImporter InitializeImporter(string extension)
         {
             IFrameImporter frameImporter;
-            switch (extension)
+            if (extension.Equals(".txt"))
             {
-                case ".vtk":
-                    if (simulationData)
-                    {
-                        frameImporter = new PolydataImporter("POLYDATA");
-                    }
-                    else
-                    {
-                        frameImporter = new UnstructuredGridImporter("UNSTRUCTURED_GRID");
-                    }
-                    break;
-                case ".txt":
-                    frameImporter = new ConvertedDataImporter();
-                    break;
-                case ".stl":
-                default:
-                    throw new Exception("Type not supported!");
+                frameImporter = new ConvertedDataImporter();
+
+            }
+            else
+            {
+                var ex = new IOException();
+                Log.Error("Type not supported!", ex);
+                throw ex;
             }
             return frameImporter;
         }
