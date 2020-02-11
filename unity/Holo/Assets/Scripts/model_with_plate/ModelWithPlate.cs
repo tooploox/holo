@@ -198,14 +198,6 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             }
         }
 
-        // HACK FOR Microscopy
-        {
-            GameObject button = FindAddButton(activeButtonsCount++);
-            button.SetActive(true);
-
-            button.GetComponent<CompoundButtonText>().Text = "MICROSCOPY";
-        }
-
         // hide the rest of the buttons, when there are less models than buttons
         for (int i = activeButtonsCount; i < addButtonsCount; i++)
         {

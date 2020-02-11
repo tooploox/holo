@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using UnityEditor;
 using UnityEngine;
 
 public class VolumetricLoader : MonoBehaviour
@@ -17,7 +18,7 @@ public class VolumetricLoader : MonoBehaviour
     public Color channel3;
     public Color channel4;
 
-    private Texture3D texture;
+    public Texture3D texture;
     private Renderer TargetRenderer;
 
     private byte[] RawData;
@@ -85,9 +86,10 @@ public class VolumetricLoader : MonoBehaviour
         TargetRenderer = this.gameObject.GetComponent<MeshRenderer>();
             
         Color32[] colorArray = new Color32[size];
-        texture = new Texture3D(Width, Height, Depth, TextureFormat.RGBA32, true);     
+        texture = new Texture3D(Width, Height, Depth, TextureFormat.RGBA32, true);
 
-        Debug.Log("Raw data size: " + RawData.Length);       
+        Debug.Log("Calculating 3D Texture");
+        Debug.Log("Raw data size: " + RawData.Length);      
 
         for (int z = 0; z < Depth; ++z)
             for (int it = 0; it < xysize; ++it)
@@ -113,7 +115,10 @@ public class VolumetricLoader : MonoBehaviour
 
         texture.Apply();
 
-        TargetRenderer.sharedMaterial.SetTexture("_MainTex", texture);
+        Debug.Log("Setting just calculated texture ");
+
+        TargetRenderer.sharedMaterial.mainTexture = texture;
+
         dataInitialized = true;
     }
 

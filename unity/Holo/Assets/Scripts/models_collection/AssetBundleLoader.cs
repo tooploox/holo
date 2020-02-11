@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using System.Linq;
 using UnityEngine;
+using UnityEditor;
 
 public enum LoadState {
     None,
@@ -100,10 +101,8 @@ public class AssetBundleLoader
     {
         var bytesDataAssetName = assetBundle.GetAllAssetNames().First(x => x.EndsWith("_data.bytes"));
         TextAsset bytesAsset = assetBundle.LoadAsset(bytesDataAssetName) as TextAsset;
-        string new_path = "C:/work/microdata.bytes";
-        File.WriteAllBytes(new_path, bytesAsset.bytes);
         VolumetricLoader loader = layers[0].gameObject.GetComponent<VolumetricLoader>();
-        loader.LoadRawDataFromFile(new_path);
+        loader.SetRawBytes(bytesAsset.bytes);
     }
 
     private void LoadLayers()
