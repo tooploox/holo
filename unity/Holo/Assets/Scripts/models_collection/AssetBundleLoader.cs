@@ -47,7 +47,7 @@ public class AssetBundleLoader
     public int BlendShapeCount { get { return blendShapeCount;  } }
 
     // HACK
-    private bool Microscopy = false;
+    private bool VolumetricData = false;
 
 
     public void LoadBundleMetadata()
@@ -64,7 +64,7 @@ public class AssetBundleLoader
             throw new Exception("Failed to load AssetBundle from " + bundlePath);
         }
 
-        Microscopy = assetBundle.GetAllAssetNames().Any(x => x.EndsWith("_data.bytes"));
+        VolumetricData = assetBundle.GetAllAssetNames().Any(x => x.EndsWith("_data.bytes"));
 
         LoadIcon();
         LoadState = LoadState.Metadata;
@@ -79,7 +79,7 @@ public class AssetBundleLoader
         }
         LoadBundleMetadata();
         LoadLayers();
-        if (Microscopy)
+        if (VolumetricData)
         {
             LoadVolumetricData();
         }
@@ -99,10 +99,15 @@ public class AssetBundleLoader
 
     private void LoadVolumetricData()
     {
-        var bytesDataAssetName = assetBundle.GetAllAssetNames().First(x => x.EndsWith("_data.bytes"));
-        TextAsset bytesAsset = assetBundle.LoadAsset(bytesDataAssetName) as TextAsset;
-        VolumetricLoader loader = layers[0].gameObject.GetComponent<VolumetricLoader>();
-        loader.SetRawBytes(bytesAsset.bytes);
+        foreach(ModelLayer l in layers)
+        {
+            string budleName = l.name + "_data.bytes";
+            //var bytesDataAssetName = assetBundle.GetAllAssetNames().First(x => x.EndsWith("_data.bytes"));
+            TextAsset bytesAsset = assetBundle.LoadAsset(budleName) as TextAsset;
+            VolumetricLoader loader = layers[0].gameObject.GetComponent<VolumetricLoader>();
+            loader.SetRawBytes(bytesAsset.bytes);
+        }
+        
     }
 
     private void LoadLayers()
@@ -174,6 +179,7 @@ public class AssetBundleLoader
                 layer = layerGameObject.AddComponent<ModelLayer>();
                 layer.Caption = Path.GetFileNameWithoutExtension(bundleObjectName);
                 layer.Simulation = bundleObjectName.Contains("dataflow") || bundleObjectName.Contains("simulation");
+                layer.DataType = VolumetricData ? DataType.Volumetric : DataType.Mesh;
                 if (layer.Simulation)
                 {
                     int simulationsCount = layers.Count(c => c.Simulation);

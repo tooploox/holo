@@ -107,6 +107,12 @@ namespace ModelLoad
             ModelLayer layer = go.AddComponent<ModelLayer>();
             layer.Caption = layerInfo.Caption;
             layer.Simulation = CheckIfSimulation(layerInfo.DataType);
+            layer.DataType = GetDataType(layerInfo.DataType);
+        }
+
+        private DataType GetDataType(string layerDataType)
+        {
+            return layerDataType == "volumetric" ? DataType.Volumetric : DataType.Mesh;
         }
 
         private bool CheckIfSimulation(string simulationFlag)

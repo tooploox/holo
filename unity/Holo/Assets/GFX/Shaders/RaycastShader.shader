@@ -73,10 +73,11 @@
 					fixed4 color = tex3D(_MainTex, origin + float3(0.5, 0.5, 0.5));
 					float amount = 0.3;
 					// todo: this could be a matrix multiply
-					acc += amount * _Channel1.rgb * color.x * _Channel1.a;
-					acc += amount * _Channel2.rgb * color.y * _Channel2.a;
-					acc += amount * _Channel3.rgb * color.z * _Channel3.a;
-					acc += amount * _Channel4.rgb * color.w * _Channel4.a;
+					acc += amount * _Channel1.rgb * color.x *_Channel1.a;
+					acc += amount * _Channel2.rgb * color.y *_Channel2.a;
+					acc += amount * _Channel3.rgb * color.z *_Channel3.a;
+					acc += amount * _Channel4.rgb * color.w *_Channel4.a;
+                    //acc += amount * color.rgba;
 
 //					acc += 0.01 * v * opacity;
 					//acc *= (1.0 - opacity);

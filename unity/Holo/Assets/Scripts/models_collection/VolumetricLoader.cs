@@ -18,13 +18,18 @@ public class VolumetricLoader : MonoBehaviour
     public Color channel3;
     public Color channel4;
 
-    public Texture3D texture;
     private Renderer TargetRenderer;
 
     private byte[] RawData;
     private bool dataInitialized = false;
 
     private int xysize, size;
+
+    private void OnEnable()
+    {
+        Debug.Log("Recalculate texture OnEnable!");
+        RecalculateTextures();
+    }
 
     private void Start()
     {
@@ -74,7 +79,82 @@ public class VolumetricLoader : MonoBehaviour
         }
     }
 
-    private void InitializeWithData() {
+    public void SetNumberOfChannels(int num)
+    {
+        Channels = num;
+    }
+
+    private Texture3D CalculateTexture()
+    {
+        Color32[] colorArray = new Color32[size];
+        Texture3D resultTexture = new Texture3D(Width, Height, Depth, TextureFormat.RGBA32, true);
+
+        Debug.Log("Calculating 3D Texture");
+        Debug.Log("Raw data size: " + (RawData == null ? 0 : RawData.Length));
+        bool rl, gl, bl, al;
+        rl = gl = bl = al = false;
+
+        for (int z = 0; z < Depth; ++z)
+            for (int it = 0; it < xysize; ++it)
+            {
+                //todo: this if chain sucks in inner loop
+                byte r = 0; byte g = 0; byte b = 0; byte a = 0;
+                if(!rl)
+                    Debug.Log("Set Red!");
+                rl = true;
+                r = RawData[z * xysize * Channels + it];
+                if (Channels > 1)
+                {
+                    if(!gl)
+                        Debug.Log("Set Green!");
+                    gl = true;
+                    g = RawData[z * xysize * Channels + xysize + it];
+                }
+                if (Channels > 2)
+                {
+                    if (!bl)
+                        Debug.Log("Set Blue!");
+                    bl = true;
+                    b = RawData[z * xysize * Channels + xysize * 2 + it];
+                }
+                if (Channels > 3)
+                {
+                    if(!al)
+                        Debug.Log("Set Alpha!");
+                    al = true;
+                    a = RawData[z * xysize * Channels + xysize * 3 + it];
+                }
+
+                colorArray[z * xysize + it] = new Color32(r, g, b, a);
+            }
+
+        resultTexture.SetPixels32(colorArray);
+        //texture.SetPixelData(bytes, 0);
+        resultTexture.wrapModeU = TextureWrapMode.Clamp;
+        resultTexture.wrapModeV = TextureWrapMode.Clamp;
+        resultTexture.wrapModeW = TextureWrapMode.Clamp;
+
+        resultTexture.Apply();
+
+        return resultTexture;
+    }
+
+    public void RecalculateTextures()
+    {
+        if (!dataInitialized || RawData == null || RawData.Length == 0)
+        {
+            Debug.Log("Data not yet initialized");
+            return;
+        }
+        Debug.Log("Setting just calculated texture ");
+
+        TargetRenderer = this.gameObject.GetComponent<MeshRenderer>();
+        TargetRenderer.sharedMaterial.mainTexture = CalculateTexture();
+    }
+
+
+    private void InitializeWithData()
+    {
         if (dataInitialized) return;
 
         if (RawData == null || RawData.Length == 0)
@@ -83,41 +163,7 @@ public class VolumetricLoader : MonoBehaviour
             return;
         }
 
-        TargetRenderer = this.gameObject.GetComponent<MeshRenderer>();
-            
-        Color32[] colorArray = new Color32[size];
-        texture = new Texture3D(Width, Height, Depth, TextureFormat.RGBA32, true);
-
-        Debug.Log("Calculating 3D Texture");
-        Debug.Log("Raw data size: " + RawData.Length);      
-
-        for (int z = 0; z < Depth; ++z)
-            for (int it = 0; it < xysize; ++it)
-            {
-                //todo: this if chain sucks in inner loop
-                byte r = 0; byte g = 0; byte b = 0; byte a = 0;
-                r = RawData[z * xysize * Channels + it];
-                if (Channels > 1)
-                    g = RawData[z * xysize * Channels + xysize + it];
-                if (Channels > 2)
-                    b = RawData[z * xysize * Channels + xysize * 2 + it];
-                if (Channels > 3)
-                    a = RawData[z * xysize * Channels + xysize * 3 + it];
-
-                colorArray[z * xysize + it] = new Color32(r, g, b, a);
-            }
-
-        texture.SetPixels32(colorArray);
-        //texture.SetPixelData(bytes, 0);
-        texture.wrapModeU = TextureWrapMode.Clamp;
-        texture.wrapModeV = TextureWrapMode.Clamp;
-        texture.wrapModeW = TextureWrapMode.Clamp;
-
-        texture.Apply();
-
-        Debug.Log("Setting just calculated texture ");
-
-        TargetRenderer.sharedMaterial.mainTexture = texture;
+        RecalculateTextures();
 
         dataInitialized = true;
     }

@@ -3,6 +3,7 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 using ModelLoad.ModelImport;
+using Newtonsoft.Json;
 
 namespace ModelLoad
 {
@@ -30,15 +31,27 @@ namespace ModelLoad
             meshRenderer.material = AssetDatabase.LoadAssetAtPath<Material>(DefaultMaterialAsset);
             VolumetricLoader volumetricLoader = ModelGameObject.AddComponent<VolumetricLoader>();
 
-            // All this data should be set according to metadata info for microscopy data!!!
-            // Now it's hardcoded !!!
-            volumetricLoader.Width = 512;
-            volumetricLoader.Height = 512;
-            volumetricLoader.Depth = 26;
 
-            volumetricLoader.Channels = 2;
-            volumetricLoader.channel1 = new Color(255.0f, 0.0f, 0.0f);
-            volumetricLoader.channel2 = new Color(0.0f, 255.0f, 0.0f);
+            VolumetricMedata metadata;
+            using (StreamReader r = new StreamReader(layerInfo.Directory + @"\" + "metadata.json"))
+            {
+                string json = r.ReadToEnd();
+                metadata = JsonConvert.DeserializeObject<VolumetricMedata>(json);
+            }
+
+            volumetricLoader.Width = metadata.width;
+            volumetricLoader.Height = metadata.height;
+            volumetricLoader.Depth = metadata.depth;
+
+            volumetricLoader.Channels = metadata.channels;
+            if(volumetricLoader.Channels > 0)
+                volumetricLoader.channel1 = new Color(1, 0, 0);
+            if (volumetricLoader.Channels > 1)
+                volumetricLoader.channel2 = new Color(0, 1, 0);
+            if (volumetricLoader.Channels > 2)
+                volumetricLoader.channel2 = new Color(0, 0, 1);
+            if (volumetricLoader.Channels > 3)
+                volumetricLoader.channel2 = new Color(1, 0, 1);
         }
 
         // Prepare the go for taking preview icon.
@@ -71,8 +84,7 @@ namespace ModelLoad
             AssetPaths.Add(meshPath);
             AssetDatabase.CreateAsset(modelMesh, meshPath);
 
-            // TODO: FIXME!!!
-            var rawDataPath = "C:/work/Hololens/holo/models/Microscopy/micro/data.raw";
+            string rawDataPath = layerInfo.Directory + @"\" + "data.raw";
             // This is strange to copy data first as Asset then copy asset to build dir
             string tmpDataPath = rootAssetsDir + "/tmp_data.bytes";
             string dataPath = rootAssetsDir + "/" + objectName + "_data.bytes";

@@ -32,4 +32,12 @@ namespace ModelLoad
         public string AssetFileName;
         public bool UseAsIcon;
     }
+
+    public class VolumetricMedata
+    {
+        public int width;
+        public int height;
+        public int depth;
+        public int channels;
+    }
 }

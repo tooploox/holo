@@ -361,10 +361,24 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             return;
         }
 
+        
         bool addLayer = !layersLoaded.ContainsKey(layer);
         if (!addLayer) {
             UnloadLayer(layer);
         } else {
+            
+            if (layer.DataType == DataType.Volumetric)
+            {
+                List<ModelLayer> layersToUnload = new List<ModelLayer>();
+                foreach (KeyValuePair<ModelLayer, LayerLoaded> entry in layersLoaded)
+                    layersToUnload.Add(entry.Key);
+
+                foreach(ModelLayer l in layersToUnload)
+                {
+                    UnloadLayer(l);
+                    HoloUtilities.SetButtonStateText(layersButtons[l], false);
+                }
+            }
             LoadLayer(layer);
         }
         HoloUtilities.SetButtonStateText(layersButtons[layer], addLayer);
@@ -760,7 +774,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
      */
     private Material LayerMaterial(ModelLayer layer)
     {
-        if(layer.Caption == "Microscopy")
+        if(layer.DataType == DataType.Volumetric)
         {
             return DefaultVolumetricMaterial;
         }
