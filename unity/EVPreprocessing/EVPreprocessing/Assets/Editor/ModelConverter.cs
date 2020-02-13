@@ -38,7 +38,7 @@ class ModelConverter
         string command = pathToExe + "VTKConverter.exe " + "'" + Path.GetFullPath(inputRootDir) + "' '" + Path.GetFullPath(TmpPath) + "'";
         var startInfo = new ProcessStartInfo("powershell.exe", command)
         {
-            CreateNoWindow = false,
+            CreateNoWindow = true,
             RedirectStandardError = true,
             RedirectStandardOutput = true,
             UseShellExecute = false

@@ -228,3 +228,4 @@ C:\Users\mit-kuchnowski\repos\holo\unity\EVPreprocessing\EVPreprocessing\Temp\bi
 C:\Users\mit-kuchnowski\repos\holo\unity\EVPreprocessing\EVPreprocessing\Temp\bin\Debug\Unity.CollabProxy.Editor.pdb
 C:\Users\mit-kuchnowski\repos\holo\unity\EVPreprocessing\EVPreprocessing\Temp\bin\Debug\Unity.TextMeshPro.pdb
 C:\Users\mit-kuchnowski\repos\holo\unity\EVPreprocessing\EVPreprocessing\Temp\bin\Debug\Unity.Analytics.DataPrivacy.pdb
+C:\Users\mit-kuchnowski\repos\holo\unity\EVPreprocessing\EVPreprocessing\Temp\bin\Debug\NDesk.Options.dll

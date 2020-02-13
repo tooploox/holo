@@ -65,6 +65,7 @@
   <ItemGroup>
     <Compile Include="Assets\Editor\AssetBundles\AssetBundleCreator.cs" />
     <Compile Include="Assets\Editor\DataPreparator.cs" />
+    <Compile Include="Assets\Editor\InputInfo.cs" />
     <Compile Include="Assets\Editor\LoggingConfiguration.cs" />
     <Compile Include="Assets\Editor\ModelConverter.cs" />
     <Compile Include="Assets\Editor\ModelImport\ConvertedModel.cs" />
@@ -330,6 +331,9 @@
     </Reference>
     <Reference Include="log4net">
       <HintPath>C:/Users/mit-kuchnowski/repos/holo/unity/EVPreprocessing/EVPreprocessing/Assets/Plugins/log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="NDesk.Options">
+      <HintPath>C:/Users/mit-kuchnowski/repos/holo/unity/EVPreprocessing/EVPreprocessing/Assets/Plugins/NDesk.Options.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>C:/Users/mit-kuchnowski/repos/holo/unity/EVPreprocessing/EVPreprocessing/Assets/Plugins/Newtonsoft.Json.dll</HintPath>

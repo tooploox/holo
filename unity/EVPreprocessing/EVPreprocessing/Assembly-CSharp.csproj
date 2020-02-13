@@ -289,6 +289,9 @@
     <Reference Include="log4net">
       <HintPath>C:/Users/mit-kuchnowski/repos/holo/unity/EVPreprocessing/EVPreprocessing/Assets/Plugins/log4net.dll</HintPath>
     </Reference>
+    <Reference Include="NDesk.Options">
+      <HintPath>C:/Users/mit-kuchnowski/repos/holo/unity/EVPreprocessing/EVPreprocessing/Assets/Plugins/NDesk.Options.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>C:/Users/mit-kuchnowski/repos/holo/unity/EVPreprocessing/EVPreprocessing/Assets/Plugins/Newtonsoft.Json.dll</HintPath>
     </Reference>

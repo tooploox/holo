@@ -10,10 +10,9 @@ using UnityEngine;
 
 public class LoggingConfiguration
 {
-    public LoggingConfiguration()
+    public LoggingConfiguration(string logFileDir)
     {
-        string logFilepath = Path.GetFullPath(Application.persistentDataPath + "/PreprocessingLogs/" + DateTime.Now.ToString(@"dd.MM.yyyy\/HH-mm-ss") + ".log");
-
+        string logFilepath = Path.GetFullPath( logFileDir + DateTime.Now.ToString(@"dd.MM.yyyy\/HH-mm-ss") + ".log");
         var infoFileLogger = InitializeInfoLogger(logFilepath);
         var errorFileLogger = InitializeErrorLogger(logFilepath);
         var unityLogger = InitializeUnityLogger();

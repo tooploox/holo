@@ -1,12 +1,21 @@
-﻿using System.Linq;
+﻿using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
 using ModelImport;
 
 public class AssetBundleCreator
-{  
+{
     //Creates AssetBundle
+    private string outputPath;
+
+    public AssetBundleCreator(string outputPath)
+    {
+            this.outputPath = outputPath;
+    }
+
+
     public void Create(ModelImport.ModelImporter importedModel)
     {
         AssetBundleBuild[] buildMapArray = BuildMapABs(importedModel);
@@ -31,7 +40,7 @@ public class AssetBundleCreator
             AssetDatabase.CreateFolder("Assets", "StreamingAssets");
         }
         AssetDatabase.Refresh();
-        BuildPipeline.BuildAssetBundles(Application.dataPath + "/StreamingAssets", buildMapArray, BuildAssetBundleOptions.None, BuildTarget.WSAPlayer);
+        BuildPipeline.BuildAssetBundles(outputPath, buildMapArray, BuildAssetBundleOptions.None, BuildTarget.WSAPlayer);
         AssetDatabase.DeleteAsset("Assets/StreamingAssets/StreamingAssets");
         AssetDatabase.DeleteAsset("Assets/StreamingAssets/StreamingAssets.manifest");
     }
