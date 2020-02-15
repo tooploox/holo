@@ -8,9 +8,9 @@ using log4net.Filter;
 using UnityEngine;
 
 
-public class LoggingConfiguration
+public static class LoggingConfiguration
 {
-    public LoggingConfiguration()
+    public static void Configure()
     {
         string logFilepath = Path.GetFullPath(Application.persistentDataPath + "/PreprocessingLogs/" + DateTime.Now.ToString(@"dd.MM.yyyy\/HH-mm-ss") + ".log");
 
@@ -112,5 +112,10 @@ public class LoggingConfiguration
             }
         }
     }
-    
+
+    public static void ThrowError(this log4net.ILog log, string message, Exception ex)
+    {
+        log.Error(message, ex);
+        throw ex;
+    }
 }

@@ -96,7 +96,7 @@ namespace ModelImport.LayerImport.VTKConvertedImport
             catch (FormatException ex)
             {
                 Log.Error("Incorrect " + arrayName + " data in: " + filePath, ex);
-                throw;
+                throw ex;
             }
         }
 
@@ -108,8 +108,7 @@ namespace ModelImport.LayerImport.VTKConvertedImport
             }
             catch (FormatException ex)
             {
-                Log.Error("Incorrect indices data in: " + filePath, ex);
-                throw;
+                Log.ThrowError("Incorrect indices data in: " + filePath, ex);
             }
         }
 

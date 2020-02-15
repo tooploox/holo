@@ -38,8 +38,9 @@ public class DataPreparator
 
     private void PrepareData(string modelType)
     {
+        LoggingConfiguration.Configure();
+        AssetDirs.CreateDirectory(AssetDirs.TempAssetsDir);
         Log.Info("Preprocessing started!");
-        var logConfig = new LoggingConfiguration();
         var assetBundleCreator = new AssetBundleCreator();
         var modelConverter = new ModelConverter();
         var modelImporter = InitializeModelImporter(modelType, modelConverter);
@@ -62,12 +63,7 @@ public class DataPreparator
         }
         finally
         {
-            Directory.Delete(modelConverter.TmpPath, true);
-            if (AssetDatabase.IsValidFolder("Assets/tmp"))
-            {
-                FileUtil.DeleteFileOrDirectory("Assets/tmp");
-                AssetDatabase.Refresh();
-            }
+            Directory.Delete(AssetDirs.TempAssetsDir, true); 
         }
     }
 
@@ -104,9 +100,7 @@ public class DataPreparator
         }
         if (string.IsNullOrEmpty(rootDirectory))
         {
-            var ex = new IOException();
-            Log.Error("Path cannot be null!", ex);
-            throw ex;
+            Log.ThrowError("Path cannot be null!", new IOException());
         }
         return rootDirectory;
     }
@@ -118,10 +112,8 @@ public class DataPreparator
         Log.Debug("rootDirectoryIndex:" + directoryFlagIndex.ToString());
         string rootDirectory = args[directoryFlagIndex + 1];
         if (string.IsNullOrEmpty(rootDirectory))
-        {
-            var ex = new IOException();
-            Log.Error("Model's root directory has not been assigned!", ex);
-            throw ex;
+        { 
+            Log.ThrowError("Model's root directory has not been assigned!", new IOException());
         }
         return rootDirectory;
     }

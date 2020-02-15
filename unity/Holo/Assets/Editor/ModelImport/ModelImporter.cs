@@ -10,18 +10,20 @@ namespace ModelImport
 {
     public abstract class ModelImporter
     {
+        private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         public ModelInfo Info { get; protected set; }
         public List<string> AssetPaths { get; protected set; } = new List<string>();
+        public string RootDirectory { get; protected set;} 
 
         //Loads a single model, with its body and/or simulationData.
-        public ModelImporter()
+        public ModelImporter(string rootDirectory)
         {
-            string RootDirectory = GetRootDirectory();
+            RootDirectory = rootDirectory;
         }
 
         public void GetModelData()
         {
-            AssetsPath.Clear();
             ReadInfoFile();
             Log.Debug("Converting model: \"" + Info.Caption + "\"");
             foreach (ModelLayerInfo layerInfo in Info.Layers)
@@ -32,70 +34,40 @@ namespace ModelImport
             ImportIcon();
         }
 
-        protected string GetRootDirectory()
+        protected void ReadInfoFile()
         {
-            string rootDirectory = "";
-            if (Application.isBatchMode)
+            if (!File.Exists(RootDirectory + @"\" + "ModelInfo.json"))
             {
-                rootDirectory = GetBatchModeRootDir();
-            }
-            else
-            {
-                rootDirectory = EditorUtility.OpenFolderPanel("Select model root folder with ModelInfo.json", Application.dataPath, "");
-            }
-            if (String.IsNullOrEmpty(rootDirectory))
-            {
-                var exception = new IOException();
-                Log.Error("Path cannot be null!", exception);
-                throw exception;
-            }
-            return rootDirectory;
-        }
-
-        protected string GetBatchModeRootDir()
-        {
-            string[] args = Environment.GetCommandLineArgs();
-            int directoryFlagIndex = Array.FindIndex(args, a => a.Equals("-rootDirectory"));
-            //Debug.Log("rootDirectoryIndex:" + directoryFlagIndex.ToString());
-            string rootDirectory = args[directoryFlagIndex + 1];
-            if (string.IsNullOrEmpty(rootDirectory))
-            {
-                var exception = new IOException();
-                Log.Error("Model's root directory has not been assigned!", exception);
-                throw exception;
-            }
-            return rootDirectory;
-        }
-
-        protected void ReadInfoFile(string rootDirectory)
-        {
-            if (!File.Exists(rootDirectory + @"\" + "ModelInfo.json"))
-            {
-                throw new Exception("No ModelInfo.json found in root folder!");
+                Log.ThrowError("No ModelInfo.json found in root folder!", new FileNotFoundException());
             }
 
-            using (StreamReader r = new StreamReader(rootDirectory + @"\" + "ModelInfo.json"))
+            using (StreamReader r = new StreamReader(RootDirectory + @"\" + "ModelInfo.json"))
             {
-                Log.Error("No ModelInfo.json found in root folder!", ex);
+                try
+                {
+                    string json = r.ReadToEnd();
+                    Info = JsonConvert.DeserializeObject<ModelInfo>(json);
+                }
+                catch (JsonReaderException ex)
+                {
+                    Log.ThrowError("Corrupted ModelInfo.json file!", ex);
+                }
             }
 
             // convert some paths to be absolute filenames
             foreach (ModelLayerInfo layerInfo in Info.Layers)
             {
-                layerInfo.Directory = rootDirectory + @"\" + layerInfo.Directory;
+                layerInfo.Directory = RootDirectory + @"\" + layerInfo.Directory;
             }
             if (!string.IsNullOrEmpty(Info.IconFileName))
             {
-                Info.IconFileName = rootDirectory + @"\" + Info.IconFileName;
+                Info.IconFileName = RootDirectory + @"\" + Info.IconFileName;
             }
 
             // simple validation of the structure
             if (Info.Layers.Count == 0)
             {
-                var ex = new InvalidDataException();
-                Log.Error("No layers found in ModelInfo.json file", ex);
-                throw ex;
-                
+                Log.ThrowError("No layers found in ModelInfo.json file", new InvalidDataException());
             }
         }
 

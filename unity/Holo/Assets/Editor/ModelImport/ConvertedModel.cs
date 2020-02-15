@@ -10,17 +10,10 @@ namespace ModelImport
     public class ConvertedModel : ModelImporter
     {
         private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
+        private const string DefaultMaterialAsset = "Assets/GFX/Materials/DefaultModelMaterial.mat";
         private LayerImporter layerImporter = new LayerImporter();
-        private string pathToTmp;
-        public ConvertedModel(bool vtkConversion) : base()
-        {
-            pathToTmp = Path.GetFullPath(Application.dataPath + "/tmp/");
-            if (vtkConversion)
-            {
-                ConvertVTKToTemp();
-            }
-        }
+
+        public ConvertedModel(string rootDirectory) : base(rootDirectory) { }
 
         protected override void ImportLayer(ModelLayerInfo layerInfo)
         {
@@ -30,7 +23,6 @@ namespace ModelImport
             SaveFilesForExport(layerInfo, objectName, layerImporter.ModelMesh.Get(), layerImporter.ModelGameObject);
         }
 
-        private const string DefaultMaterialAsset = "Assets/GFX/Materials/DefaultModelMaterial.mat";
 
         // Prepare the go for taking preview icon.
         // We need to configure blend shapes state, material -- otherwise icon would look bad.
@@ -45,7 +37,7 @@ namespace ModelImport
                 Material defaultMaterial = AssetDatabase.LoadAssetAtPath<Material>(DefaultMaterialAsset);
                 if (defaultMaterial == null)
                 {
-                    throw new Exception("Cannot read default material asset from " + DefaultMaterialAsset);
+                    Log.ThrowError("Cannot read default material asset from " + DefaultMaterialAsset, new IOException());
                 }
                 renderer.material = defaultMaterial;
             }
@@ -70,5 +62,5 @@ namespace ModelImport
                 LayerAutomaticIconGenerate(modelGameObject);
             }
         }
-    }
+    } 
 }

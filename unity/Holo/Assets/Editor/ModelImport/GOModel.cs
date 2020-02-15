@@ -19,11 +19,9 @@ namespace ModelImport
             GameObject modelGameObject = AssetDatabase.LoadAssetAtPath<GameObject>(objectPath);
             if (modelGameObject == null)
             {
-                var ex = new System.Exception();
-                Log.Error("Cannot import model from " + objectPath, ex);
-                throw ex;
+                Log.ThrowError("Cannot import model from " + objectPath, new IOException());
             }
-            GameObject modelInstance = Object.Instantiate(modelGameObject);
+            GameObject modelInstance = UnityEngine.Object.Instantiate(modelGameObject);
             AddLayerComponent(modelInstance, layerInfo);
             CreatePrefab(layerInfo, modelInstance, objectName);
             if (layerInfo.UseAsIcon) {
