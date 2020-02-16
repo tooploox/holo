@@ -9,7 +9,7 @@ public class DataPreparator
 {
     /* Loads a model in batchmode or multiple models in Editor and converts them into an AssetBundle.
      * To use in batchmode: "<Path to Unity.exe>" -quit -batchmode -logFile "<Path to the logfile>"  
-    * -executeMethod ModelLoader.LoadVTKModel -rootDirectory "<Directory of the folder which stores the meshes>" 
+    * -executeMethod ModelLoader.ImportWithConversion() --RootDirectory "<Directory of the folder which stores the meshes>" 
     */
 
     private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
@@ -37,13 +37,14 @@ public class DataPreparator
 
 
     private void PrepareData(string modelType)
-    {
-        LoggingConfiguration.Configure();
+    { 
+        var inputConfig = new InputConfiguration();
         AssetDirs.CreateDirectory(AssetDirs.TempAssetsDir);
-        Log.Info("Preprocessing started!");
-        var assetBundleCreator = new AssetBundleCreator();
+        var assetBundleCreator = new AssetBundleCreator(inputConfig.OutputDir);
         var modelConverter = new ModelConverter();
-        var modelImporter = InitializeModelImporter(modelType, modelConverter);
+
+        Log.Info("Preprocessing started!");
+        var modelImporter = InitializeModelImporter(modelType, modelConverter, inputConfig.RootDirectory);
         bool loadModel = true;
         try
         {
@@ -63,13 +64,13 @@ public class DataPreparator
         }
         finally
         {
-            Directory.Delete(AssetDirs.TempAssetsDir, true); 
+            Directory.Delete(AssetDirs.TempAssetsDir, true);
+            Log.Info("Preprocessing finished!");
         }
     }
 
-    private ModelImport.ModelImporter InitializeModelImporter(string modelType, ModelConverter modelConverter)
+    private ModelImport.ModelImporter InitializeModelImporter(string modelType, ModelConverter modelConverter, string rootDirectory)
     {
-        string rootDirectory = GetRootDirectory();
         switch (modelType)
         {
             case "UnityNative":
@@ -84,37 +85,5 @@ public class DataPreparator
                 Log.Error("Incorrect Model Importer type declared!", ex);
                 throw ex;
         }
-    }
-
-    private string GetRootDirectory()
-    {
-        string rootDirectory;
-
-        if (Application.isBatchMode)
-        {
-            rootDirectory = GetBatchModeRootDir();
-        }
-        else
-        {
-            rootDirectory = EditorUtility.OpenFolderPanel("Select model root folder with ModelInfo.json", Application.dataPath, "");
-        }
-        if (string.IsNullOrEmpty(rootDirectory))
-        {
-            Log.ThrowError("Path cannot be null!", new IOException());
-        }
-        return rootDirectory;
-    }
-
-    private string GetBatchModeRootDir()
-    {
-        string[] args = Environment.GetCommandLineArgs();
-        int directoryFlagIndex = Array.FindIndex(args, a => a.Equals("-rootDirectory"));
-        Log.Debug("rootDirectoryIndex:" + directoryFlagIndex.ToString());
-        string rootDirectory = args[directoryFlagIndex + 1];
-        if (string.IsNullOrEmpty(rootDirectory))
-        { 
-            Log.ThrowError("Model's root directory has not been assigned!", new IOException());
-        }
-        return rootDirectory;
     }
 }

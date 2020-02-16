@@ -6,6 +6,14 @@ using ModelImport;
 
 public class AssetBundleCreator
 {
+    //Creates AssetBundle 
+    private string outputPath;
+
+    public AssetBundleCreator(string outputPath)
+    {
+        this.outputPath = outputPath;
+    }
+
     //Creates AssetBundle
     public void Create(ModelImport.ModelImporter importedModel)
     {
@@ -26,10 +34,8 @@ public class AssetBundleCreator
     //Creates appropriate AssetBundle for the model.
     private void CreateAssetBundle(AssetBundleBuild[] buildMapArray)
     {
-	    AssetDirs.CreateDirectory("Assets/StreamingAssets");
-        BuildPipeline.BuildAssetBundles(Application.dataPath + "/StreamingAssets", buildMapArray, BuildAssetBundleOptions.None, BuildTarget.WSAPlayer);
-        AssetDatabase.DeleteAsset("Assets/StreamingAssets/StreamingAssets");
-        AssetDatabase.DeleteAsset("Assets/StreamingAssets/StreamingAssets.manifest");
+	    AssetDirs.CreateDirectory(outputPath);
+        BuildPipeline.BuildAssetBundles(outputPath, buildMapArray, BuildAssetBundleOptions.None, BuildTarget.WSAPlayer);
         //TODO: The .mesh and .prefab files are left for debugging purposes but should be removed in the final version.
 
         // this is necessary to clear references to this asset
