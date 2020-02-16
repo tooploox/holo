@@ -11,14 +11,20 @@ namespace ModelImport.LayerImport
         private Dictionary<string, Vector3> boundingVertices = new Dictionary<string, Vector3>();
         bool simulationData;
         private int verticesInFacet;
-        public ModelMesh(bool isSimulationData)
+        public ModelMesh(string dataType)
         {
-            simulationData = isSimulationData;
+            simulationData = CheckIfSimulation(dataType);
         }
 
         public Mesh Get()
         {
             return mesh;
+        }
+
+        private bool CheckIfSimulation(string dataType)
+        {
+            string[] simulationVariants = { "true", "fibre", "flow" };
+            return simulationVariants.Contains(dataType);
         }
 
         public void Initiate(int numberOfVertices, int verticesNumberInFacet, int[] indices)

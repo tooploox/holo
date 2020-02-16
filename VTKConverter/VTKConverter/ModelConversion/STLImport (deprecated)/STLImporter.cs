@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿/*
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using UnityEngine;
@@ -41,7 +42,7 @@ public class STLImporter
                 }
             }
         }
-        
+
         //Normalising summed-up facets' normals
         foreach (Vector3 normal in normals) normal.Normalize();
     }
@@ -81,3 +82,4 @@ public class STLImporter
         normals.Add(currentNormal);
     }
 }
+*/

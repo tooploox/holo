@@ -6,11 +6,11 @@ using VTKConverter.DataImport;
 
 namespace VTKConverter
 {
-    class FileConverter
+    class VTKImporter
     {
         private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        public FileConverter(string outputLogDir)
+        public VTKImporter(string outputLogDir)
         {
             var vtkOutput = vtkWin32OutputWindow.New();
             vtkOutput.SendToStdErrOn();

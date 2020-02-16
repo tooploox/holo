@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿/*
+using System.IO;
 using UnityEngine;
 
 
@@ -18,3 +19,4 @@ public static class STLImportUtils
         return vector3;
     }
 }
+*/

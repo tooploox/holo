@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-using ModelImport.LayerImport.VTKImport;
 using ModelImport.LayerImport.VTKConvertedImport;
 
 namespace ModelImport.LayerImport
@@ -18,24 +16,15 @@ namespace ModelImport.LayerImport
         public ModelMesh ModelMesh { get; private set; }
         private string[] filePaths;
         private Dictionary<string, Vector3> boundingVertices = new Dictionary<string, Vector3>();
-        private bool simulationData = false;
 
         public void ImportData(ModelLayerInfo layerInfo, string gameObjectName)
         {
             ModelGameObject = new GameObject(gameObjectName);
-            simulationData = CheckIfSimulation(layerInfo.DataType);
-            ModelMesh = new ModelMesh(simulationData);
+            ModelMesh = new ModelMesh(layerInfo.DataType);
             
             GetFilepaths(layerInfo.Directory);
             ImportFrames();
             AddMeshToGameObject();
-        }
-
-        //To be removed.
-        private bool CheckIfSimulation(string simulationFlag)
-        {
-            string[] simulationVariants = { "true", "fibre", "flow" };
-            return simulationVariants.Contains(simulationFlag);
         }
 
         private void GetFilepaths(string layerDirectory)
@@ -89,14 +78,7 @@ namespace ModelImport.LayerImport
                     }
                     ModelMesh.CheckTopology(i, frameImporter.Indices);
                     ModelMesh.UpdateBounds(firstMesh, frameImporter.BoundingVertices);
-                    if (simulationData)
-                    {
-                        ModelMesh.mesh.AddBlendShapeFrame(Path.GetFileName(filePaths[i]), 100f, frameImporter.Vertices, frameImporter.Normals, frameImporter.DeltaTangents);
-                    }
-                    else
-                    {
-                        ModelMesh.mesh.AddBlendShapeFrame(Path.GetFileName(filePaths[i]), 100f, frameImporter.Vertices, frameImporter.Normals, null);
-                    }
+                    ModelMesh.mesh.AddBlendShapeFrame(Path.GetFileName(filePaths[i]), 100f, frameImporter.Vertices, frameImporter.Normals, frameImporter.DeltaTangents);
                     firstMesh = false;
                 }
             }
@@ -108,29 +90,16 @@ namespace ModelImport.LayerImport
 
         private IFrameImporter InitializeImporter(string extension)
         {
-            IFrameImporter frameImporter;
-            switch (extension)
+            if (extension.Equals(".txt"))
             {
-                case ".vtk":
-                    if (simulationData)
-                    {
-                        frameImporter = new PolydataImporter("POLYDATA");
-                    }
-                    else
-                    {
-                        frameImporter = new UnstructuredGridImporter("UNSTRUCTURED_GRID");
-                    }
-                    break;
-                case ".txt":
-                    frameImporter = new ConvertedDataImporter();
-                    break;
-                case ".stl":
-                default:
-                    var ex = new IOException();
-                    Log.Error("Type not supported!", ex);
-                    throw ex;
+                return new ConvertedDataImporter();
             }
-            return frameImporter;
+            else
+            {
+                var ex = new IOException();
+                Log.ThrowError("Type not supported!", ex);
+                throw ex;
+            }
         }
 
         //Function for aborting the import of a model
