@@ -9,9 +9,9 @@ class InputConfiguration
 {
     private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-    public string RootDirectory { get; private set; }
-    public string OutputDir { get; private set; }
-    public string LogFileDir { get; private set; }
+    public string RootDirectory { get; private set; } = null;
+    public string OutputDir { get; private set; } = null;
+    public string LogFileDir { get; private set; } = null;
     private OptionSet options = new OptionSet();
 
     public InputConfiguration()
@@ -33,17 +33,15 @@ class InputConfiguration
             LogFileDir = Application.persistentDataPath + "/PreprocessingLogs/";
         }
 
-        LoggingConfiguration.Configure();
+        LoggingConfiguration.Configure(LogFileDir);
 
         if (string.IsNullOrEmpty(RootDirectory))
         {
-            var ex = new IOException();
-            Log.Error("Path cannot be null!", ex);
             if (Application.isBatchMode)
             {
                 DisplayHelp();
             }
-            throw ex;
+            throw Log.ThrowError("Path cannot be null!", new IOException()); 
         }
     }
 
@@ -52,8 +50,8 @@ class InputConfiguration
         string[] args = Environment.GetCommandLineArgs();
 
         options.Add("RootDirectory=", "Path to the root directory of the model.", rootdir => RootDirectory = rootdir)
-            .Add("OutputPath:", "Directory where finished Asset Bundle will be stored.", outputdir => OutputDir = outputdir)
-            .Add("LogDir:", "Directory where log file will be stored.", logdir => LogFileDir = logdir);
+            .Add("OutputDir=", "Directory where finished Asset Bundle will be stored.", outputdir => OutputDir = outputdir)
+            .Add("LogDir=", "Directory where log file will be stored.", logdir => LogFileDir = logdir);
 
         options.Parse(args);
     }

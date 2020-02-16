@@ -9,7 +9,6 @@ class ModelConverter
 
     public string OutputRootDir { get; private set; }
     public string TmpPath { get; private set; }
-    private string errormsg = null;
     private static bool errorWritten = false;
 
     public ModelConverter()

@@ -1,4 +1,5 @@
-﻿using log4net.Config;
+﻿using System;
+using log4net.Config;
 using log4net.Appender;
 using log4net.Core;
 using log4net.Layout;
@@ -6,9 +7,9 @@ using log4net.Filter;
 
 namespace VTKConverter
 {
-    public class LoggingConfiguration
+    public static class LoggingConfiguration
     {
-        public LoggingConfiguration()
+        public static void Configure()
         {
             var infoFileLogger = InitializeInfoLogger();
             var errorFileLogger = InitializeErrorLogger();
@@ -61,6 +62,12 @@ namespace VTKConverter
             errorFileAppender.AddFilter(filter);
             errorFileAppender.ActivateOptions();
             return errorFileAppender;
+        }
+
+        public static Exception ThrowError(this log4net.ILog log, string message, Exception ex)
+        {
+            log.Error(message, ex);
+            return ex;
         }
     }
 }

@@ -1,8 +1,7 @@
-﻿using System.Linq;
+﻿using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-using ModelImport;
 
 public class AssetBundleCreator
 {
@@ -36,13 +35,18 @@ public class AssetBundleCreator
     {
 	    AssetDirs.CreateDirectory(outputPath);
         BuildPipeline.BuildAssetBundles(outputPath, buildMapArray, BuildAssetBundleOptions.None, BuildTarget.WSAPlayer);
-        //TODO: The .mesh and .prefab files are left for debugging purposes but should be removed in the final version.
 
         // this is necessary to clear references to this asset
+        
         Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(AssetDirs.TempAssetsDir + "/icon.asset");
         UnityEngine.Object.DestroyImmediate(texture, true);
 
         // this is still necessary even after above DestroyImmediate.
         AssetDatabase.DeleteAsset(AssetDirs.TempAssetsDir + "/icon.asset");
+
+        //Cleaning up an unnecessesary bundle
+        string folderBundle = Path.Combine(outputPath, Path.GetFileNameWithoutExtension(outputPath));
+        File.Delete(folderBundle);
+        File.Delete(folderBundle + ".manifest");
     }
 }

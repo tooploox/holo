@@ -8,14 +8,12 @@ namespace VTKConverter
 
         static void Main(string[] args)
         {
-            var logConfig = new LoggingConfiguration();
+            LoggingConfiguration.Configure();
             Log.Info("Program Started!");
             if (args.Length != 2)
             {
-                var exception =  new IOException();
-                Log.Error("Wrong number of parameters at the input!\n" +
-                    "VTKconverter.exe <path/to/model/root/folder> <path/to/the/root/folder>", exception);
-                throw exception;
+                throw Log.ThrowError("Wrong number of parameters at the input!\n VTKconverter.exe <path/to/model/root/folder> <path/to/the/root/folder>", 
+                    new IOException());
             }
             string inputRootDir = args[0];
             string outputFolder = args[1];

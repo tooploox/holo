@@ -58,8 +58,7 @@ namespace VTKConverter
                     modelData = new FlowData(vtkModel);
                     break;
                 default:
-                    var exception = new Exception("Wrong model type!");
-                    throw exception;
+                    throw Log.ThrowError("Wrong model type!", new IOException());
             }
             return modelData;
         }

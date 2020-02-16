@@ -35,11 +35,11 @@ namespace ModelImport.LayerImport
             }
             catch (DirectoryNotFoundException ex)
             {
-                Log.ThrowError("Directory does not exist at: " + layerDirectory, ex);
+                throw Log.ThrowError("Directory does not exist at: " + layerDirectory, ex);
             }
             if (filePaths == null)
             {
-                Log.ThrowError("No files found in: " + layerDirectory, new FileNotFoundException());
+                throw Log.ThrowError("No files found in: " + layerDirectory, new FileNotFoundException());
             }
         }
 
@@ -96,9 +96,7 @@ namespace ModelImport.LayerImport
             }
             else
             {
-                var ex = new IOException();
-                Log.ThrowError("Type not supported!", ex);
-                throw ex;
+                throw Log.ThrowError("Type not supported!", new IOException());
             }
         }
 
@@ -107,7 +105,7 @@ namespace ModelImport.LayerImport
         {
             UnityEngine.Object.DestroyImmediate(ModelGameObject);
             EditorUtility.ClearProgressBar();
-            Log.ThrowError("Import aborted by the user!", new OperationCanceledException());
+            throw Log.ThrowError("Import aborted by the user!", new OperationCanceledException());
         }
 
         private void AddMeshToGameObject()

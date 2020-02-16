@@ -49,9 +49,7 @@ namespace VTKConverter
             string[] filePaths = Directory.GetFiles(rootDirectory + @"\");
             if (filePaths == null)
             {
-                var ex = new FileNotFoundException();
-                Log.Error("No files found in: " + rootDirectory, ex);
-                throw ex;
+                throw Log.ThrowError("No files found in: " + rootDirectory, new FileNotFoundException());
             }
             return filePaths;
         }

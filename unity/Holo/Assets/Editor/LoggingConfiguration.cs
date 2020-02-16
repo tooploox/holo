@@ -12,7 +12,7 @@ public static class LoggingConfiguration
 {
     public static void Configure(string logFileDir)
     {
-        string logFilepath = Path.GetFullPath(logFileDir + DateTime.Now.ToString(@"dd.MM.yyyy\/HH-mm-ss") + ".log");
+        string logFilepath = Path.GetFullPath(logFileDir + @"\" + DateTime.Now.ToString(@"dd.MM.yyyy\/HH-mm-ss") + ".log");
 
         var infoFileLogger = InitializeInfoLogger(logFilepath);
         var errorFileLogger = InitializeErrorLogger(logFilepath);
@@ -113,9 +113,9 @@ public static class LoggingConfiguration
         }
     }
 
-    public static void ThrowError(this log4net.ILog log, string message, Exception ex)
+    public static Exception ThrowError(this log4net.ILog log, string message, Exception ex)
     {
         log.Error(message, ex);
-        throw ex;
+        return ex;
     }
 }

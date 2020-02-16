@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
-using Newtonsoft.Json;
 
 namespace ModelImport
 {
@@ -38,7 +37,7 @@ namespace ModelImport
         {
             if (!File.Exists(RootDirectory + @"\" + "ModelInfo.json"))
             {
-                Log.ThrowError("No ModelInfo.json found in root folder!", new FileNotFoundException());
+                throw Log.ThrowError("No ModelInfo.json found in root folder!", new FileNotFoundException());
             }
 
             using (StreamReader r = new StreamReader(RootDirectory + @"\" + "ModelInfo.json"))
@@ -50,7 +49,7 @@ namespace ModelImport
                 }
                 catch (JsonReaderException ex)
                 {
-                    Log.ThrowError("Corrupted ModelInfo.json file!", ex);
+                    throw Log.ThrowError("Corrupted ModelInfo.json file!", ex);
                 }
             }
 
@@ -67,7 +66,7 @@ namespace ModelImport
             // simple validation of the structure
             if (Info.Layers.Count == 0)
             {
-                Log.ThrowError("No layers found in ModelInfo.json file", new InvalidDataException());
+                throw Log.ThrowError("No layers found in ModelInfo.json file", new InvalidDataException());
             }
         }
 

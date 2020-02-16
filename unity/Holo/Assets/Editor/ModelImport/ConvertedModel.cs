@@ -46,7 +46,7 @@ namespace ModelImport
         private void SaveFilesForExport(ModelLayerInfo layerInfo, string objectName, Mesh modelMesh, GameObject modelGameObject)
         {
             string rootAssetsDir = AssetDirs.TempAssetsDir + "/" + Info.Caption;
-			AssetDirs.CreateDirectory(rootAssetsDir);
+			AssetDirs.CreateAssetDirectory(rootAssetsDir);
 		
         	string meshPath = rootAssetsDir + "/" + objectName + ".asset";
 			AssetPaths.Add(meshPath);

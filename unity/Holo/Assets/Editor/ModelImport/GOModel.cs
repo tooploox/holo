@@ -19,7 +19,7 @@ namespace ModelImport
             GameObject modelGameObject = AssetDatabase.LoadAssetAtPath<GameObject>(objectPath);
             if (modelGameObject == null)
             {
-                Log.ThrowError("Cannot import model from " + objectPath, new IOException());
+                throw Log.ThrowError("Cannot import model from " + objectPath, new IOException());
             }
             GameObject modelInstance = UnityEngine.Object.Instantiate(modelGameObject);
             AddLayerComponent(modelInstance, layerInfo);
@@ -34,7 +34,7 @@ namespace ModelImport
         private void CreatePrefab(ModelLayerInfo layerInfo, GameObject modelGameObject, string objectName)
         {
             string rootAssetsDir = AssetDirs.TempAssetsDir + "/" + Info.Caption;
-			AssetDirs.CreateDirectory(rootAssetsDir);
+			AssetDirs.CreateAssetDirectory(rootAssetsDir);
 
 			string prefabPath = rootAssetsDir + "/" + objectName + ".prefab";
 			AssetPaths.Add(prefabPath);

@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using UnityEditor;
 using UnityEngine;
 
@@ -8,8 +7,8 @@ using ModelImport;
 public class DataPreparator
 {
     /* Loads a model in batchmode or multiple models in Editor and converts them into an AssetBundle.
-     * To use in batchmode: "<Path to Unity.exe>" -quit -batchmode -logFile "<Path to the logfile>"  
-    * -executeMethod ModelLoader.ImportWithConversion() --RootDirectory "<Directory of the folder which stores the meshes>" 
+     * To use in batchmode: "<Path to Unity.exe>" -quit -batchmode -logFile "<Path to the Unitys logfile>"  
+    * -executeMethod ModelLoader.ImportWithConversion() --RootDirectory "<Directory of the folder which stores the meshes>" --OutputDir ""<Directory where ABs will be stored" --LogDir "<directory where debug logfiles will be stored>" 
     */
 
     private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
@@ -39,7 +38,7 @@ public class DataPreparator
     private void PrepareData(string modelType)
     { 
         var inputConfig = new InputConfiguration();
-        AssetDirs.CreateDirectory(AssetDirs.TempAssetsDir);
+        AssetDirs.CreateAssetDirectory(AssetDirs.TempAssetsDir);
         var assetBundleCreator = new AssetBundleCreator(inputConfig.OutputDir);
         var modelConverter = new ModelConverter();
 
@@ -81,9 +80,7 @@ public class DataPreparator
             case "ConvertedModel":
                 return new ConvertedModel(rootDirectory);
             default:
-                var ex = new IOException();
-                Log.Error("Incorrect Model Importer type declared!", ex);
-                throw ex;
+                throw Log.ThrowError("Incorrect Model Importer type declared!", new IOException());
         }
     }
 }

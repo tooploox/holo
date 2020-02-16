@@ -26,8 +26,7 @@ namespace VTKConverter
             }
             catch (FileNotFoundException ex)
             {
-                Log.Error("No ModelInfo.json found in root folder!", ex);
-                throw;
+                throw Log.ThrowError("No ModelInfo.json found in root folder!", ex);
             }
             foreach (ModelLayerInfo layerInfo in Info.Layers)
             {
@@ -36,9 +35,7 @@ namespace VTKConverter
 
             if (Info.Layers.Count == 0)
             {
-                var exception = new InvalidDataException();
-                Log.Error("No layers found in ModelInfo.json file", exception);
-                throw exception;
+                throw Log.ThrowError("No layers found in ModelInfo.json file", new InvalidDataException());
             }
         }
 
