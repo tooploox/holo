@@ -11,15 +11,6 @@ public static class AssetDirs
     
 public const string TempAssetsDir = "Assets/Temporary";
 
-
-    public static void CreateDirectory(string path)
-    {
-        if (!Directory.Exists(path))
-        {
-            Directory.CreateDirectory(path);
-        }
-    }
-
     /* Create the directory within assets if necessary.
      * The directory to create is the last component of given path.
      */

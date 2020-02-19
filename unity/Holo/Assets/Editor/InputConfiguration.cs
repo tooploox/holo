@@ -27,10 +27,12 @@ class InputConfiguration
         if (string.IsNullOrEmpty(OutputDir))
         {
             OutputDir = Application.dataPath + "/StreamingAssets/";
+            Log.Info("OutputDir is empty, setting it to: " + OutputDir);
         }
         if (string.IsNullOrEmpty(LogFileDir))
         {
             LogFileDir = Application.persistentDataPath + "/PreprocessingLogs/";
+            Log.Info("OutputDir is empty, setting it to: " + LogFileDir);
         }
 
         LoggingConfiguration.Configure(LogFileDir);

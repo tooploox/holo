@@ -33,7 +33,7 @@ public class AssetBundleCreator
     //Creates appropriate AssetBundle for the model.
     private void CreateAssetBundle(AssetBundleBuild[] buildMapArray)
     {
-	    AssetDirs.CreateDirectory(outputPath);
+	    Directory.CreateDirectory(outputPath);
         BuildPipeline.BuildAssetBundles(outputPath, buildMapArray, BuildAssetBundleOptions.None, BuildTarget.WSAPlayer);
 
         // this is necessary to clear references to this asset

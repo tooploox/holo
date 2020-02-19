@@ -8,8 +8,8 @@ namespace VTKConverter
 
         static void Main(string[] args)
         {
-            LoggingConfiguration.Configure();
-            Log.Info("Program Started!");
+            var logConfig = new LoggingConfiguration();
+            Log.Info("VTKConverter started!");
             if (args.Length != 2)
             {
                 throw Log.ThrowError("Wrong number of parameters at the input!\n VTKconverter.exe <path/to/model/root/folder> <path/to/the/root/folder>", 

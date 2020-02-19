@@ -25,7 +25,7 @@ namespace VTKConverter
 
         private void ConvertSingleModel(SingleModel singleModel)
         {
-            Log.Info("Conversion started!");
+            Log.Info(singleModel.Info.Caption + " conversion started!");
             foreach (ModelLayerInfo layerInfo in singleModel.Info.Layers)
             {
                 ConvertLayer(layerInfo);
