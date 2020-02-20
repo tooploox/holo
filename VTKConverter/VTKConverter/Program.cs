@@ -8,7 +8,7 @@ namespace VTKConverter
 
         static void Main(string[] args)
         {
-            var logConfig = new LoggingConfiguration();
+            LoggingConfiguration.Configure();
             Log.Info("VTKConverter started!");
             if (args.Length != 2)
             {
