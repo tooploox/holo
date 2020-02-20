@@ -1,20 +1,27 @@
-﻿using System.Linq;
+﻿using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-using ModelLoad;
 
 public class AssetBundleCreator
 {
+    //Creates AssetBundle 
+    private string outputPath;
+
+    public AssetBundleCreator(string outputPath)
+    {
+        this.outputPath = outputPath;
+    }
+
     //Creates AssetBundle
-    public void Create(SingleModel importedModel)
+    public void Create(ModelImport.ModelImporter importedModel)
     {
         AssetBundleBuild[] buildMapArray = BuildMapABs(importedModel);
         CreateAssetBundle(buildMapArray);
     }
 
     // Create the array of bundle build details.
-    private AssetBundleBuild[] BuildMapABs(SingleModel importedModel)
+    private AssetBundleBuild[] BuildMapABs(ModelImport.ModelImporter importedModel)
     {
 
         AssetBundleBuild buildMap = new AssetBundleBuild();
@@ -26,17 +33,20 @@ public class AssetBundleCreator
     //Creates appropriate AssetBundle for the model.
     private void CreateAssetBundle(AssetBundleBuild[] buildMapArray)
     {
-	    AssetDirs.CreateDirectory("Assets/StreamingAssets");
-        BuildPipeline.BuildAssetBundles(Application.dataPath + "/StreamingAssets", buildMapArray, BuildAssetBundleOptions.None, BuildTarget.WSAPlayer);
-        AssetDatabase.DeleteAsset("Assets/StreamingAssets/StreamingAssets");
-        AssetDatabase.DeleteAsset("Assets/StreamingAssets/StreamingAssets.manifest");
-        //TODO: The .mesh and .prefab files are left for debugging purposes but should be removed in the final version.
+	    Directory.CreateDirectory(outputPath);
+        BuildPipeline.BuildAssetBundles(outputPath, buildMapArray, BuildAssetBundleOptions.None, BuildTarget.WSAPlayer);
 
         // this is necessary to clear references to this asset
+        
         Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(AssetDirs.TempAssetsDir + "/icon.asset");
         UnityEngine.Object.DestroyImmediate(texture, true);
 
         // this is still necessary even after above DestroyImmediate.
         AssetDatabase.DeleteAsset(AssetDirs.TempAssetsDir + "/icon.asset");
+
+        //Cleaning up an unnecessesary bundle
+        string folderBundle = Path.Combine(outputPath, Path.GetFileNameWithoutExtension(outputPath));
+        File.Delete(folderBundle);
+        File.Delete(folderBundle + ".manifest");
     }
 }

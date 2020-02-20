@@ -2,20 +2,20 @@
     Caption: "Test Model",
     Layers: [
         {
-            Caption: "Body",
-            DataType: "anatomy",
-            Directory: "test_body"
-            UseAsIcon: true
+            "Caption": "Body",
+            "DataType": "anatomy",
+            "Directory": "test_body",
+			"UseAsIcon": true
         },
         {
-            Caption: "Fibre Simulation",
-            DataType: "fibre",
-            Directory: "testfibre_simulation"
+            "Caption": "Fibre Simulation",
+            "DataType": "fibre",
+            "Directory": "testfibre_simulation"
         },
         {
-            Caption: "Flow Simulation",
-            DataType: "flow",
-            Directory: "testflow_simulation"
+            "Caption": "Flow Simulation",
+            "DataType": "flow",
+            "Directory": "testflow_simulation"
         }
     ]
 }

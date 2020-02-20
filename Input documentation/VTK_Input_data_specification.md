@@ -23,19 +23,19 @@ You can choose any names for the root and layer folders. Simply make sure to lis
     Caption: "Test Model",
     Layers: [
         {
-            Caption: "Body",
-            DataType: anatomy,
+            "Caption": "Body",
+            "DataType": "anatomy",
             Directory: "test_body"
         },
         {
             Caption: "Fibre Simulation",
-            DataType: fibre,
-            DataType: "testfibre_simulation"
+            "DataType": "fibre",
+            "Directory": "testfibre_simulation"
         },
         {
-            Caption: "Flow Simulation",
-            DataType: flow,
-            Directory: "testflow_simulation"
+            "Caption": "Flow Simulation",
+            "DataType": "flow",
+            "Directory": "testflow_simulation"
         }
     ]
 }
