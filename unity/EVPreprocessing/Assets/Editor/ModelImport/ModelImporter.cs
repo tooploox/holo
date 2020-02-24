@@ -66,7 +66,7 @@ namespace ModelImport
             // simple validation of the structure
             if (Info.Layers.Count == 0)
             {
-                throw Log.ThrowError("No layers found in ModelInfo.json file", new InvalidDataException());
+                throw Log.ThrowError("No layers found in ModelInfo.json file at:" + RootDirectory, new InvalidDataException());
             }
         }
 

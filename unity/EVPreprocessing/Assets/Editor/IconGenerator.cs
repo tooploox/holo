@@ -59,7 +59,7 @@ public static class IconGenerator
         return result;
     }
 
-    [MenuItem("Holo/Test Generating Icon For Selected Item")]
+    [MenuItem("EVPreprocessing/Test Generating Icon For Selected Item")]
     private static void TestGenerate()
     {
         UnityEngine.Object obj = Selection.activeObject;

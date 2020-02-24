@@ -7,27 +7,27 @@ using ModelImport;
 public class DataPreparator
 {
     /* Loads a model in batchmode or multiple models in Editor and converts them into an AssetBundle.
-     * To use in batchmode: "<Path to Unity.exe>" -quit -batchmode -logFile "<Path to the Unitys logfile>"  
-    * -executeMethod ModelLoader.ImportWithConversion() --RootDirectory "<Directory of the folder which stores the meshes>" --OutputDir ""<Directory where ABs will be stored" --LogDir "<directory where debug logfiles will be stored>" 
+     * To use in batchmode: "<Path to Unity.exe>" -quit -batchmode -logFile "<Path to the Unitys logfile>"  -projectPath "<path to the EVPreprocessing project>"
+    * -executeMethod DataPreparator.ImportWithConversion --RootDirectory "<Directory of the folder which stores the meshes>" --OutputDir ""<Directory where ABs will be stored" --LogDir "<directory where debug logfiles will be stored>" 
     */
 
     private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-    [MenuItem("Holo/Create AssetBundle from an external supported format")]
+    [MenuItem("EVPreprocessing/Create an AssetBundle from an external supported format")]
     public static void ImportWithConversion()
     {
         var importDispatcher = new DataPreparator();
         importDispatcher.PrepareData("ConversionRequired");
     }
 
-    [MenuItem("Holo/Create AssetBundle from converted data")]
+    [MenuItem("EVPreprocessing/Create an AssetBundle from converted data")]
     public static void ImportConvertedModel()
     {
         var importDispatcher = new DataPreparator();
         importDispatcher.PrepareData("ConvertedModel");
     }
 
-    [MenuItem("Holo/Create AssetBundle from a Unity-supported format")]
+    [MenuItem("EVPreprocessing/Create an AssetBundle from a Unity-supported format")]
     public static void ImportGameObjectModel()
     {
         var importDispatcher = new DataPreparator();
@@ -80,7 +80,7 @@ public class DataPreparator
             case "ConvertedModel":
                 return new ConvertedModel(rootDirectory);
             default:
-                throw Log.ThrowError("Incorrect Model Importer type declared!", new IOException());
+                throw Log.ThrowError("Incorrect ModelImporter type declared!", new IOException());
         }
     }
 }

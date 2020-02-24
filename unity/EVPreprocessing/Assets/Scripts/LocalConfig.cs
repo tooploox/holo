@@ -24,7 +24,6 @@ class LocalConfig : ScriptableObject
     }
 
 #if UNITY_EDITOR
-    [MenuItem("Holo/Create Local Configuration (to specify BundlesDirectory)")]
     public static void CreateLocalConfigAsset()
     {
         LocalConfig localConfig = ScriptableObject.CreateInstance<LocalConfig>();

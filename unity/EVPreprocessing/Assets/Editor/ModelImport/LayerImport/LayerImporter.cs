@@ -96,7 +96,7 @@ namespace ModelImport.LayerImport
             }
             else
             {
-                throw Log.ThrowError("Type not supported!", new IOException());
+                throw Log.ThrowError("Imported file type is not supported! (currently only .txt after the conversion)", new IOException());
             }
         }
 

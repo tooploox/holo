@@ -10,7 +10,7 @@ namespace VTKConverter
     {
         private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        public VTKImporter(string outputLogDir)
+        public VTKImporter()
         {
             var vtkOutput = vtkWin32OutputWindow.New();
             vtkOutput.SendToStdErrOn();
@@ -58,7 +58,7 @@ namespace VTKConverter
                     modelData = new FlowData(vtkModel);
                     break;
                 default:
-                    throw Log.ThrowError("Wrong model type!", new IOException());
+                    throw Log.ThrowError("Wrong model datatype in ModelInfo.json! \n Currently supporting: \"anatomy\" \"fibre\" and \"flow\" ", new IOException());
             }
             return modelData;
         }

@@ -3,7 +3,7 @@ using UnityEditor;
 
 public class TestMeshTopology
 {
-    [MenuItem("Holo/Test Mesh.SetTopology with lines")]
+    [MenuItem("EVPreprocessing/Test Mesh.SetTopology with lines")]
     static void Execute()
     {
         // base vertices are all zero
