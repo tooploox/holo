@@ -20,6 +20,13 @@ public class DataPreparator
         importDispatcher.PrepareData("ConversionRequired");
     }
 
+    [MenuItem("EVPreprocessing/Create an AssetBundle from volumetric data")]
+    public static void ImportVolumetric()
+    {
+        var importDispatcher = new DataPreparator();
+        importDispatcher.PrepareData("VolumetricModel");
+    }
+
     [MenuItem("EVPreprocessing/Create an AssetBundle from converted data")]
     public static void ImportConvertedModel()
     {
@@ -79,6 +86,8 @@ public class DataPreparator
                 return new ConvertedModel(modelConverter.OutputRootDir);
             case "ConvertedModel":
                 return new ConvertedModel(rootDirectory);
+            case "VolumetricModel":
+                return new VolumetricModel(rootDirectory);
             default:
                 throw Log.ThrowError("Incorrect ModelImporter type declared!", new IOException());
         }

@@ -3,10 +3,20 @@
 /* Information about layer.
  * It should be present in asset bundle for each GameObject representing a layer.
  */
+
+public enum DataType
+{
+    Mesh,
+    Volumetric
+}
+
 public class ModelLayer : MonoBehaviour
 {
     // Nice name to show to user.
     public string Caption;
+
+    // Type of data to be visualized
+    public DataType DataType;
 
     // Is this a simulation layer (using simulation shader etc.)
     public bool Simulation;
