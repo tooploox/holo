@@ -36,7 +36,7 @@ namespace VTKConverter
         {
             string outputLayerDir = outputRootDir + @"\" + Path.GetFileName(layerInfo.Directory);
             Directory.CreateDirectory(outputLayerDir);
-            var fileConverter = new VTKImporter(outputRootDir);
+            var fileConverter = new VTKImporter();
             string[] inputPaths = GetFilepaths(layerInfo.Directory);
             foreach (string inputPath in inputPaths)
             {

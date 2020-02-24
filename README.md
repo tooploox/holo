@@ -23,11 +23,21 @@ Application to visualize animated 3D medical data using Hololens, with shared ex
 
 #### Converting VTK model series into Asset Bundles
 
-Open Unity project from unity/Holo.
+**In Unity GUI**
+Open Unity project from unity/EVPreprocessing.
 
-1. Run script: **Holo -> Convert VTK model to an AssetBundle's GameObject**
+1. Run script: **EVPreprocessing -> Create an AssetBundle from an external supported format**
 2. Choose the directory with model time series in VTK files
 3. Your resulting AssetBundle is located in _**<repository location>/unity/Holo/Assets/StreamingAssets/<name of converted directory>\_bundle(.manifest)**_
+
+**Through CMD**
+1. Run CMD as an administrator
+2. Run the following command: 
+```
+"<Path to Unity.exe>" -quit -batchmode -logFile "<Path to the Unitys logfile>"  -projectPath "<path to the EVPreprocessing project>" -executeMethod DataPreparator.ImportWithConversion --RootDirectory "<Directory of the input's model root folder>" --OutputDir ""<Directory where ABs will be stored" --LogDir "<directory where debug logfiles will be stored>"
+```
+
+**Important:** Path to the Unity.exe needs to lead to the 2018.4 version. --OutputDir and --LogDir flags need to be raised, if user wants to leave them at the default paths, one just needs to leave their values empty.
 
 #### Uploading AssetBundles to Hololens headset
 
