@@ -24,6 +24,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public Material DefaultModelMaterial;
     public Material DefaultModelTransparentMaterial;
     public Material DataVisualizationMaterial;
+    public Material DefaultVolumetricMaterial;
     public Transform InstanceParent;
     public CompoundButton ButtonTogglePlay;
     public CompoundButton ButtonTranslate;
@@ -364,6 +365,18 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         if (!addLayer) {
             UnloadLayer(layer);
         } else {
+            if (layer.DataType == DataType.Volumetric)
+            {
+                List<ModelLayer> layersToUnload = new List<ModelLayer>();
+                foreach (KeyValuePair<ModelLayer, LayerLoaded> entry in layersLoaded)
+                    layersToUnload.Add(entry.Key);
+
+                foreach (ModelLayer l in layersToUnload)
+                {
+                    UnloadLayer(l);
+                    HoloUtilities.SetButtonStateText(layersButtons[l], false);
+                }
+            }
             LoadLayer(layer);
         }
         HoloUtilities.SetButtonStateText(layersButtons[layer], addLayer);
@@ -759,6 +772,10 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
      */
     private Material LayerMaterial(ModelLayer layer)
     {
+        if (layer.DataType == DataType.Volumetric)
+        {
+            return DefaultVolumetricMaterial;
+        } else
         if (layer.Simulation)
         {
             return DataVisualizationMaterial;

@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System;
 using System.IO;
 using System.Linq;
+using UnityEditor;
 using UnityEngine;
 
 public enum LoadState {
@@ -71,6 +72,10 @@ public class AssetBundleLoader
         }
         LoadBundleMetadata();
         LoadLayers();
+        if(layers.All(x => x.GetComponent<ModelLayer>().DataType == DataType.Volumetric))
+        {
+            LoadVolumetricData();
+        }
         LoadState = LoadState.Full;
     }
 
@@ -84,7 +89,37 @@ public class AssetBundleLoader
             bounds = newBounds;
         }
     }
+    private void LoadVolumetricData()
+    {
+        const string DefaultMaterialAsset = "Assets/GFX/Materials/RaycastMat.mat";
 
+        Color ch1 = new Color(1, 0, 0);
+        Color ch2 = new Color(0, 1, 0);
+        Color ch3 = new Color(0, 0, 1);
+        Color ch4 = new Color(1, 0, 1);
+
+        foreach(ModelLayer l in layers)
+        {
+            MeshRenderer meshRenderer = l.gameObject.GetComponent<MeshRenderer>();
+            meshRenderer.material = AssetDatabase.LoadAssetAtPath<Material>(DefaultMaterialAsset);
+            string budleName = l.name + "_data.bytes";
+            TextAsset bytesAsset = assetBundle.LoadAsset(budleName) as TextAsset;
+            VolumetricModelLayer volumetricLayer = l.gameObject.GetComponent<VolumetricModelLayer>();
+            VolumetricLoader loader = l.gameObject.AddComponent<VolumetricLoader>();
+            loader.Width = volumetricLayer.Width;
+            loader.Height = volumetricLayer.Height;
+            loader.Depth = volumetricLayer.Depth;
+            loader.Channels = volumetricLayer.Channels;
+
+            if (loader.Channels > 0) loader.channel1 = ch1;
+            if (loader.Channels > 1) loader.channel2 = ch2;
+            if (loader.Channels > 2) loader.channel3 = ch3;
+            if (loader.Channels > 3) loader.channel4 = ch4;
+
+            loader.SetRawBytes(bytesAsset.bytes);
+        }
+        
+    }
     private void LoadLayers()
     {
         layers = new List<ModelLayer>();
@@ -157,6 +192,7 @@ public class AssetBundleLoader
                     int simulationsCount = layers.Count(c => c.Simulation);
                     layer.Caption = "Simulation " + (simulationsCount + 1).ToString();
                 }
+                layer.DataType = DataType.Mesh; // FIXME: If AB does not have ModeLayer - treat as simple mesh
                 Debug.LogWarning(layerDebugName + " does not contain ModelLayer component, guessing layer Caption (" + 
                     layer.Caption + ") and simulation (" + 
                     layer.Simulation.ToString() + ")");
