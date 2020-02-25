@@ -91,7 +91,7 @@ public class AssetBundleLoader
     }
     private void LoadVolumetricData()
     {
-        const string DefaultMaterialAsset = "Assets/GFX/Materials/RaycastMat.mat";
+        const string DefaultMaterialAsset = "Resources/RaycastMat.mat";
 
         Color ch1 = new Color(1, 0, 0);
         Color ch2 = new Color(0, 1, 0);
@@ -101,7 +101,7 @@ public class AssetBundleLoader
         foreach(ModelLayer l in layers)
         {
             MeshRenderer meshRenderer = l.gameObject.GetComponent<MeshRenderer>();
-            meshRenderer.material = AssetDatabase.LoadAssetAtPath<Material>(DefaultMaterialAsset);
+            meshRenderer.material = Resources.Load<Material>(DefaultMaterialAsset);
             string budleName = l.name + "_data.bytes";
             TextAsset bytesAsset = assetBundle.LoadAsset(budleName) as TextAsset;
             VolumetricModelLayer volumetricLayer = l.gameObject.GetComponent<VolumetricModelLayer>();
