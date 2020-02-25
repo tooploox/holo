@@ -6,8 +6,8 @@ namespace VTKConverter.DataImport
     {
         public AnatomyData(vtkDataSet vtkModel) : base(vtkModel)
         {
-            LoadVertices(vtkModel);
-            LoadIndices(vtkModel);
+            ImportVertices(vtkModel);
+            ImportIndices(vtkModel);
         }
     }
 }
