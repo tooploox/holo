@@ -24,6 +24,8 @@ public class AssetBundleLoader
     /* Uniquely identifies this bundle (across all running instances of the application). */
     public string Name { get; private set; }
 
+    public Material VolumetricMaterial;
+
     public AssetBundleLoader(string aName, string aBundlePath)
     {
         Name = aName;
@@ -72,10 +74,6 @@ public class AssetBundleLoader
         }
         LoadBundleMetadata();
         LoadLayers();
-        if(layers.All(x => x.GetComponent<ModelLayer>().DataType == DataType.Volumetric))
-        {
-            LoadVolumetricData();
-        }
         LoadState = LoadState.Full;
     }
 
@@ -89,9 +87,14 @@ public class AssetBundleLoader
             bounds = newBounds;
         }
     }
-    private void LoadVolumetricData()
+
+    public  void LoadVolumetricData()
     {
-        const string DefaultMaterialAsset = "Resources/RaycastMat.mat";
+        if (!layers.All(x => x.GetComponent<ModelLayer>().DataType == DataType.Volumetric))
+        {
+            Debug.LogWarning("Missing volumetric data in AssetBundle during LoadVolumetricData call.");
+            return;
+        }
 
         Color ch1 = new Color(1, 0, 0);
         Color ch2 = new Color(0, 1, 0);
@@ -100,8 +103,8 @@ public class AssetBundleLoader
 
         foreach(ModelLayer l in layers)
         {
-            MeshRenderer meshRenderer = l.gameObject.GetComponent<MeshRenderer>();
-            meshRenderer.material = Resources.Load<Material>(DefaultMaterialAsset);
+            l.gameObject.GetComponent<MeshRenderer>().sharedMaterial = VolumetricMaterial;
+
             string budleName = l.name + "_data.bytes";
             TextAsset bytesAsset = assetBundle.LoadAsset(budleName) as TextAsset;
             VolumetricModelLayer volumetricLayer = l.gameObject.GetComponent<VolumetricModelLayer>();

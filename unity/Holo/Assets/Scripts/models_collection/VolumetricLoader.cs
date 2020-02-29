@@ -18,18 +18,11 @@ public class VolumetricLoader : MonoBehaviour
     public Color channel3;
     public Color channel4;
 
-    private Renderer TargetRenderer;
-
     private byte[] RawData;
     private bool dataInitialized = false;
 
     private int xysize, size;
-
-    private void OnEnable()
-    {
-        Debug.Log("Recalculate texture OnEnable!");
-        RecalculateTextures();
-    }
+    private bool recalculationInProgress = false;
 
     private void Start()
     {
@@ -58,7 +51,11 @@ public class VolumetricLoader : MonoBehaviour
             Debug.LogError("Invalid size of raw bytes: " + bytes.Length + ", expecting: " + size * 2);
         }
 
-        RawData = bytes;
+        if(this.RawData == null || this.RawData.Length == 0)
+        {
+            this.RawData = new byte[bytes.Length];
+        }
+        bytes.CopyTo(this.RawData, 0);
         InitializeWithData();
     }
 
@@ -89,41 +86,22 @@ public class VolumetricLoader : MonoBehaviour
         Color32[] colorArray = new Color32[size];
         Texture3D resultTexture = new Texture3D(Width, Height, Depth, TextureFormat.RGBA32, true);
 
-        Debug.Log("Calculating 3D Texture");
-        Debug.Log("Raw data size: " + (RawData == null ? 0 : RawData.Length));
-        bool rl, gl, bl, al;
-        rl = gl = bl = al = false;
+        Debug.Log("Calculating 3D Texture. Raw data size: " + (RawData == null ? 0 : RawData.Length));
 
         for (int z = 0; z < Depth; ++z)
             for (int it = 0; it < xysize; ++it)
             {
                 //todo: this if chain sucks in inner loop
                 byte r = 0; byte g = 0; byte b = 0; byte a = 0;
-                if(!rl)
-                    Debug.Log("Set Red!");
-                rl = true;
                 r = RawData[z * xysize * Channels + it];
                 if (Channels > 1)
-                {
-                    if(!gl)
-                        Debug.Log("Set Green!");
-                    gl = true;
                     g = RawData[z * xysize * Channels + xysize + it];
-                }
+
                 if (Channels > 2)
-                {
-                    if (!bl)
-                        Debug.Log("Set Blue!");
-                    bl = true;
                     b = RawData[z * xysize * Channels + xysize * 2 + it];
-                }
+
                 if (Channels > 3)
-                {
-                    if(!al)
-                        Debug.Log("Set Alpha!");
-                    al = true;
                     a = RawData[z * xysize * Channels + xysize * 3 + it];
-                }
 
                 colorArray[z * xysize + it] = new Color32(r, g, b, a);
             }
@@ -143,15 +121,19 @@ public class VolumetricLoader : MonoBehaviour
     {
         if (RawData == null || RawData.Length == 0)
         {
-            Debug.Log("Empty data for texture calculation");
+            Debug.Log("Empty data for texture calculation RawData: " + (RawData == null ? "null" : RawData.Length.ToString()));
             return;
         }
-        Debug.Log("Setting just calculated texture ");
 
-        TargetRenderer = this.gameObject.GetComponent<MeshRenderer>();
-        TargetRenderer.sharedMaterial.mainTexture = CalculateTexture();
+        if (this.gameObject.GetComponent<MeshRenderer>().sharedMaterial && !recalculationInProgress)
+        {
+            recalculationInProgress = true;
+            MeshRenderer renderer = gameObject.GetComponent<MeshRenderer>();
+            Debug.Log("Setting just calculated texture to material [name: " + renderer.sharedMaterial.name + "]");
+            renderer.sharedMaterial.mainTexture = CalculateTexture();
+            recalculationInProgress = false;
+        }
     }
-
 
     private void InitializeWithData()
     {

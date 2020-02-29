@@ -555,6 +555,12 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
         instanceLoaded = true;
         instanceBundle = ModelsCollection.Singleton.BundleLoad(newInstanceBundleName);
+        // Load Volumetric Data 
+        if(instanceBundle.Layers.All(x => x.GetComponent<ModelLayer>().DataType == DataType.Volumetric))
+        {
+            instanceBundle.VolumetricMaterial = DefaultVolumetricMaterial;
+            instanceBundle.LoadVolumetricData();
+        }
         instanceIsPreview = newIsPreview;
         layersLoaded = new Dictionary<ModelLayer, LayerLoaded>();
 
