@@ -543,7 +543,8 @@ PlayerSettings:
   webGLCompressionFormat: 1
   webGLLinkerTarget: 1
   webGLThreadsSupport: 0
-  scriptingDefineSymbols: {}
+  scriptingDefineSymbols:
+    14: 
   platformArchitecture: {}
   scriptingBackend:
     Metro: 2
@@ -557,7 +558,7 @@ PlayerSettings:
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
   metroPackageName: EssentialVision
-  metroPackageVersion: 1.0.0.0
+  metroPackageVersion: 1.0.6.0
   metroCertificatePath: Assets\WSATestCertificate.pfx
   metroCertificatePassword: 
   metroCertificateSubject: DefaultCompany
