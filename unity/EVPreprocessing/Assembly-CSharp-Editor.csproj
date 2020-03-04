@@ -64,7 +64,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Editor\AssetBundles\AssetBundleCreator.cs" />
-    <Compile Include="Assets\Editor\AssetBundles\AssetBundleEditorLoader.cs" />
     <Compile Include="Assets\Editor\AssetDirs.cs" />
     <Compile Include="Assets\Editor\DataPreparator.cs" />
     <Compile Include="Assets\Editor\IconGenerator.cs" />

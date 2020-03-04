@@ -18,17 +18,17 @@ namespace VTKConverter.DataImport
 
         public ModelData(vtkDataSet vtkModel)
         {
-            LoadBounds(vtkModel);
+            ImportFrameBounds(vtkModel);
         }
 
-        private void LoadBounds(vtkDataSet vtkModel)
+        private void ImportFrameBounds(vtkDataSet vtkModel)
         {
             double[] boundingCoordinates = vtkModel.GetBounds();
             BoundingBox = new double[6] {boundingCoordinates[0], boundingCoordinates[2], -boundingCoordinates[4],
             boundingCoordinates[1], boundingCoordinates[3], -boundingCoordinates[5]};
         }
 
-        protected void LoadVertices(vtkDataSet vtkModel)
+        protected void ImportVertices(vtkDataSet vtkModel)
         {
             int numberOfPoints = vtkModel.GetNumberOfPoints();
             Vertices = new double[numberOfPoints][];
@@ -39,7 +39,7 @@ namespace VTKConverter.DataImport
             }
         }
 
-        protected virtual void LoadIndices(vtkDataSet vtkModel)
+        protected virtual void ImportIndices(vtkDataSet vtkModel)
         {
             int numberOfCells = vtkModel.GetNumberOfCells();
             NumberOfFacetEdges = vtkModel.GetMaxCellSize();
@@ -47,7 +47,7 @@ namespace VTKConverter.DataImport
             int currentIndexNumber = 0;
             for (int i = 0; i < numberOfCells; i++)
             {
-                currentIndexNumber = LoadCellIndices(currentIndexNumber, vtkModel.GetCell(i).GetPointIds());
+                currentIndexNumber = ImportCellIndices(currentIndexNumber, vtkModel.GetCell(i).GetPointIds());
             }
         }
 
@@ -66,7 +66,7 @@ namespace VTKConverter.DataImport
             }
         }
 
-        private int LoadCellIndices(int currentIndexNumber, vtkIdList cellIndices)
+        private int ImportCellIndices(int currentIndexNumber, vtkIdList cellIndices)
         {
             int numberOfIndices = cellIndices.GetNumberOfIds();
             for (int j = 0; j < numberOfIndices; j++)

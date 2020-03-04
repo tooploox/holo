@@ -10,12 +10,12 @@ namespace VTKConverter.DataImport
         {
             numberOfPoints = vtkModel.GetNumberOfPoints();
             ComputePointIndices(numberOfPoints);
-            LoadVertices(vtkModel);
-            GetVectors(vtkModel);
-            GetAngles(vtkModel);
+            ImportVertices(vtkModel);
+            ImportVectors(vtkModel);
+            ImportAngles(vtkModel);
         }
 
-        private void GetVectors(vtkDataSet vtkModel)
+        private void ImportVectors(vtkDataSet vtkModel)
         {
             Vectors = new double[numberOfPoints][];
 
@@ -27,7 +27,7 @@ namespace VTKConverter.DataImport
             }
         }
 
-        private void GetAngles(vtkDataSet vtkModel)
+        private void ImportAngles(vtkDataSet vtkModel)
         {
             Scalars = new double[numberOfPoints][];
             vtkPointData pointData = vtkModel.GetPointData();
