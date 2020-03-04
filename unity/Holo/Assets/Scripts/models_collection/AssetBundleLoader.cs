@@ -114,12 +114,24 @@ public class AssetBundleLoader
             loader.Depth = volumetricLayer.Depth;
             loader.Channels = volumetricLayer.Channels;
 
+            // Calculate scale ratios. Bases: w - 512, h - 512, d - 20
+            float w_ratio = (float)loader.Width / 512.0f;
+            float h_ratio = (float)loader.Height / 512.0f;
+            float d_ratio = (float)loader.Depth / 20.0f;
+
+            // Set rescalled "canvas". Bases: x - 0.9, y - 0.9, z - 0.1
+            l.gameObject.transform.localScale = new Vector3((0.9f * w_ratio), (0.9f * h_ratio), (0.1f * d_ratio));
+
             if (loader.Channels > 0) loader.channel1 = ch1;
             if (loader.Channels > 1) loader.channel2 = ch2;
             if (loader.Channels > 2) loader.channel3 = ch3;
             if (loader.Channels > 3) loader.channel4 = ch4;
 
-            loader.SetRawBytes(bytesAsset.bytes);
+            if (!loader.IsModelTextureCalculated())
+            {
+                Debug.Log("Loading Volumetric - bytes size: " + bytesAsset.bytes.Length.ToString());
+                loader.SetRawBytes(bytesAsset.bytes);
+            }
         }
         
     }
