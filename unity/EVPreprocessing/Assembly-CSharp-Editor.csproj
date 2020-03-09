@@ -78,6 +78,7 @@
     <Compile Include="Assets\Editor\ModelImport\LayerImport\ModelMesh.cs" />
     <Compile Include="Assets\Editor\ModelImport\ModelImporter.cs" />
     <Compile Include="Assets\Editor\ModelImport\ModelInfoClasses.cs" />
+    <Compile Include="Assets\Editor\ModelImport\VolumetricModel.cs" />
     <Compile Include="Assets\Editor\TestMeshTopology.cs" />
     <Reference Include="Unity.TextMeshPro.Editor">
       <HintPath>C:/Users/mit-kuchnowski/repos/holo/unity/EVPreprocessing/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>

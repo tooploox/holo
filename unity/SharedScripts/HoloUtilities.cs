@@ -1,9 +1,5 @@
-﻿using System;
+﻿using UnityEngine;
 
-using UnityEngine;
-
-using HoloToolkit.Unity;
-using HoloToolkit.Unity.UX;
 using HoloToolkit.Unity.Buttons;
 
 public static class HoloUtilities

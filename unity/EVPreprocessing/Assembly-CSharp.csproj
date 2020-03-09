@@ -69,6 +69,8 @@
     <Compile Include="Assets\Scripts\models_collection\AssetBundleLoader.cs" />
     <Compile Include="Assets\Scripts\models_collection\ModelLayer.cs" />
     <Compile Include="Assets\Scripts\models_collection\ModelsCollection.cs" />
+    <Compile Include="Assets\Scripts\models_collection\VolumetricLoader.cs" />
+    <Compile Include="Assets\Scripts\models_collection\VolumetricModelLayer.cs" />
     <None Include="Assets\VTKConverter\License-OS.txt" />
     <Reference Include="Unity.TextMeshPro.Editor">
       <HintPath>C:/Users/mit-kuchnowski/repos/holo/unity/EVPreprocessing/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
