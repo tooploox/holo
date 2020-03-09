@@ -551,6 +551,17 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
      */
     private void LoadInstance(string newInstanceBundleName, bool newIsPreview)
     {
+        if(instanceBundle != null)
+        {
+            Debug.Log("LoadInstance - currentInstanceName: " + instanceBundle.Name + ", newInstanceName: " + newInstanceBundleName);
+            if(instanceIsPreview != newIsPreview && instanceBundle.Layers.All(l => l.DataType == DataType.Volumetric))
+            {
+                Debug.Log("LoadInstance - preview accepted!");
+                instanceIsPreview = newIsPreview;
+                return;
+            }
+        }            
+
         UnloadInstance();
 
         instanceLoaded = true;
@@ -778,6 +789,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
      */
     private Material LayerMaterial(ModelLayer layer)
     {
+        Debug.Log("Getting LayerMaterial for layer: " + layer.name);
         if (layer.DataType == DataType.Volumetric)
         {
             return DefaultVolumetricMaterial;
