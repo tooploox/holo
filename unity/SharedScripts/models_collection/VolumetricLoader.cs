@@ -1,5 +1,7 @@
-﻿using System.IO;
+﻿using System.Collections;
+using System.IO;
 using UnityEngine;
+using UnityEditor;
 
 public class VolumetricLoader : MonoBehaviour
 {
@@ -15,15 +17,17 @@ public class VolumetricLoader : MonoBehaviour
     public Color channel3;
     public Color channel4;
 
-    private byte[] RawData;
-    private bool dataInitialized = false;
-
     private int xysize, size;
-    private bool recalculationInProgress = false;
+    public Texture3D ModelTexture;
 
-    private void Start()
+    private void Awake()
     {
-        SetSizes();
+        SetTexture();
+    }
+
+    public bool IsModelTextureCalculated()
+    {
+        return !(ModelTexture == null || ModelTexture.height == 0 || ModelTexture.width == 0 || ModelTexture.depth == 0);
     }
 
     void SetSizes()
@@ -43,23 +47,19 @@ public class VolumetricLoader : MonoBehaviour
             Debug.Log("Empty raw bytes array!");
             return;
         }
-        if (bytes.Length != size * 2)
+        if (bytes.Length != size * Channels)
         {
-            Debug.LogError("Invalid size of raw bytes: " + bytes.Length + ", expecting: " + size * 2);
+            Debug.LogError("Invalid size of raw bytes: " + bytes.Length + ", expecting: " + size * Channels);
+            return;
         }
 
-        if(this.RawData == null || this.RawData.Length == 0)
-        {
-            this.RawData = new byte[bytes.Length];
-        }
-        bytes.CopyTo(this.RawData, 0);
-        InitializeWithData();
+        InitializeWithData(bytes);
     }
 
     public void LoadRawDataFromFile(string filePath)
     {
         SetSizes();
-        if (File.Exists(filePath) && RawData == null)
+        if (File.Exists(filePath))
         {
             LocalConfig localConfig = Resources.Load<LocalConfig>("LocalConfig");
             string dir = localConfig.GetBundlesDirectory();
@@ -78,12 +78,12 @@ public class VolumetricLoader : MonoBehaviour
         Channels = num;
     }
 
-    private Texture3D CalculateTexture()
+    private Texture3D CalculateTexture(byte[] RawData)
     {
         Color32[] colorArray = new Color32[size];
         Texture3D resultTexture = new Texture3D(Width, Height, Depth, TextureFormat.RGBA32, true);
 
-        Debug.Log("Calculating 3D Texture. Raw data size: " + (RawData == null ? 0 : RawData.Length));
+        Debug.Log("[" + this.gameObject.name + "] Calculating 3D Texture. Raw data size: " + (RawData == null ? 0 : RawData.Length));
 
         for (int z = 0; z < Depth; ++z)
             for (int it = 0; it < xysize; ++it)
@@ -114,40 +114,46 @@ public class VolumetricLoader : MonoBehaviour
         return resultTexture;
     }
 
-    public void RecalculateTextures()
+    public void RecalculateTextures(byte[] RawData)
     {
         if (RawData == null || RawData.Length == 0)
         {
-            Debug.Log("Empty data for texture calculation RawData: " + (RawData == null ? "null" : RawData.Length.ToString()));
+            Debug.Log("[" + this.gameObject.name + "] Empty data for texture calculation RawData: " + (RawData == null ? "null" : RawData.Length.ToString()));
             return;
         }
 
-        if (this.gameObject.GetComponent<MeshRenderer>().sharedMaterial && !recalculationInProgress)
+        if (this.gameObject.GetComponent<MeshRenderer>().sharedMaterial && !IsModelTextureCalculated())
         {
-            recalculationInProgress = true;
-            MeshRenderer renderer = gameObject.GetComponent<MeshRenderer>();
-            Debug.Log("Setting just calculated texture to material [name: " + renderer.sharedMaterial.name + "]");
-            renderer.sharedMaterial.mainTexture = CalculateTexture();
-            recalculationInProgress = false;
+            this.ModelTexture = CalculateTexture(RawData);
+            SetTexture();
         }
     }
 
-    private void InitializeWithData()
+    private void SetTexture()
     {
-        if (dataInitialized) return;
+        if (!IsModelTextureCalculated())
+        {
+            Debug.Log("[" + this.gameObject.name + "] Cannot SetTexture, because it is not yet calculated!");
+            return;
+        }
+        MeshRenderer renderer = gameObject.GetComponent<MeshRenderer>();
+        Debug.Log("Setting calculated texture to material [name: " + renderer.sharedMaterial.name + "]");
+        renderer.sharedMaterial.mainTexture = this.ModelTexture;
+    }
 
+    private void InitializeWithData(byte[] RawData)
+    {
         if (RawData == null || RawData.Length == 0)
         {
             Debug.Log("Empty data for initialization!");
             return;
         }
 
-        RecalculateTextures();
-
-        dataInitialized = true;
+        RecalculateTextures(RawData);
     }
 
-    Matrix4x4 GetCameraMatrix(Camera.StereoscopicEye eye) {
+    Matrix4x4 GetCameraMatrix(Camera.StereoscopicEye eye)
+    {
         var cam = Camera.main;
         if (cam.stereoEnabled)
             return cam.GetStereoViewMatrix(eye).inverse;
@@ -155,7 +161,8 @@ public class VolumetricLoader : MonoBehaviour
             return cam.cameraToWorldMatrix;
     }
 
-    void LateUpdate() {
+    void LateUpdate()
+    {
         var cam = Camera.main;
         var mat = GetComponent<Renderer>().sharedMaterial;
         var left = GetCameraMatrix(Camera.StereoscopicEye.Left).MultiplyPoint3x4(Vector3.zero);
