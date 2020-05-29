@@ -837,6 +837,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             plateTransform = value;
             PlateTransformManipulatable.GetComponent<Collider>().enabled = plateTransform;
             PlateTransformManipulatable.enabled = plateTransform;
+            PlateTransformManipulatable.ManipulationMode = plateTransform ? ManipulationMode.Rotate : ManipulationMode.MoveAndScale;
             HoloUtilities.SetButtonState(ButtonPlateTransform, PlateTransform);
         }
     }
