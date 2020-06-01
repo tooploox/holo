@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 using UnityEngine;
@@ -11,6 +12,7 @@ using HoloToolkit.Unity.UX;
 using HoloToolkit.Unity.Buttons;
 using HoloToolkit.Unity.InputModule;
 using HoloToolkit.Unity.InputModule.Utilities.Interactions;
+
 
 public class ModelWithPlate : MonoBehaviour, IClickHandler
 {
@@ -312,7 +314,29 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
     private void ClickPlateTransform()
     {
+        TestAcces();
         PlateTransform = !PlateTransform;
+    }
+
+    private void TestAcces()
+    {
+        //#define ENABLE_WINMD_SUPPORT
+#if ENABLE_WINMD_SUPPORT
+        string newFileName = DateTime.Now.ToString("ddMMyyyy-HHmmss") + "_test.txt";
+
+        LocalConfig localConfig = Resources.Load<LocalConfig>("LocalConfig");
+        string LogFileDir = localConfig.GetBundlesDirectory();
+
+
+        string text = File.ReadAllText(Path.Combine(LogFileDir, "testFile.txt"));
+
+        newFileName = Path.Combine(LogFileDir, newFileName);
+        using (var logFile = File.CreateText(newFileName))
+        {
+            logFile.WriteLine(" ==== " + DateTime.Now.ToString() + " logging started ==== ");
+            logFile.WriteLine(text);
+        }
+#endif
     }
 
     /* Load new model or unload.

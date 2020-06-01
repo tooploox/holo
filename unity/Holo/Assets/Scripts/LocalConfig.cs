@@ -1,6 +1,9 @@
 using System;
 using System.IO;
 using UnityEngine;
+#if ENABLE_WINMD_SUPPORT
+using Windows.Storage;
+#endif
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -9,18 +12,19 @@ using UnityEditor;
 class LocalConfig : ScriptableObject
 {
     // Disable warning: this field is never by code, but it set in Unity Editor and (de)serialized
-    #pragma warning disable CS0649
+#pragma warning disable CS0649
     // Directory with asset bundles (on non-Hololens)
     public string BundlesDirectory;
-    #pragma warning restore CS0649
+#pragma warning restore CS0649
 
     public string GetBundlesDirectory()
     {
-    #if ENABLE_WINMD_SUPPORT
-        return Application.persistentDataPath;
-    #else
+#if ENABLE_WINMD_SUPPORT
+        return Path.Combine(KnownFolders.Objects3D.Path, "EssentialVision");
+
+#else
         return BundlesDirectory;
-    #endif
+#endif
     }
 
 #if UNITY_EDITOR
