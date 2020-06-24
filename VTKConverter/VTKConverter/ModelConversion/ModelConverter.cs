@@ -11,16 +11,22 @@ namespace VTKConverter
 
         public void Convert(string inputRootDir, string outputFolder)
         {
-            CreateOutputRoot(inputRootDir, outputFolder);
             var singleModel = new SingleModel(inputRootDir);
+
+            CreateOutputRoot(inputRootDir, outputFolder, singleModel);
             ConvertSingleModel(singleModel);
         }
 
-        private void CreateOutputRoot(string inputRootDir, string outputFolder)
+        private void CreateOutputRoot(string inputRootDir, string outputFolder, SingleModel singleModel)
         {
             outputRootDir = outputFolder + @"\" + Path.GetFileName(inputRootDir);
             Directory.CreateDirectory(outputRootDir);
             File.Copy(inputRootDir + @"\ModelInfo.json", outputRootDir + @"\ModelInfo.json", true);
+            if (singleModel.Info.IconFileName != null)
+            {
+                File.Copy(inputRootDir + @"\" + singleModel.Info.IconFileName, 
+                    outputRootDir + @"\" + singleModel.Info.IconFileName, true);
+            }
         }
 
         private void ConvertSingleModel(SingleModel singleModel)

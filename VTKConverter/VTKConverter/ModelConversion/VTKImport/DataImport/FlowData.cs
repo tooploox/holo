@@ -1,4 +1,5 @@
-﻿using Kitware.VTK;
+﻿using System.Linq;
+using Kitware.VTK;
 
 namespace VTKConverter.DataImport
 {
@@ -9,12 +10,12 @@ namespace VTKConverter.DataImport
         public FlowData(vtkDataSet vtkModel) : base(vtkModel)
         {
             numberOfVertices = vtkModel.GetNumberOfPoints() / 2;
-            GetLineVerticesAndVectors(vtkModel);
+            ImportVerticesAndVectors(vtkModel);
             ComputePointIndices(numberOfVertices);
-            GetFlowColors(vtkModel);
+            ImportFlowColors(vtkModel);
         }
 
-        private void GetLineVerticesAndVectors(vtkDataSet vtkModel)
+        private void ImportVerticesAndVectors(vtkDataSet vtkModel)
         {
             Vertices = new double[numberOfVertices][];
             Vectors = new double[numberOfVertices][];
@@ -22,12 +23,14 @@ namespace VTKConverter.DataImport
             for (int i = 0; i < numberOfVertices * 2; i+=2)
             {
                 Vertices[currentVertexNumber] = vtkModel.GetPoint(i);
-                Vectors[currentVertexNumber] = vtkModel.GetPoint(i+1);
+                Vectors[currentVertexNumber] = vtkModel.GetPoint(i + 1).Zip(vtkModel.GetPoint(i), (vector, vertex) => vector - vertex).ToArray();
+                Vertices[currentVertexNumber][2] = -Vertices[currentVertexNumber][2];
+                Vectors[currentVertexNumber][2] = -Vectors[currentVertexNumber][2];
                 currentVertexNumber += 1;
             }
         }
 
-        private void GetFlowColors(vtkDataSet vtkModel)
+        private void ImportFlowColors(vtkDataSet vtkModel)
         {
             // Kitware.VTK.dll automatically scales colours to 0-255 range.
             Scalars = new double[numberOfVertices][];

@@ -8,10 +8,16 @@ namespace VTKConverter
     public class ModelInfo
     {
         public string Caption;
+        // Icon filename.
+        // Initially (when deserialized from JSON) this is relative to ModelInfo.json,
+        // but it is converted to an absolute path during SingleModel.ReadInfoFile,
+        // so most of the code can safely assume it's an absolute filename.
+        // Must be a PNG file now.
+        public string IconFileName;
         public List<ModelLayerInfo> Layers = new List<ModelLayerInfo>();
     }
 
-    // Information about a single layer.
+    // Information about a single layer.\
     public class ModelLayerInfo
     {
         public string Caption;

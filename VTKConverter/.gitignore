@@ -1,0 +1,5 @@
+.vs/
+VTKConverter/bin/
+VTKConverter/obj/
+*.csproj
+*.csproj.user
