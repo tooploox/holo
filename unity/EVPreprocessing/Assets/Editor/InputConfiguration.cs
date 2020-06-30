@@ -23,6 +23,7 @@ class InputConfiguration
         else
         {
             RootDirectory = EditorUtility.OpenFolderPanel("Select model root folder with ModelInfo.json", Application.dataPath, "");
+            OutputDir = EditorUtility.OpenFolderPanel("Select model output directory", Application.dataPath, "");
         }
         if (string.IsNullOrEmpty(OutputDir))
         {
@@ -32,7 +33,7 @@ class InputConfiguration
         if (string.IsNullOrEmpty(LogFileDir))
         {
             LogFileDir = Application.persistentDataPath + "/PreprocessingLogs/";
-            Log.Info("OutputDir is empty, setting it to: " + LogFileDir);
+            Log.Info("LogFile is empty, setting it to: " + LogFileDir);
         }
 
         LoggingConfiguration.Configure(LogFileDir);
