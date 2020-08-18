@@ -9,7 +9,7 @@ namespace VTKConverter.DataImport
 
         public FlowData(vtkDataSet vtkModel) : base(vtkModel)
         {
-            numberOfVertices = vtkModel.GetNumberOfPoints() / 2;
+            numberOfVertices = vtkModel.GetNumberOfCells();
             ImportVerticesAndVectors(vtkModel);
             ComputePointIndices(numberOfVertices);
             ImportFlowColors(vtkModel);
@@ -20,10 +20,14 @@ namespace VTKConverter.DataImport
             Vertices = new double[numberOfVertices][];
             Vectors = new double[numberOfVertices][];
             int currentVertexNumber = 0;
-            for (int i = 0; i < numberOfVertices * 2; i+=2)
+            for (int i = 0; i < numberOfVertices; i++)
             {
-                Vertices[currentVertexNumber] = vtkModel.GetPoint(i);
-                Vectors[currentVertexNumber] = vtkModel.GetPoint(i + 1).Zip(vtkModel.GetPoint(i), (vector, vertex) => vector - vertex).ToArray();
+                int[] cellIds = new int[2] {
+                    vtkModel.GetCell(i).GetPointIds().GetId(0),
+                    vtkModel.GetCell(i).GetPointIds().GetId(1)
+                };
+                Vertices[currentVertexNumber] = vtkModel.GetPoint(cellIds[0]);
+                Vectors[currentVertexNumber] = vtkModel.GetPoint(cellIds[1]).Zip(vtkModel.GetPoint(cellIds[0]), (vector, vertex) => vector - vertex).ToArray();
                 Vertices[currentVertexNumber][2] = -Vertices[currentVertexNumber][2];
                 Vectors[currentVertexNumber][2] = -Vectors[currentVertexNumber][2];
                 currentVertexNumber += 1;
@@ -37,8 +41,18 @@ namespace VTKConverter.DataImport
             vtkDataArray colors = vtkModel.GetCellData().GetScalars("Colors");
             for(int i = 0; i < numberOfVertices; i++)
             {
-                Scalars[i] = colors.GetTuple3(i);
+                Scalars[i] = TranslateColorAsFraction(colors.GetTuple3(i));
+                double[] a = Scalars[i];
             }
+        }
+
+        private double[] TranslateColorAsFraction(double[] scalars)
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                scalars[i] = scalars[i] / 255;
+            }
+            return scalars;
         }
     }
 }

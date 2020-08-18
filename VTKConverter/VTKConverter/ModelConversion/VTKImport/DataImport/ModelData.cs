@@ -110,12 +110,12 @@ namespace VTKConverter.DataImport
 
         private string ConvertArrayToString(int[] indicesArray)
         {
-            string txtArray = String.Join(" ", indicesArray.Select(p => p.ToString()).ToArray());
+            string txtArray = string.Join(" ", indicesArray.Select(p => p.ToString()).ToArray());
             return txtArray;
         }
         private string ConvertArrayToString(double[] indicesArray)
         {
-            string txtArray = String.Join(" ", indicesArray.Select(p => Math.Round(p, 5).ToString(CultureInfo.InvariantCulture)).ToArray());
+            string txtArray = string.Join(" ", indicesArray.Select(p => Math.Round(p, 5).ToString(CultureInfo.InvariantCulture)).ToArray());
             return txtArray;
         }
     }
