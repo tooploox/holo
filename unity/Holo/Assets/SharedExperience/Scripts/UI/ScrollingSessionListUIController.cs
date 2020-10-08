@@ -4,9 +4,9 @@ using UnityEngine;
 using System;
 using System.Linq;
 using HoloToolkit.Examples.SharingWithUNET;
-using HoloToolkit.Unity;
+using UnityEditor;
 
-public class ScrollingSessionListUIController : SingleInstance<ScrollingSessionListUIController>
+public class ScrollingSessionListUIController : ScriptableSingleton<ScrollingSessionListUIController>
 {
     NetworkDiscoveryWithAnchors networkDiscovery;
     //CurrentSessionManager 

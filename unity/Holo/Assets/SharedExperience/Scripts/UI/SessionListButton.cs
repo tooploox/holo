@@ -1,11 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using HoloToolkit.Unity.InputModule;
 using System;
-
+using Microsoft.MixedReality.Toolkit.Input;
 using HoloToolkit.Examples.SharingWithUNET;
-public class SessionListButton : MonoBehaviour, IInputClickHandler {
+public class SessionListButton : MonoBehaviour, IMixedRealityPointerHandler
+{
 
     public NetworkDiscoveryWithAnchors.SessionInfo SessionInfo { get; private set; }
     int textColorId;
@@ -18,7 +18,7 @@ public class SessionListButton : MonoBehaviour, IInputClickHandler {
         textMesh = gameObject.GetComponentInChildren<TextMesh>();
         textMaterial = textMesh.GetComponent<MeshRenderer>().material;
         textColorId = Shader.PropertyToID("_Color");
-        scrollingUIController = ScrollingSessionListUIController.Instance;
+        scrollingUIController = ScrollingSessionListUIController.instance;
         if (scrollingUIController == null)
             Debug.Log("sad");
     }
@@ -43,7 +43,22 @@ public class SessionListButton : MonoBehaviour, IInputClickHandler {
         }
     }
 
-    public void OnInputClicked(InputClickedEventData eventData)
+    public void OnPointerDown(MixedRealityPointerEventData eventData)
+    {
+
+    }
+
+    public void OnPointerDragged(MixedRealityPointerEventData eventData)
+    {
+
+    }
+
+    public void OnPointerUp(MixedRealityPointerEventData eventData)
+    {
+
+    }
+
+    public void OnPointerClicked(MixedRealityPointerEventData eventData)
     {
         scrollingUIController.SetSelectedSession(SessionInfo);
     }

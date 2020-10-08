@@ -1,10 +1,10 @@
 ﻿using HoloToolkit.Examples.SharingWithUNET;
-using HoloToolkit.Unity;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
-public class PositionDebugButton : SingleInstance<PositionDebugButton> {
+public class PositionDebugButton : ScriptableSingleton<PositionDebugButton> {
 
     public GameObject DisconnectedPosition { get; set; }
     public GameObject ConnectedPosition { get; set; }

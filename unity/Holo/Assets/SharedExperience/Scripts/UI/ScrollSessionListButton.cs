@@ -1,15 +1,32 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using HoloToolkit.Unity.InputModule;
+using Microsoft.MixedReality.Toolkit.Input;
 using System;
 
-public class ScrollSessionListButton : MonoBehaviour, IInputClickHandler {
+public class ScrollSessionListButton : MonoBehaviour, IMixedRealityPointerHandler
+{
 
     public int Direction;
 
-    public void OnInputClicked(InputClickedEventData eventData)
+
+    public void OnPointerClicked(MixedRealityPointerEventData eventData)
     {
-        ScrollingSessionListUIController.Instance.ScrollSessions(Direction);
+        ScrollingSessionListUIController.instance.ScrollSessions(Direction);
+    }
+
+    public void OnPointerDown(MixedRealityPointerEventData eventData)
+    {
+
+    }
+
+    public void OnPointerDragged(MixedRealityPointerEventData eventData)
+    {
+
+    }
+
+    public void OnPointerUp(MixedRealityPointerEventData eventData)
+    {
+
     }
 }
