@@ -2,9 +2,9 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using UnityEngine;
-using HoloToolkit.Unity;
 using System;
 using System.Collections.Generic;
+using UnityEditor;
 
 #if !UNITY_EDITOR
 using Windows.Networking.Sockets;
@@ -19,7 +19,7 @@ namespace HoloToolkit.Examples.SharingWithUNET
     /// <summary>
     /// For a UWP application this should allow us to send or receive data given a server IP address.
     /// </summary>
-    public class GenericNetworkTransmitter : Singleton<GenericNetworkTransmitter>
+    public class GenericNetworkTransmitter : ScriptableSingleton<GenericNetworkTransmitter>
     {
 
         [Tooltip("The connection port on the machine to use.")]

@@ -2,10 +2,10 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using UnityEngine;
-using HoloToolkit.Unity.InputModule;
+using Microsoft.MixedReality.Toolkit.Input;
 using UnityEngine.XR.WSA.Input;
 
-public class ToggleDebugWindow : MonoBehaviour, IInputClickHandler
+public class ToggleDebugWindow : MonoBehaviour, IMixedRealityPointerHandler
 {
     bool debugEnabled = false;
     public GameObject DebugWindow;
@@ -26,7 +26,7 @@ public class ToggleDebugWindow : MonoBehaviour, IInputClickHandler
         if (obj.state.source.supportsThumbstick && obj.state.thumbstickPressed && Time.frameCount - resetFrame > 30)
         {
             resetFrame = Time.frameCount;
-            OnInputClicked(null);
+            OnPointerClicked(null);
         }
     }
 
@@ -34,20 +34,35 @@ public class ToggleDebugWindow : MonoBehaviour, IInputClickHandler
     {
         if (Input.GetButtonUp("Fire3"))
         {
-            OnInputClicked(null);
+            OnPointerClicked(null);
         }
 
         
     }
 
-    public void OnInputClicked(InputClickedEventData eventData)
-    {
-        debugEnabled = !debugEnabled;
-        UpdateChildren();
-    }
-
     private void UpdateChildren()
     {
         DebugWindow.SetActive(debugEnabled);
+    }
+
+    public void OnPointerDown(MixedRealityPointerEventData eventData)
+    {
+
+    }
+
+    public void OnPointerDragged(MixedRealityPointerEventData eventData)
+    {
+
+    }
+
+    public void OnPointerUp(MixedRealityPointerEventData eventData)
+    {
+
+    }
+
+    public void OnPointerClicked(MixedRealityPointerEventData eventData)
+    {
+        debugEnabled = !debugEnabled;
+        UpdateChildren();
     }
 }
