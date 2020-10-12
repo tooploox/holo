@@ -1,7 +1,7 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
+using ModelConversion.LayerConversion;
 
-namespace VTKConverter
+namespace ModelConversion
 {
     class ModelConverter
     {
@@ -32,32 +32,11 @@ namespace VTKConverter
         private void ConvertSingleModel(SingleModel singleModel)
         {
             Log.Info(singleModel.Info.Caption + " conversion started!");
+            var layerConverter = new LayerConverter(outputRootDir);
             foreach (ModelLayerInfo layerInfo in singleModel.Info.Layers)
             {
-                ConvertLayer(layerInfo);
+                layerConverter.Convert(layerInfo);
             }
-        }
-
-        private void ConvertLayer(ModelLayerInfo layerInfo)
-        {
-            string outputLayerDir = outputRootDir + @"\" + Path.GetFileName(layerInfo.Directory);
-            Directory.CreateDirectory(outputLayerDir);
-            var fileConverter = new VTKImporter();
-            string[] inputPaths = GetFilepaths(layerInfo.Directory);
-            foreach (string inputPath in inputPaths)
-            {
-                fileConverter.Convert(inputPath, outputLayerDir, layerInfo.DataType);
-            }
-        }
-
-        private string[] GetFilepaths(string rootDirectory)
-        {
-            string[] filePaths = Directory.GetFiles(rootDirectory + @"\");
-            if (filePaths == null)
-            {
-                throw Log.ThrowError("No files found in: " + rootDirectory, new FileNotFoundException());
-            }
-            return filePaths;
         }
     }
 }

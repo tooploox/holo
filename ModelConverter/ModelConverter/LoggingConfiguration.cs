@@ -5,7 +5,7 @@ using log4net.Core;
 using log4net.Layout;
 using log4net.Filter;
 
-namespace VTKConverter
+namespace ModelConversion
 {
     public static class LoggingConfiguration
     {

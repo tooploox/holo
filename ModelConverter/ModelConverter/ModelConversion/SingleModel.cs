@@ -4,7 +4,7 @@ using System.IO;
 using Newtonsoft.Json;
 
 
-namespace VTKConverter
+namespace ModelConversion
 {
     public class SingleModel
     {

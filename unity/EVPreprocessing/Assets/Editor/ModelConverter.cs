@@ -33,8 +33,8 @@ class ModelConverter
 
     private Process ConfigureProcess(string inputRootDir)
     {
-        string pathToExe = Path.GetFullPath(Application.dataPath + "/VTKConverter/");
-        string command = pathToExe + "VTKConverter.exe " + "'" + Path.GetFullPath(inputRootDir) + "' '" + Path.GetFullPath(TmpPath) + "'";
+        string pathToExe = Path.GetFullPath(Application.dataPath + "/ModelConverter/");
+        string command = pathToExe + "ModelConverter.exe " + "'" + Path.GetFullPath(inputRootDir) + "' '" + Path.GetFullPath(TmpPath) + "'";
         var startInfo = new ProcessStartInfo("powershell.exe", command)
         {
             CreateNoWindow = true,

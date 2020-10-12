@@ -5,9 +5,9 @@ using System.Text;
 
 using Kitware.VTK;
 
-namespace VTKConverter.DataImport
+namespace ModelConversion.LayerConversion.FrameImport.VTK
 {
-    abstract class ModelData
+    abstract class VTKFrame : IFrame
     {
         public double[] BoundingBox { get; protected set; }
         public double[][] Vertices { get; protected set; }
@@ -16,19 +16,48 @@ namespace VTKConverter.DataImport
         public double[][] Vectors { get; protected set; } = null;
         public double[][] Scalars { get; protected set; } = null;
 
-        public ModelData(vtkDataSet vtkModel)
+        protected vtkDataSet vtkModel;
+
+        public VTKFrame(string inputPath)
         {
-            ImportFrameBounds(vtkModel);
+            vtkModel = ReadVTKData(inputPath);
+            ImportFrameBounds();
         }
 
-        private void ImportFrameBounds(vtkDataSet vtkModel)
+        public void NormalizeVectors(double scalingFactor)
+        {
+            BoundingBox = ScaleArray(BoundingBox, scalingFactor);
+            Vertices = ScaleArray(Vertices, scalingFactor);
+            if (Vectors != null)
+            {
+                Vectors = ScaleArray(Vectors, scalingFactor);
+            }
+        }
+
+        private vtkDataSet ReadVTKData(string path)
+        {
+            using (vtkDataSetReader reader = new vtkDataSetReader())
+            {
+                reader.ReadAllScalarsOn();
+                reader.GetReadAllScalars();
+                reader.ReadAllVectorsOn();
+                reader.GetReadAllVectors();
+                reader.ReadAllColorScalarsOn();
+                reader.GetReadAllColorScalars();
+                reader.SetFileName(path);
+                reader.Update();
+                return reader.GetOutput();
+            }
+        }
+
+        private void ImportFrameBounds()
         {
             double[] boundingCoordinates = vtkModel.GetBounds();
-            BoundingBox = new double[6] {boundingCoordinates[0], boundingCoordinates[2], -boundingCoordinates[4],
-            boundingCoordinates[1], boundingCoordinates[3], -boundingCoordinates[5]};
+            BoundingBox = new double[6] { boundingCoordinates[0], boundingCoordinates[2], -boundingCoordinates[5],
+            boundingCoordinates[1], boundingCoordinates[3], -boundingCoordinates[4] };
         }
 
-        protected void ImportVertices(vtkDataSet vtkModel)
+        protected void ImportVertices()
         {
             int numberOfPoints = vtkModel.GetNumberOfPoints();
             Vertices = new double[numberOfPoints][];
@@ -39,7 +68,7 @@ namespace VTKConverter.DataImport
             }
         }
 
-        protected virtual void ImportIndices(vtkDataSet vtkModel)
+        protected virtual void ImportIndices()
         {
             int numberOfCells = vtkModel.GetNumberOfCells();
             NumberOfFacetEdges = vtkModel.GetMaxCellSize();
@@ -77,46 +106,18 @@ namespace VTKConverter.DataImport
             return currentIndexNumber;
         }
 
-        public string GetModelAsString()
+        private double[][] ScaleArray(double[][] jaggedArray, double scalingFactor)
         {
-            StringBuilder modelString = new StringBuilder();
-            modelString.Append("BOUNDS\n" + ConvertArrayToString(BoundingBox) + "\n");
-            modelString.Append("NUMBER OF FACET EDGES " + NumberOfFacetEdges.ToString() + "\n");
-            modelString.Append("VERTICES " + Vertices.Length.ToString() + "\n" + ConvertArrayToString(Vertices) + "\n");
-            modelString.Append("INDICES\n" + ConvertArrayToString(Indices) + "\n");
-            if (Vectors != null)
-            {
-                modelString.Append("VECTORS " + Vectors.Length.ToString() + "\n" + ConvertArrayToString(Vectors) + "\n");
-            }
-            if (Scalars != null)
-            {
-                modelString.Append("SCALARS " + Scalars.Length.ToString() + "\n" + ConvertArrayToString(Scalars) + "\n");
-            }
-            return modelString.ToString();
-        }
-
-        private string ConvertArrayToString(double[][] jaggedArray)
-        {
-            StringBuilder stringBuilder = new StringBuilder();
             for (int i = 0; i < jaggedArray.Length; i++)
             {
-                string vertexStr = string.Join(" ", jaggedArray[i].Select(p => Math.Round(p, 5).ToString(CultureInfo.InvariantCulture)).ToArray());
-                stringBuilder.Append(vertexStr + ' ');  
+                jaggedArray[i] = jaggedArray[i].Select(x => x * scalingFactor).ToArray();
             }
-            string finalString = stringBuilder.ToString();
-            finalString = finalString.TrimEnd();
-            return finalString;
+            return jaggedArray;
         }
 
-        private string ConvertArrayToString(int[] indicesArray)
+        private double[] ScaleArray(double[] array, double scalingFactor)
         {
-            string txtArray = string.Join(" ", indicesArray.Select(p => p.ToString()).ToArray());
-            return txtArray;
-        }
-        private string ConvertArrayToString(double[] indicesArray)
-        {
-            string txtArray = string.Join(" ", indicesArray.Select(p => Math.Round(p, 5).ToString(CultureInfo.InvariantCulture)).ToArray());
-            return txtArray;
+            return array.Select(x => x * scalingFactor).ToArray();
         }
     }
 }

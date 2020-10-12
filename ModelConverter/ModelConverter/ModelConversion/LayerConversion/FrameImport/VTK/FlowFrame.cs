@@ -1,21 +1,21 @@
 ﻿using System.Linq;
 using Kitware.VTK;
 
-namespace VTKConverter.DataImport
+namespace ModelConversion.LayerConversion.FrameImport.VTK
 {
-    class FlowData : ModelData
+    class FlowFrame : VTKFrame
     {
         private int numberOfVertices;
 
-        public FlowData(vtkDataSet vtkModel) : base(vtkModel)
+        public FlowFrame(string inputPath) : base(inputPath)
         {
             numberOfVertices = vtkModel.GetNumberOfCells();
-            ImportVerticesAndVectors(vtkModel);
+            ImportVerticesAndVectors();
             ComputePointIndices(numberOfVertices);
-            ImportFlowColors(vtkModel);
+            ImportFlowColors();
         }
 
-        private void ImportVerticesAndVectors(vtkDataSet vtkModel)
+        private void ImportVerticesAndVectors()
         {
             Vertices = new double[numberOfVertices][];
             Vectors = new double[numberOfVertices][];
@@ -34,7 +34,7 @@ namespace VTKConverter.DataImport
             }
         }
 
-        private void ImportFlowColors(vtkDataSet vtkModel)
+        private void ImportFlowColors()
         {
             // Kitware.VTK.dll automatically scales colours to 0-255 range.
             Scalars = new double[numberOfVertices][];

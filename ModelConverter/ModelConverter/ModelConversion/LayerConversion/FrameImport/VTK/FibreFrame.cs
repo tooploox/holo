@@ -1,21 +1,21 @@
 ﻿using Kitware.VTK;
 
-namespace VTKConverter.DataImport
+namespace ModelConversion.LayerConversion.FrameImport.VTK
 {
-    class FibreData : ModelData
+    class FibreFrame : VTKFrame
     {
         private int numberOfPoints;
 
-        public FibreData(vtkDataSet vtkModel) : base(vtkModel)
+        public FibreFrame(string inputPath) : base(inputPath)
         {
             numberOfPoints = vtkModel.GetNumberOfPoints();
             ComputePointIndices(numberOfPoints);
-            ImportVertices(vtkModel);
-            ImportVectors(vtkModel);
-            ImportAngles(vtkModel);
+            ImportVertices();
+            ImportVectors();
+            ImportAngles();
         }
 
-        private void ImportVectors(vtkDataSet vtkModel)
+        private void ImportVectors()
         {
             Vectors = new double[numberOfPoints][];
 
@@ -27,7 +27,7 @@ namespace VTKConverter.DataImport
             }
         }
 
-        private void ImportAngles(vtkDataSet vtkModel)
+        private void ImportAngles()
         {
             Scalars = new double[numberOfPoints][];
             vtkPointData pointData = vtkModel.GetPointData();

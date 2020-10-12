@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.421
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VTKConverter", "VTKConverter\VTKConverter.csproj", "{6C6E0406-759B-4E54-9913-E7163B8C674F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModelConverter", "ModelConverter\ModelConverter.csproj", "{6C6E0406-759B-4E54-9913-E7163B8C674F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
