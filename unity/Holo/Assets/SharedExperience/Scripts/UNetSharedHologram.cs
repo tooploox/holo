@@ -5,6 +5,9 @@ using UnityEngine.Networking;
 using System;
 using HoloToolkit.Examples.SharingWithUNET;
 using Microsoft.MixedReality.Toolkit.Input;
+using Microsoft.MixedReality.Toolkit.Experimental.Input;
+using System.Runtime.CompilerServices;
+using UnityEngine.EventSystems;
 
 #pragma warning disable CS0618 // using deprecated Unity stuff (TODO: upgrade in Holo project in the future)
 public class UNetSharedHologram : NetworkBehaviour, IMixedRealityPointerHandler
@@ -56,7 +59,7 @@ public class UNetSharedHologram : NetworkBehaviour, IMixedRealityPointerHandler
 
     bool Moving = false;
     int layerMask;
-    InputManager inputManager;
+    MixedRealityInputSystem inputManager;
     public Vector3 movementOffset = Vector3.zero;
     bool isOpaque;
     
@@ -80,7 +83,7 @@ public class UNetSharedHologram : NetworkBehaviour, IMixedRealityPointerHandler
             layerMask = (1 << /*PhysicsLayer*/31);
         }
         
-        inputManager = InputManager.Instance;
+        inputManager = new MixedRealityInputSystem(new MixedRealityInputSystemProfile());
         
     }
 	
@@ -140,7 +143,7 @@ public class UNetSharedHologram : NetworkBehaviour, IMixedRealityPointerHandler
             Moving = !Moving;
             if (Moving)
             {
-                inputManager.AddGlobalListener(this.gameObject);
+                inputManager.RegisterHandler<IEventSystemHandler>(this);
 
                 if (SpatialMappingManager.Instance != null)
                 {
@@ -149,7 +152,7 @@ public class UNetSharedHologram : NetworkBehaviour, IMixedRealityPointerHandler
             }
             else
             {
-                inputManager.RemoveGlobalListener(this.gameObject);
+                inputManager.UnregisterHandler<IEventSystemHandler>(this);
 
                 if (SpatialMappingManager.Instance != null)
                 {
