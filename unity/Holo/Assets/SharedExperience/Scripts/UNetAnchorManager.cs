@@ -4,7 +4,6 @@
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.Networking;
-using HoloToolkit.Unity;
 using UnityEngine.XR.WSA;
 using UnityEngine.XR.WSA.Sharing;
 

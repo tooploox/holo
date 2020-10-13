@@ -6,9 +6,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 using HoloToolkit.Examples.SharingWithUNET;
-using HoloToolkit.Unity.InputModule;
 using System;
-using HoloToolkit.Unity;
 
 /// <summary>
 /// This script has the primary game state logic for the Shared Mixed Reality 250 app.

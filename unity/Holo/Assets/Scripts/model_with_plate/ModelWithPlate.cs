@@ -5,12 +5,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-using HoloToolkit.Examples.InteractiveElements;
-
-using HoloToolkit.Unity.UX;
-using HoloToolkit.Unity.Buttons;
-using HoloToolkit.Unity.InputModule;
-using HoloToolkit.Unity.InputModule.Utilities.Interactions;
+using UnityEngine.UI;
 
 public class ModelWithPlate : MonoBehaviour, IClickHandler
 {
@@ -26,12 +21,12 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public Material DataVisualizationMaterial;
     public Material DefaultVolumetricMaterial;
     public Transform InstanceParent;
-    public CompoundButton ButtonTogglePlay;
-    public CompoundButton ButtonTranslate;
-    public CompoundButton ButtonRotate;
-    public CompoundButton ButtonScale;
-    public CompoundButton ButtonTransparency;
-    public CompoundButton ButtonPlateTransform;
+    public Button ButtonTogglePlay;
+    public Button ButtonTranslate;
+    public Button ButtonRotate;
+    public Button ButtonScale;
+    public Button ButtonTransparency;
+    public Button ButtonPlateTransform;
     public TwoHandManipulatable PlateTransformManipulatable;
     public GameObject ButtonLayerTemplate;
     public Texture2D ButtonIconPlay;
@@ -73,7 +68,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
      * that is only after LoadInstance call (and before UnloadInstance). */
     private AssetBundleLoader instanceBundle;
     private Dictionary<ModelLayer, LayerLoaded> layersLoaded;
-    private Dictionary<ModelLayer, CompoundButton> layersButtons;
+    private Dictionary<ModelLayer, Button> layersButtons;
     private GameObject instanceTransformation;
     private bool instanceIsPreview = false;
 
@@ -188,13 +183,13 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             button.SetActive(true);
 
             string modelName = ModelsCollection.Singleton.BundleCaption(i);
-            button.GetComponent<CompoundButtonText>().Text = modelName;
+            button.GetComponentInChildren<Text>().text = modelName;
 
             Texture2D icon = ModelsCollection.Singleton.BundleIcon(i);
             if (icon != null) { 
-                button.GetComponent<CompoundButtonIcon>().IconScale = IconScale;
-                button.GetComponent<CompoundButtonIcon>().IconShiftY = IconShiftY;
-                button.GetComponent<CompoundButtonIcon>().SetIconOverride(icon);
+                Rect imageRect = new Rect(0.0f, 0.0f, icon.width * IconScale, icon.height * IconScale);
+                Vector2 imageVector = new Vector2(0.0f, IconShiftY);
+                button.GetComponent<Image>().sprite = Sprite.Create(icon, imageRect, imageVector);
             }
         }
 

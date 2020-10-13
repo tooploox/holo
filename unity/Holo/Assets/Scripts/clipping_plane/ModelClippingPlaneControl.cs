@@ -1,19 +1,17 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using HoloToolkit.Unity.Buttons;
-using HoloToolkit.Unity.InputModule;
-using HoloToolkit.Unity.UX;
+﻿using UnityEngine;
+
+using Microsoft.MixedReality.Toolkit.UI;
+using UnityEngine.UI;
 
 public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
 {
-    public CompoundButton ButtonClippingPlane;
-    public CompoundButton ButtonClippingPlaneTranslation;
-    public CompoundButton ButtonClippingPlaneRotation;
+    public Button ButtonClippingPlane;
+    public Button ButtonClippingPlaneTranslation;
+    public Button ButtonClippingPlaneRotation;
     public ModelWithPlate ModelWithPlate;
 
-    BoundingBoxRig clipPlaneQuadBbox;
-    HandDraggable HandTranslation;
+    BoundingBox clipPlaneQuadBbox;
+    ManipulationHandler HandTranslation;
 
     public enum ClipPlaneState
     {
@@ -46,9 +44,9 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
             HandTranslation.enabled = value == ClipPlaneState.Translation;
 
             if (value == ClipPlaneState.Active || value == ClipPlaneState.Disabled)
-                clipPlaneQuadBbox.Deactivate();
+                clipPlaneQuadBbox.Active = false;
             else
-                clipPlaneQuadBbox.Activate();
+                clipPlaneQuadBbox.Active = true;
 
             if (value == ClipPlaneState.Disabled)
             {
@@ -79,13 +77,13 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
 
     void Start()
     {
-        clipPlaneQuadBbox = GetComponent<BoundingBoxRig>();
-        HandTranslation = GetComponent<HandDraggable>();
+        clipPlaneQuadBbox = GetComponent<BoundingBox>();
+        HandTranslation = GetComponent<ManipulationHandler>();
         HandTranslation.enabled = false;
 
         ButtonClippingPlaneTranslation.gameObject.SetActive(false);
         ButtonClippingPlaneRotation.gameObject.SetActive(false);
-        clipPlaneQuadBbox.Deactivate();
+        clipPlaneQuadBbox.Active = false;
     }
 
     public void Click(GameObject clickObj)
@@ -99,13 +97,13 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
 
             case "ButtonClippingTranslation":
                 ClippingPlaneState = ClippingPlaneState == ClipPlaneState.Translation ? ClipPlaneState.Active : ClipPlaneState.Translation;
-                ModelWithPlate.GetComponent<HandDraggable>().enabled = true;
-                ModelWithPlate.GetComponent<HandDraggable>().IsDraggingEnabled = false;
+                ModelWithPlate.GetComponent<ManipulationHandler>().enabled = true;
+                // ModelWithPlate.GetComponent<ManipulationHandler>().IsDraggingEnabled = false;
                 break;
 
             case "ButtonClippingRotation":
                 ClippingPlaneState = ClippingPlaneState == ClipPlaneState.Rotation ? ClipPlaneState.Active : ClipPlaneState.Rotation;
-                ModelWithPlate.GetComponent<HandDraggable>().enabled = false;
+                ModelWithPlate.GetComponent<ManipulationHandler>().enabled = false;
                 break;
         }
     }

@@ -1,14 +1,13 @@
-﻿using HoloToolkit.Unity.InputModule;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 using System;
 using HoloToolkit.Examples.SharingWithUNET;
-using HoloToolkit.Unity.SpatialMapping;
+using Microsoft.MixedReality.Toolkit.Input;
 
 #pragma warning disable CS0618 // using deprecated Unity stuff (TODO: upgrade in Holo project in the future)
-public class UNetSharedHologram : NetworkBehaviour, IInputClickHandler
+public class UNetSharedHologram : NetworkBehaviour, IMixedRealityPointerHandler
 #pragma warning restore CS0618 // using deprecated Unity stuff (TODO: upgrade in Holo project in the future)
 {
 
@@ -119,7 +118,22 @@ public class UNetSharedHologram : NetworkBehaviour, IInputClickHandler
         return retval;
     }
 
-    public void OnInputClicked(InputClickedEventData eventData)
+    public void OnPointerDown(MixedRealityPointerEventData eventData)
+    {
+
+    }
+
+    public void OnPointerDragged(MixedRealityPointerEventData eventData)
+    {
+
+    }
+
+    public void OnPointerUp(MixedRealityPointerEventData eventData)
+    {
+
+    }
+
+    public void OnPointerClicked(MixedRealityPointerEventData eventData)
     {
         if (isOpaque == false)
         {
@@ -127,7 +141,7 @@ public class UNetSharedHologram : NetworkBehaviour, IInputClickHandler
             if (Moving)
             {
                 inputManager.AddGlobalListener(this.gameObject);
-               
+
                 if (SpatialMappingManager.Instance != null)
                 {
                     SpatialMappingManager.Instance.DrawVisualMeshes = true;
@@ -136,7 +150,7 @@ public class UNetSharedHologram : NetworkBehaviour, IInputClickHandler
             else
             {
                 inputManager.RemoveGlobalListener(this.gameObject);
-               
+
                 if (SpatialMappingManager.Instance != null)
                 {
                     SpatialMappingManager.Instance.DrawVisualMeshes = false;

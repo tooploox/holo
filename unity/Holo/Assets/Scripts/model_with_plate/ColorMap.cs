@@ -2,9 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-using HoloToolkit.Unity.UX;
-using HoloToolkit.Unity.Buttons;
+using UnityEngine.UI;
 
 /* Configure colormap used by DataVisualizationMaterial. */
 public class ColorMap : MonoBehaviour, IClickHandler
@@ -18,7 +16,7 @@ public class ColorMap : MonoBehaviour, IClickHandler
     {
         foreach (GameObject interactable in GetComponent<ButtonsClickReceiver>().interactables) {
             if (interactable.name == name) {
-                CompoundButton button = interactable.GetComponent<CompoundButton>();
+                Button button = interactable.GetComponent<Button>();
                 if (button == null) {
                     throw new Exception("Interactable named " + name + " found, but it is not a button");
                 }
