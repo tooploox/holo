@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.MixedReality.Toolkit.UI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -27,7 +28,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public Button ButtonScale;
     public Button ButtonTransparency;
     public Button ButtonPlateTransform;
-    public TwoHandManipulatable PlateTransformManipulatable;
+    public ManipulationHandler PlateTransformManipulatable;
     public GameObject ButtonLayerTemplate;
     public Texture2D ButtonIconPlay;
     public Texture2D ButtonIconPause;
@@ -46,7 +47,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     private TransformationState transformationState = TransformationState.None;
 
     // Constant after Start()
-    private HandDraggable handDraggable;
+    private ManipulationHandler handDraggable;
 
     public GameObject ModelClipPlane;
 
@@ -128,9 +129,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     private void Start()
     {
         /* Adding components using code, simply because it's more friendly to version control */
-        handDraggable = gameObject.AddComponent<HandDraggable>();
-        handDraggable.RotationMode = HandDraggable.RotationModeEnum.LockObjectRotation;
-        GetComponent<TwoHandManipulatable>().enabled = false;
+        handDraggable = gameObject.AddComponent<ManipulationHandler>();
+        handDraggable.OneHandRotationModeNear = ManipulationHandler.RotateInOneHandType.RotateAboutObjectCenter;
+        GetComponent<ManipulationHandler>().enabled = false;
 
         ModelClipPlaneCtrl = ModelClipPlane.GetComponentInChildren<ModelClippingPlaneControl>();
         // Turn off the clipping plane on start
@@ -251,12 +252,12 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     {
         if (focusObject.name == "Slider")
         {
-            StoreTwoHandManipulatableModelActiveState = GetComponent<TwoHandManipulatable>().enabled;
-            StoreHandDraggableModelActiveState = GetComponent<HandDraggable>().enabled;
-            StoreHandDraggableClipPlaneActiveState = ModelClipPlane.GetComponent<HandDraggable>().enabled;
-            GetComponent<TwoHandManipulatable>().enabled = false;
-            GetComponent<HandDraggable>().enabled = false;
-            ModelClipPlane.GetComponent<HandDraggable>().enabled = false;
+            StoreTwoHandManipulatableModelActiveState = GetComponent<ManipulationHandler>().enabled;
+            StoreHandDraggableModelActiveState = GetComponent<ManipulationHandler>().enabled;
+            StoreHandDraggableClipPlaneActiveState = ModelClipPlane.GetComponent<ManipulationHandler>().enabled;
+            GetComponent<ManipulationHandler>().enabled = false;
+            GetComponent<ManipulationHandler>().enabled = false;
+            ModelClipPlane.GetComponent<ManipulationHandler>().enabled = false;
         }
     }
 
@@ -264,9 +265,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     {
         if (focusObject.name == "Slider")
         {
-            GetComponent<TwoHandManipulatable>().enabled = StoreTwoHandManipulatableModelActiveState;
-            GetComponent<HandDraggable>().enabled = StoreHandDraggableModelActiveState;
-            ModelClipPlane.GetComponent<HandDraggable>().enabled = StoreHandDraggableClipPlaneActiveState;
+            GetComponent<ManipulationHandler>().enabled = StoreTwoHandManipulatableModelActiveState;
+            GetComponent<ManipulationHandler>().enabled = StoreHandDraggableModelActiveState;
+            ModelClipPlane.GetComponent<ManipulationHandler>().enabled = StoreHandDraggableClipPlaneActiveState;
         }
     }
 
@@ -386,7 +387,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         // update ButtonTogglePlay caption and icon
         bool playing = AnimationPlaying;
         string playOrPauseText = playing ? "PAUSE" : "PLAY";
-        ButtonTogglePlay.GetComponent<CompoundButtonText>().Text = playOrPauseText;
+        ButtonTogglePlay.GetComponent<Text>().text = playOrPauseText;
         Texture2D playOrPatseIcon = playing ? ButtonIconPause : ButtonIconPlay;
         MeshRenderer iconRenderer = ButtonTogglePlay.GetComponent<CompoundButtonIcon>().IconMeshFilter.GetComponent<MeshRenderer>();
         if (iconRenderer != null) {
@@ -515,9 +516,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         if (scaleBoxRigActiveOld != scaleBoxRigActiveNew)
         {
             if (scaleBoxRigActiveNew) {
-                GetComponent<TwoHandManipulatable>().enabled = true;
+                GetComponent<ManipulationHandler>().enabled = true;
             } else {
-                GetComponent<TwoHandManipulatable>().enabled = false;
+                GetComponent<ManipulationHandler>().enabled = false;
             }
         }
     }
@@ -611,7 +612,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         Transparent = false;
 
         // add buttons to toggle layers
-        layersButtons = new Dictionary<ModelLayer, CompoundButton>();
+        layersButtons = new Dictionary<ModelLayer, Button>();
         int buttonIndex = 0;
         foreach (ModelLayer layer in instanceBundle.Layers)
         {
@@ -622,12 +623,12 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             buttonIndex++;
 
             // configure button text
-            CompoundButton button = buttonGameObject.GetComponent<CompoundButton>();
+            Button button = buttonGameObject.GetComponent<Butt>();
             if (button == null) {
                 Debug.LogWarning("Missing component CompoundButton in ButtonLayerTemplate");
                 continue;
             }
-            button.GetComponent<CompoundButtonText>().Text = layer.Caption;
+            button.GetComponent<Text>().text = layer.Caption;
 
             // extend ButtonsClickReceiver.interactables
             ButtonsClickReceiver clickReceiver = GetComponent<ButtonsClickReceiver>();
