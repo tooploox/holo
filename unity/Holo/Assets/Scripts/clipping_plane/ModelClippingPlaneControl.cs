@@ -1,19 +1,16 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using Microsoft.MixedReality.Toolkit.UI;
 using UnityEngine;
-using HoloToolkit.Unity.Buttons;
-using HoloToolkit.Unity.InputModule;
-using HoloToolkit.Unity.UX;
+
 
 public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
 {
-    public CompoundButton ButtonClippingPlane;
-    public CompoundButton ButtonClippingPlaneTranslation;
-    public CompoundButton ButtonClippingPlaneRotation;
+    public PressableButtonHoloLens2 ButtonClippingPlane;
+    public PressableButtonHoloLens2 ButtonClippingPlaneTranslation;
+    public PressableButtonHoloLens2 ButtonClippingPlaneRotation;
     public ModelWithPlate ModelWithPlate;
 
     BoundingBoxRig clipPlaneQuadBbox;
-    HandDraggable HandTranslation;
+    ManipulationHandler HandTranslation;
 
     public enum ClipPlaneState
     {
@@ -80,7 +77,7 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
     void Start()
     {
         clipPlaneQuadBbox = GetComponent<BoundingBoxRig>();
-        HandTranslation = GetComponent<HandDraggable>();
+        HandTranslation = GetComponent<ManipulationHandler>();
         HandTranslation.enabled = false;
 
         ButtonClippingPlaneTranslation.gameObject.SetActive(false);
@@ -99,13 +96,13 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
 
             case "ButtonClippingTranslation":
                 ClippingPlaneState = ClippingPlaneState == ClipPlaneState.Translation ? ClipPlaneState.Active : ClipPlaneState.Translation;
-                ModelWithPlate.GetComponent<HandDraggable>().enabled = true;
+                ModelWithPlate.GetComponent<ManipulationHandler>().enabled = true;
                 ModelWithPlate.GetComponent<HandDraggable>().IsDraggingEnabled = false;
                 break;
 
             case "ButtonClippingRotation":
                 ClippingPlaneState = ClippingPlaneState == ClipPlaneState.Rotation ? ClipPlaneState.Active : ClipPlaneState.Rotation;
-                ModelWithPlate.GetComponent<HandDraggable>().enabled = false;
+                ModelWithPlate.GetComponent<ManipulationHandler>().enabled = false;
                 break;
         }
     }

@@ -631,6 +631,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             // extend ButtonsClickReceiver.interactables
             ButtonsClickReceiver clickReceiver = GetComponent<ButtonsClickReceiver>();
             clickReceiver.interactables.Add(buttonGameObject);
+            //clickReceiver.AddInteractable(buttonGameObject);
 
             // update layersButtons dictionary
             layersButtons[layer] = button;
