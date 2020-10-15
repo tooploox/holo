@@ -186,9 +186,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
             Texture2D icon = ModelsCollection.Singleton.BundleIcon(i);
             if (icon != null) { 
-                button.GetComponent<CompoundButtonIcon>().IconScale = IconScale;
-                button.GetComponent<CompoundButtonIcon>().IconShiftY = IconShiftY;
-                button.GetComponent<CompoundButtonIcon>().SetIconOverride(icon);
+                //button.GetComponent<CompoundButtonIcon>().IconScale = IconScale;
+                //button.GetComponent<CompoundButtonIcon>().IconShiftY = IconShiftY;
+                //button.GetComponent<CompoundButtonIcon>().SetIconOverride(icon);
             }
         }
 
@@ -387,7 +387,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         string playOrPauseText = playing ? "PAUSE" : "PLAY";
         ButtonTogglePlay.GetComponent<ButtonConfigHelper>().MainLabelText = playOrPauseText;
         Texture2D playOrPatseIcon = playing ? ButtonIconPause : ButtonIconPlay;
-        MeshRenderer iconRenderer = ButtonTogglePlay.GetComponent<CompoundButtonIcon>().IconMeshFilter.GetComponent<MeshRenderer>();
+        MeshRenderer iconRenderer = ButtonTogglePlay.GetComponent<ButtonConfigHelper>().GetComponent<MeshRenderer>();
         if (iconRenderer != null) {
             iconRenderer.sharedMaterial.mainTexture = playOrPatseIcon;
         } else {
