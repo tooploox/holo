@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 /* Place this as a sibling of ClippingPlane component.
  * It will enable the appropriate material (shader) behavior to perform clipping.

@@ -1,4 +1,5 @@
 ﻿using Microsoft.MixedReality.Toolkit.UI;
+using Microsoft.MixedReality.Toolkit.UI.BoundsControl;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +27,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public PressableButtonHoloLens2 ButtonScale;
     public PressableButtonHoloLens2 ButtonTransparency;
     public PressableButtonHoloLens2 ButtonPlateTransform;
-    public ManipulationHandler PlateTransformManipulatable; //TwoHandsManipulatable
+    public ManipulationHandler manipulationHandler;
     public GameObject ButtonLayerTemplate;
     public Texture2D ButtonIconPlay;
     public Texture2D ButtonIconPause;
@@ -44,9 +45,6 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     }
     private TransformationState transformationState = TransformationState.None;
 
-    // Constant after Start()
-    private ManipulationHandler handDraggable;
-
     public GameObject ModelClipPlane;
 
     private ModelClippingPlaneControl ModelClipPlaneCtrl;
@@ -60,8 +58,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         public BlendShapeAnimation Animation;
     }
 
-    private bool instanceLoaded = false;
-    public bool InstanceLoaded { get { return instanceLoaded; } }
+    public bool InstanceLoaded { get; private set; } = false;
     /* All the variables below are non-null
      * only when instanceLoaded,
      * that is only after LoadInstance call (and before UnloadInstance). */
@@ -127,9 +124,8 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     private void Start()
     {
         /* Adding components using code, simply because it's more friendly to version control */
-        handDraggable = gameObject.AddComponent<HandDraggable>();
-        handDraggable.RotationMode = HandDraggable.RotationModeEnum.LockObjectRotation;
-        GetComponent<TwoHandManipulatable>().enabled = false;
+        manipulationHandler = gameObject.AddComponent<ManipulationHandler>();
+        GetComponent<ManipulationHandler>().enabled = false;
 
         ModelClipPlaneCtrl = ModelClipPlane.GetComponentInChildren<ModelClippingPlaneControl>();
         // Turn off the clipping plane on start
@@ -147,9 +143,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         ClickChangeTransformationState(TransformationState.None);
 
         // Animation speed slider
-        SliderAnimationSpeed.GetComponent<SliderGestureControl>().OnUpdateEvent.AddListener(
+        SliderAnimationSpeed.GetComponent<PinchSlider>().OnValueUpdated.AddListener(
             delegate { 
-                AnimationSpeed = SliderAnimationSpeed.GetComponent<SliderGestureControl>().SliderValue;
+                AnimationSpeed = SliderAnimationSpeed.GetComponent<PinchSlider>().SliderValue;
             }
         );
     }
@@ -160,8 +156,8 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     /* Find the GameObject of some "AddXxx" button. */
     private GameObject FindAddButton(int i)
     {
-        List<GameObject> interactables = GetComponent<ButtonsClickReceiver>().interactables;
-        return interactables.Find(gameObject => gameObject.name == "Add" + i.ToString());
+        // TODO: Search for the real name
+        return gameObject.transform.Find("Add" + i.ToString()).gameObject;
     }
 
     /* Initialize "AddXxx" buttons captions and existence. */
@@ -203,10 +199,10 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     /* Handle a click on some button inside. Called by ButtonsClickReceiver. */
     public void Click(GameObject clickObject)
     {
-        if (SharingSceneData.Singleton.isClient &&
-		    !SharingSceneData.Singleton.isServer) {
-            return;
-        }
+      //  if (SharingSceneData.Singleton.isClient &&
+		    //!SharingSceneData.Singleton.isServer) {
+      //      return;
+      //  }
 
         switch (clickObject.name)
         {
@@ -245,17 +241,15 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         }
     }
 
-    private bool StoreTwoHandManipulatableModelActiveState, StoreHandDraggableModelActiveState, StoreHandDraggableClipPlaneActiveState;
+    private bool StoreManipulatableModelActiveState, StoreHandDraggableClipPlaneActiveState;
     public void FocusEnter(GameObject focusObject)
     {
         if (focusObject.name == "Slider")
         {
-            StoreTwoHandManipulatableModelActiveState = GetComponent<TwoHandManipulatable>().enabled;
-            StoreHandDraggableModelActiveState = GetComponent<HandDraggable>().enabled;
-            StoreHandDraggableClipPlaneActiveState = ModelClipPlane.GetComponent<HandDraggable>().enabled;
-            GetComponent<TwoHandManipulatable>().enabled = false;
-            GetComponent<HandDraggable>().enabled = false;
-            ModelClipPlane.GetComponent<HandDraggable>().enabled = false;
+            StoreManipulatableModelActiveState = GetComponent<ManipulationHandler>().enabled;
+            StoreHandDraggableClipPlaneActiveState = ModelClipPlane.GetComponent<ManipulationHandler>().enabled;
+            GetComponent<ManipulationHandler>().enabled = false;
+            ModelClipPlane.GetComponent<ManipulationHandler>().enabled = false;
         }
     }
 
@@ -263,9 +257,8 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     {
         if (focusObject.name == "Slider")
         {
-            GetComponent<TwoHandManipulatable>().enabled = StoreTwoHandManipulatableModelActiveState;
-            GetComponent<HandDraggable>().enabled = StoreHandDraggableModelActiveState;
-            ModelClipPlane.GetComponent<HandDraggable>().enabled = StoreHandDraggableClipPlaneActiveState;
+            GetComponent<ManipulationHandler>().enabled = StoreManipulatableModelActiveState;
+            ModelClipPlane.GetComponent<ManipulationHandler>().enabled = StoreHandDraggableClipPlaneActiveState;
         }
     }
 
@@ -290,7 +283,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         const float MaxSpeed = 5f;
         float newSpeed = Mathf.Min(MaxSpeed, AnimationSpeed * 2);
         AnimationSpeed = newSpeed;
-        SliderAnimationSpeed.GetComponent<SliderGestureControl>().SetSliderValue(newSpeed);
+        SliderAnimationSpeed.GetComponent<PinchSlider>().SliderValue = newSpeed;
     }
 
     private void ClickCancelPreview()
@@ -349,7 +342,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
     private void ClickChangeLayerState(ModelLayer layer)
     {
-        if (!instanceLoaded)
+        if (!InstanceLoaded)
         {
             Debug.Log("No model loaded, cannot show layer.");
             return;
@@ -378,9 +371,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
     private void RefreshUserInterface()
     {
-        ButtonsModel.SetActive(instanceLoaded && !instanceIsPreview);
-        ButtonsModelPreview.SetActive(instanceLoaded && instanceIsPreview);
-        PlateVisible = (!instanceLoaded) || instanceIsPreview;
+        ButtonsModel.SetActive(InstanceLoaded && !instanceIsPreview);
+        ButtonsModelPreview.SetActive(InstanceLoaded && instanceIsPreview);
+        PlateVisible = (!InstanceLoaded) || instanceIsPreview;
 
         // update ButtonTogglePlay caption and icon
         bool playing = AnimationPlaying;
@@ -423,8 +416,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         if (layersButtons != null) {
             foreach (PressableButtonHoloLens2 button in layersButtons.Values) {
                 // remove from ButtonsClickReceiver.interactables
-                ButtonsClickReceiver clickReceiver = GetComponent<ButtonsClickReceiver>();
-                clickReceiver.interactables.Remove(button.gameObject);
+                button.GetComponent<Interactable>().IsEnabled = false;
                 Destroy(button.gameObject);
             }
             layersButtons = null;
@@ -440,7 +432,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             instanceIsPreview = false; // value does not matter, but for security better to set it to something well-defined
         }
 
-        instanceLoaded = false;
+        InstanceLoaded = false;
     }
 
     /* Resulting instance will be in box of max size instanceMaxSize,
@@ -484,8 +476,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             ModelClipPlaneCtrl.ClippingPlaneState = ModelClippingPlaneControl.ClipPlaneState.Active;
 
         // turn on/off translation manipulation
-        handDraggable.enabled = newState == TransformationState.Translate;
-        handDraggable.IsDraggingEnabled = newState == TransformationState.Translate;
+        manipulationHandler.enabled = newState == TransformationState.Translate;
 
         // turn on/off rotation manipulation
         /*
@@ -498,13 +489,14 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         rotationBoxRig.enabled = newState == TransformationState.Rotate;
         */
         // call rotationBoxRig.Activate or Deactivate
+        
         bool rotationBoxRigActiveNew = newState == TransformationState.Rotate;
         if (rotationBoxRigActiveOld != rotationBoxRigActiveNew && rotationBoxRig != null)
         {
             if (rotationBoxRigActiveNew) {
-                rotationBoxRig.GetComponent<BoundingBoxRig>().Activate();
+                rotationBoxRig.GetComponent<BoundsControl>().Active = true;
             } else {
-                rotationBoxRig.GetComponent<BoundingBoxRig>().Deactivate();
+                rotationBoxRig.GetComponent<BoundsControl>().Active = false;
             }
         }
 
@@ -514,9 +506,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         if (scaleBoxRigActiveOld != scaleBoxRigActiveNew)
         {
             if (scaleBoxRigActiveNew) {
-                GetComponent<TwoHandManipulatable>().enabled = true;
+                GetComponent<ManipulationHandler>().enabled = true;
             } else {
-                GetComponent<TwoHandManipulatable>().enabled = false;
+                GetComponent<ManipulationHandler>().enabled = false;
             }
         }
     }
@@ -558,7 +550,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
         UnloadInstance();
 
-        instanceLoaded = true;
+        InstanceLoaded = true;
         instanceBundle = ModelsCollection.Singleton.BundleLoad(newInstanceBundleName);
         // Load Volumetric Data 
         if(instanceBundle.Layers.All(x => x.GetComponent<ModelLayer>().DataType == DataType.Volumetric))
@@ -604,7 +596,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
         // reset animation speed slider to value 1
         animationSpeed = 1f;
-        SliderAnimationSpeed.GetComponent<SliderGestureControl>().SetSliderValue(animationSpeed);
+        SliderAnimationSpeed.GetComponent<PinchSlider>().SliderValue = animationSpeed;
 
         // reset transparency to false
         Transparent = false;
@@ -616,6 +608,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         {
             // add button to scene
             GameObject buttonGameObject = Instantiate<GameObject>(ButtonLayerTemplate, LayersSection.transform);
+            var buttonInteractable = buttonGameObject.GetComponent<Interactable>();
             buttonGameObject.transform.localPosition =
                 buttonGameObject.transform.localPosition + new Vector3(0f, 0f, buttonLayerHeight * buttonIndex);
             buttonIndex++;
@@ -630,8 +623,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
             // extend ButtonsClickReceiver.interactables
             ButtonsClickReceiver clickReceiver = GetComponent<ButtonsClickReceiver>();
-            clickReceiver.interactables.Add(buttonGameObject);
-            //clickReceiver.AddInteractable(buttonGameObject);
+            clickReceiver.AddInteractable(buttonInteractable);
 
             // update layersButtons dictionary
             layersButtons[layer] = button;
@@ -640,7 +632,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
     private void LoadInitialLayers()
     {
-        if (!instanceLoaded)
+        if (!InstanceLoaded)
         {
             throw new Exception("Cannot call TodoLoadMeshLayer before LoadInstance");
         }
@@ -661,7 +653,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
      */
     private void LoadLayer(ModelLayer layer)
     {
-        if (!instanceLoaded)
+        if (!InstanceLoaded)
         {
             throw new Exception("Cannot call LoadLayer before LoadInstance");
         }
@@ -830,9 +822,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         set
         {
             plateTransform = value;
-            PlateTransformManipulatable.GetComponent<Collider>().enabled = plateTransform;
-            PlateTransformManipulatable.enabled = plateTransform;
-            PlateTransformManipulatable.ManipulationMode = plateTransform ? ManipulationMode.Rotate : ManipulationMode.MoveAndScale;
+            manipulationHandler.GetComponent<Collider>().enabled = plateTransform;
+            manipulationHandler.enabled = plateTransform;
+            manipulationHandler.TwoHandedManipulationType = plateTransform ? ManipulationHandler.TwoHandedManipulation.Rotate : ManipulationHandler.TwoHandedManipulation.MoveScale;
             HoloUtilities.SetButtonState(ButtonPlateTransform, PlateTransform);
         }
     }

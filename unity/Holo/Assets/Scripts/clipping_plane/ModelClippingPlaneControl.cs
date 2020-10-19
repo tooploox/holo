@@ -9,7 +9,8 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
     public PressableButtonHoloLens2 ButtonClippingPlaneRotation;
     public ModelWithPlate ModelWithPlate;
 
-    BoundingBoxRig clipPlaneQuadBbox;
+    private BoundingBox clipPlaneQuadBbox;
+
     ManipulationHandler HandTranslation;
 
     public enum ClipPlaneState
@@ -43,9 +44,9 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
             HandTranslation.enabled = value == ClipPlaneState.Translation;
 
             if (value == ClipPlaneState.Active || value == ClipPlaneState.Disabled)
-                clipPlaneQuadBbox.Deactivate();
+                clipPlaneQuadBbox.Active = false;
             else
-                clipPlaneQuadBbox.Activate();
+                clipPlaneQuadBbox.Active = true;
 
             if (value == ClipPlaneState.Disabled)
             {
@@ -76,13 +77,13 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
 
     void Start()
     {
-        clipPlaneQuadBbox = GetComponent<BoundingBoxRig>();
         HandTranslation = GetComponent<ManipulationHandler>();
         HandTranslation.enabled = false;
-
+        GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        clipPlaneQuadBbox = cube.AddComponent<BoundingBox>();
         ButtonClippingPlaneTranslation.gameObject.SetActive(false);
         ButtonClippingPlaneRotation.gameObject.SetActive(false);
-        clipPlaneQuadBbox.Deactivate();
+        clipPlaneQuadBbox.Active = false;
     }
 
     public void Click(GameObject clickObj)
@@ -97,7 +98,6 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
             case "ButtonClippingTranslation":
                 ClippingPlaneState = ClippingPlaneState == ClipPlaneState.Translation ? ClipPlaneState.Active : ClipPlaneState.Translation;
                 ModelWithPlate.GetComponent<ManipulationHandler>().enabled = true;
-                ModelWithPlate.GetComponent<HandDraggable>().IsDraggingEnabled = false;
                 break;
 
             case "ButtonClippingRotation":
