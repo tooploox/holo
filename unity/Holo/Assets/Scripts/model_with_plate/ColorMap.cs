@@ -1,29 +1,30 @@
-﻿using Microsoft.MixedReality.Toolkit.UI;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Microsoft.MixedReality.Toolkit.UI;
 
 
 /* Configure colormap used by DataVisualizationMaterial. */
 public class ColorMap : MonoBehaviour, IClickHandler
 {
     public Material DataVisualizationMaterial;
+    public List<GameObject> ColorButtons;
 
     // Map from button instance to the corresponding colormap name (texture name)
     private Dictionary<GameObject, string> colorMapButtons;
 
     private GameObject FindButton(string name)
     {
-        foreach (GameObject interactable in GetComponent<ButtonsClickReceiver>().GetComponents<GameObject>()) {
-            if (interactable.name == name) {
-                PressableButtonHoloLens2 button = interactable.GetComponent<PressableButtonHoloLens2>();
+        foreach (GameObject buttonGameObject in ColorButtons) {
+            if (buttonGameObject.name == name) {
+                PressableButtonHoloLens2 button = buttonGameObject.GetComponent<PressableButtonHoloLens2>();
                 if (button == null) {
-                    throw new Exception("Interactable named " + name + " found, but it is not a button");
+                    throw new Exception("Colormap named " + name + " found, but it is not a button");
                 }
-                return interactable;
+                return buttonGameObject;
             }
         }
-        throw new Exception("Interactable " + name + " not found");
+        throw new Exception("Colormap " + name + " not found");
     }
 
     void Start()
