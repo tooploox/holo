@@ -487,6 +487,7 @@ GameObject:
   - component: {fileID: 5420360880497943650}
   - component: {fileID: 9175290533601117426}
   - component: {fileID: 7908655470986475181}
+  - component: {fileID: 4998172198415160097}
   m_Layer: 5
   m_Name: SideButton
   m_TagString: Untagged
@@ -582,6 +583,34 @@ MonoBehaviour:
   localCenter: {x: 0, y: 0, z: -0.01}
   bounds: {x: 0.12, y: 0.12}
   touchableCollider: {fileID: 5420360880497943650}
+--- !u!114 &4998172198415160097
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5466227435875137674}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2cf098d972aeb8b4daa70b00381af006, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainLabelText: {fileID: 0}
+  interactable: {fileID: 0}
+  seeItSayItLabel: {fileID: 0}
+  seeItSatItLabelText: {fileID: 0}
+  iconStyle: 0
+  iconCharLabel: {fileID: 0}
+  iconCharFont: {fileID: 0}
+  iconChar: 0
+  iconSpriteRenderer: {fileID: 0}
+  iconSprite: {fileID: 0}
+  iconQuadRenderer: {fileID: 0}
+  iconQuadTextureNameID: _MainTex
+  iconQuadTexture: {fileID: 0}
+  defaultButtonQuadMaterial: {fileID: 0}
+  iconSet: {fileID: 0}
+  defaultIconSet: {fileID: 0}
 --- !u!1 &7596212751102527883
 GameObject:
   m_ObjectHideFlags: 0
