@@ -33,6 +33,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public Texture2D ButtonIconPause;
     // Drop here "Prefabs/ModelWithPlateRotationRig"
     public GameObject RotationBoxRigTemplate;
+    public GameObject AddButtonsCollection;
     public float IconScale = 1f;
     public float IconShiftY = 0f;
 
@@ -157,7 +158,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     private GameObject FindAddButton(int i)
     {
         // TODO: Search for the real name
-        return gameObject.transform.Find("Add" + i.ToString()).gameObject;
+        return AddButtonsCollection.transform.Find("Add" + i.ToString()).gameObject;
     }
 
     /* Initialize "AddXxx" buttons captions and existence. */
@@ -178,7 +179,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             button.SetActive(true);
 
             string modelName = ModelsCollection.Singleton.BundleCaption(i);
-            button.transform.Find("Text").GetComponent<TextMeshPro>().text = modelName;
+            button.transform.Find("IconAndText").transform.Find("Text").GetComponent<TextMeshPro>().text = modelName;
 
             Texture2D icon = ModelsCollection.Singleton.BundleIcon(i);
             if (icon != null) { 
@@ -379,14 +380,15 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         // update ButtonTogglePlay caption and icon
         bool playing = AnimationPlaying;
         string playOrPauseText = playing ? "PAUSE" : "PLAY";
-        ButtonTogglePlay.GetComponent<ButtonConfigHelper>().MainLabelText = playOrPauseText;
-        Texture2D playOrPatseIcon = playing ? ButtonIconPause : ButtonIconPlay;
-        MeshRenderer iconRenderer = ButtonTogglePlay.GetComponent<ButtonConfigHelper>().GetComponent<MeshRenderer>();
-        if (iconRenderer != null) {
-            iconRenderer.sharedMaterial.mainTexture = playOrPatseIcon;
-        } else {
-            Debug.LogWarning("ButtonTogglePlay icon does not have MeshRenderer");
-        }
+        // FIXME
+        // ButtonTogglePlay.GetComponent<ButtonConfigHelper>().MainLabelText = playOrPauseText;
+        // Texture2D playOrPatseIcon = playing ? ButtonIconPause : ButtonIconPlay;
+        // MeshRenderer iconRenderer = ButtonTogglePlay.GetComponent<ButtonConfigHelper>().GetComponent<MeshRenderer>();
+        //if (iconRenderer != null) {
+        //    iconRenderer.sharedMaterial.mainTexture = playOrPatseIcon;
+        //} else {
+        //    Debug.LogWarning("ButtonTogglePlay icon does not have MeshRenderer");
+        //}
     }
 
     private void UnloadLayer(ModelLayer layer)

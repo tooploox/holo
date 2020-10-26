@@ -80,13 +80,14 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
 
     void Start()
     {
-        HandTranslation = GetComponent<ManipulationHandler>();
-        HandTranslation.enabled = false;
-        GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        clipPlaneQuadBbox = cube.AddComponent<BoundingBox>();
-        ButtonClippingPlaneTranslation.gameObject.SetActive(false);
-        ButtonClippingPlaneRotation.gameObject.SetActive(false);
-        clipPlaneQuadBbox.Active = false;
+        // FIXME
+        //HandTranslation = GetComponent<ManipulationHandler>();
+        //HandTranslation.enabled = false;
+        //GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        //clipPlaneQuadBbox = cube.AddComponent<BoundingBox>();
+        //ButtonClippingPlaneTranslation.gameObject.SetActive(false);
+        //ButtonClippingPlaneRotation.gameObject.SetActive(false);
+        //clipPlaneQuadBbox.Active = false;
     }
 
     public void Click(GameObject clickObj)
