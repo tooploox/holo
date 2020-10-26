@@ -9,6 +9,8 @@ public static class HoloUtilities
 
     public static void SetButtonState(PressableButtonHoloLens2 button, bool active)
     {
+        // FIXME
+        return;
         var icon = button.GetComponent<ButtonConfigHelper>();
         if (icon == null)
         {

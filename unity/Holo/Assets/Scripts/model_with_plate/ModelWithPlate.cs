@@ -144,11 +144,11 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         ClickChangeTransformationState(TransformationState.None);
 
         // Animation speed slider
-        SliderAnimationSpeed.GetComponent<PinchSlider>().OnValueUpdated.AddListener(
-            delegate { 
-                AnimationSpeed = SliderAnimationSpeed.GetComponent<PinchSlider>().SliderValue;
-            }
-        );
+        //SliderAnimationSpeed.GetComponent<PinchSlider>().OnValueUpdated.AddListener(
+        //    delegate { 
+        //        AnimationSpeed = SliderAnimationSpeed.GetComponent<PinchSlider>().SliderValue;
+        //    }
+        //);
     }
 
     /* Number of "add" buttons we have in the scene. */
@@ -285,7 +285,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         const float MaxSpeed = 5f;
         float newSpeed = Mathf.Min(MaxSpeed, AnimationSpeed * 2);
         AnimationSpeed = newSpeed;
-        SliderAnimationSpeed.GetComponent<PinchSlider>().SliderValue = newSpeed;
+        //SliderAnimationSpeed.GetComponent<PinchSlider>().SliderValue = newSpeed;
     }
 
     private void ClickCancelPreview()
@@ -599,7 +599,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
         // reset animation speed slider to value 1
         animationSpeed = 1f;
-        SliderAnimationSpeed.GetComponent<PinchSlider>().SliderValue = animationSpeed;
+        //SliderAnimationSpeed.GetComponent<PinchSlider>().SliderValue = animationSpeed;
 
         // reset transparency to false
         Transparent = false;
