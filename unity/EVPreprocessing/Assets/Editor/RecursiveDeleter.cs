@@ -10,7 +10,7 @@ public class RecursiveDeleter
     {
         const int tries = 10;
 
-        for (var attempt = 1; attempt <= tries; attempt++)
+        for (var attempt = 0; attempt < tries; attempt++)
         {
             try
             {
@@ -26,7 +26,7 @@ public class RecursiveDeleter
             }
             catch (UnauthorizedAccessException)
             { // Someone or something hasn't closed a file yet.
-                Log.Debug($"Unauthorized Access at path: {destinationPath}, attempt #{attempt}. Sleeping for 50ms and trying again.");
+                Log.Debug($"Unauthorized Access at path: {destinationPath}, attempt #{attempt + 1}. Sleeping for 50ms and trying again.");
                 Thread.Sleep(50);
                 if (attempt == tries)
                 {
@@ -38,14 +38,6 @@ public class RecursiveDeleter
                 }
             }
             return;
-        }
-        try
-        {
-            TryDeleting(destinationPath);
-        }
-        catch
-        { 
-            
         }
     }
 

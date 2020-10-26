@@ -45,20 +45,16 @@ namespace ModelConversion.LayerConversion.FrameExport
                 string vertexStr = string.Join(" ", jaggedArray[i].Select(p => Math.Round(p, 5).ToString(CultureInfo.InvariantCulture)).ToArray());
                 stringBuilder.Append(vertexStr + ' ');
             }
-            string finalString = stringBuilder.ToString();
-            finalString = finalString.TrimEnd();
-            return finalString;
+            return stringBuilder.ToString().TrimEnd();
         }
 
         private string ConvertArrayToString(int[] indicesArray)
         {
-            string txtArray = string.Join(" ", indicesArray.Select(p => p.ToString()).ToArray());
-            return txtArray;
+            return string.Join(" ", indicesArray.Select(p => p.ToString()).ToArray());
         }
         private string ConvertArrayToString(double[] coordinatesArray)
         {
-            string txtArray = string.Join(" ", coordinatesArray.Select(p => Math.Round(p, 5).ToString(CultureInfo.InvariantCulture)).ToArray());
-            return txtArray;
+            return string.Join(" ", coordinatesArray.Select(p => Math.Round(p, 5).ToString(CultureInfo.InvariantCulture)).ToArray());
         }
     }
 }

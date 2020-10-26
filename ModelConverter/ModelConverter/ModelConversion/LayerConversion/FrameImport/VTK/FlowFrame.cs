@@ -42,7 +42,6 @@ namespace ModelConversion.LayerConversion.FrameImport.VTK
             for(int i = 0; i < numberOfVertices; i++)
             {
                 Scalars[i] = TranslateColorAsFraction(colors.GetTuple3(i));
-                double[] a = Scalars[i];
             }
         }
 

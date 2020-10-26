@@ -29,7 +29,6 @@ namespace ModelConversion.LayerConversion
             string outputLayerDir = outputRootDir + @"\" + Path.GetFileName(layerInfo.Directory);
             Directory.CreateDirectory(outputLayerDir);
 
-
             string[] inputPaths = GetFilepaths(layerInfo.Directory);
             CheckIfVTKFormat(inputPaths[0]);
             foreach (string inputPath in inputPaths)
@@ -68,7 +67,6 @@ namespace ModelConversion.LayerConversion
 
             double scalingPower = 0 - Math.Floor(Math.Log10(minAbsBounding));
             return Math.Pow(10, scalingPower);
-
         }
 
         private void SetUpVTKDebugger()
