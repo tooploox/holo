@@ -46,7 +46,7 @@ public class AssetBundleCreator
 
         //Cleaning up an unnecessesary bundle
         string folderBundle = Path.Combine(outputPath, Path.GetFileNameWithoutExtension(outputPath));
-        File.Delete(folderBundle);
-        File.Delete(folderBundle + ".manifest");
+        RecursiveDeleter.DeleteRecursivelyWithSleep(folderBundle);
+        RecursiveDeleter.DeleteRecursivelyWithSleep(folderBundle + ".manifest");
     }
 }

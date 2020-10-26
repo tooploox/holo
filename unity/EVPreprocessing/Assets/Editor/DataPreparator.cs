@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Threading;
 using UnityEditor;
 using UnityEngine;
 
@@ -13,7 +12,6 @@ public class DataPreparator
     */
 
     private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
     [MenuItem("EVPreprocessing/Create an AssetBundle from an external supported format")]
     public static void ImportWithConversion()
     {
@@ -71,7 +69,7 @@ public class DataPreparator
         }
         finally
         {
-            DeleteRecursivelyWithSleep(AssetDirs.TempAssetsDir);
+            RecursiveDeleter.DeleteRecursivelyWithSleep(AssetDirs.TempAssetsDir);
             Log.Info("Preprocessing finished!");
         }
     }
@@ -91,30 +89,6 @@ public class DataPreparator
                 return new VolumetricModel(rootDirectory);
             default:
                 throw Log.ThrowError("Incorrect ModelImporter type declared!", new IOException());
-        }
-    }
-
-
-    private static void DeleteRecursivelyWithSleep(string destinationDir)
-    {
-        const int tries = 10;
-        for (var attempt = 1; attempt <= tries; attempt++)
-        {
-            try
-            {
-                Directory.Delete(destinationDir, true);
-            }
-            catch (DirectoryNotFoundException)
-            {
-                return;
-            }
-            catch (System.UnauthorizedAccessException)
-            { // Someone or something hasn't closed a file yet.
-                Log.Debug($"Unauthorized Access at path: {destinationDir}, attempt #{attempt}. Sleeping for 50ms and trying again.");
-                Thread.Sleep(50);
-                continue;
-            }
-            return;
         }
     }
 }

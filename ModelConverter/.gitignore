@@ -1,0 +1,6 @@
+.vs/
+ModelConverter/bin/Debug/
+ModelConverter/bin/Release/
+ModelConverter/obj/
+*.csproj
+*.csproj.user
