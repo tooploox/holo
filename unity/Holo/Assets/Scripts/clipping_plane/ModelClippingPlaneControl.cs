@@ -1,4 +1,5 @@
 ﻿using Microsoft.MixedReality.Toolkit.UI;
+using Microsoft.MixedReality.Toolkit.Input;
 using UnityEngine;
 
 
@@ -20,6 +21,8 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
         Translation,
         Rotation
     }
+
+    //
 
     public void FocusEnter(GameObject focusObject) { }
     public void FocusExit(GameObject focusObject) { }
@@ -88,7 +91,7 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
 
     public void Click(GameObject clickObj)
     {
-        //Debug.Log("Clicked obj: " + clickObj.name);
+        Debug.Log("Clicked obj: " + clickObj.name);
         switch (clickObj.name)
         {
             case "ButtonClipping":

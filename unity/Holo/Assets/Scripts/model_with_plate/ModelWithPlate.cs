@@ -3,7 +3,7 @@ using Microsoft.MixedReality.Toolkit.UI.BoundsControl;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using TMPro;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -178,7 +178,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             button.SetActive(true);
 
             string modelName = ModelsCollection.Singleton.BundleCaption(i);
-            button.GetComponent<ButtonConfigHelper>().MainLabelText = modelName;
+            button.transform.Find("Text").GetComponent<TextMeshPro>().text = modelName;
 
             Texture2D icon = ModelsCollection.Singleton.BundleIcon(i);
             if (icon != null) { 
@@ -199,10 +199,11 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     /* Handle a click on some button inside. Called by ButtonsClickReceiver. */
     public void Click(GameObject clickObject)
     {
-      //  if (SharingSceneData.Singleton.isClient &&
-		    //!SharingSceneData.Singleton.isServer) {
-      //      return;
-      //  }
+        //  if (SharingSceneData.Singleton.isClient &&
+        //!SharingSceneData.Singleton.isServer) {
+        //      return;
+        //  }
+        Debug.Log("ModelWithPlate Click: " + clickObject.name);
 
         switch (clickObject.name)
         {
