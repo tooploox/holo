@@ -12,7 +12,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb41c8335e2ca96449f3991db5fa5702, type: 3}
   m_Name: EVIconSet
   m_EditorClassIdentifier: 
-  quadIcons: []
+  quadIcons:
+  - {fileID: 2800000, guid: 4541a3524a357ee429db7ddd1d0079c7, type: 3}
+  - {fileID: 2800000, guid: 4b74ed465a6481144a7da8b5e30fa40e, type: 3}
+  - {fileID: 2800000, guid: 46b469b54072d0e45a67f10f3fcdced3, type: 3}
+  - {fileID: 2800000, guid: 446f38811254d5548a80cc239b37c0d5, type: 3}
+  - {fileID: 2800000, guid: 01d372d1e434467418d92419679b803c, type: 3}
+  - {fileID: 2800000, guid: 79927eefc563c1c468f2d92ebcaa1875, type: 3}
+  - {fileID: 2800000, guid: 87967029829343242b88a78132c0d940, type: 3}
+  - {fileID: 2800000, guid: c95398d0f18f1da41a14c8515dd4c05c, type: 3}
+  - {fileID: 2800000, guid: e148a7de9d652894d9fcb7a0543ac1eb, type: 3}
+  - {fileID: 2800000, guid: eb90f2dfbb0beb74caacdb6af2e3c5b2, type: 3}
+  - {fileID: 2800000, guid: f1ded036bb8ebaa40970e0d680757311, type: 3}
+  - {fileID: 2800000, guid: e7b83d27ee4fcc24084f74be56883734, type: 3}
+  - {fileID: 2800000, guid: c76832cf7bfa3c343a7c91ad95abbfde, type: 3}
+  - {fileID: 2800000, guid: 9ead6499d5f9021448e6dea4fcc6abe8, type: 3}
+  - {fileID: 2800000, guid: 29a73597acca8174ea8d37ba8a2a950b, type: 3}
+  - {fileID: 2800000, guid: b2e2c1b41d5fb1a49b1d92265b2657cf, type: 3}
+  - {fileID: 2800000, guid: 6da910eb1e7fa7e4084969356f99c8b3, type: 3}
+  - {fileID: 2800000, guid: 016e45af1983200469586e3cf66c0cf3, type: 3}
+  - {fileID: 2800000, guid: 94832b65fb7eb074696a6b99370335ea, type: 3}
+  - {fileID: 2800000, guid: 6c55f9d8c4104544da644cdf3d6ab6ba, type: 3}
   spriteIcons: []
   charIconFont: {fileID: 0}
   charIcons:
