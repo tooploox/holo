@@ -607,9 +607,9 @@ PlayerSettings:
   metroPackageVersion: 1.0.12.0
   metroCertificatePath: Assets\WSATestCertificate.pfx
   metroCertificatePassword: 
-  metroCertificateSubject: DefaultCompany
-  metroCertificateIssuer: DefaultCompany
-  metroCertificateNotAfter: 80319977b4f7d501
+  metroCertificateSubject: MicroscopeIT
+  metroCertificateIssuer: MicroscopeIT
+  metroCertificateNotAfter: 803251c90accd701
   metroApplicationDescription: Visualize animated 3D medical data, with shared experience.
   wsaImages:
     65636: Assets/GFX/Logos/StoreLogo.scale-100.png
