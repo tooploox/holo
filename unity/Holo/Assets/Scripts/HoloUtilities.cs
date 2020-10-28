@@ -9,12 +9,10 @@ public static class HoloUtilities
 
     public static void SetButtonState(PressableButtonHoloLens2 button, bool active)
     {
-        // FIXME
-        return;
-        var icon = button.GetComponent<ButtonConfigHelper>();
+        var icon = button.transform.Find("IconAndText/UIButtonSquareIcon").gameObject;
         if (icon == null)
         {
-            Debug.LogWarning("Missing CompoundButtonIcon on " + button.name);
+            Debug.LogWarning("Missing UIButtonSquareIcon on " + button.name);
             return;
         }
         MeshRenderer iconRenderer = icon.GetComponent<MeshRenderer>();
@@ -33,10 +31,10 @@ public static class HoloUtilities
 
     public static void SetButtonStateText(PressableButtonHoloLens2 button, bool active)
     {
-        var text = button.GetComponent<ButtonConfigHelper>();
+        var text = button.transform.Find("IconAndText/Text").gameObject;
         if (text == null)
         {
-            Debug.LogWarning("Missing CompoundButtonText");
+            Debug.LogWarning("Missing Text GameObject");
             return;
         }
         TextMeshPro textMesh = text.GetComponent<TextMeshPro>();

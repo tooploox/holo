@@ -666,25 +666,25 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             return;
         }
 
-        LayerLoaded l = new LayerLoaded();
-        l.Instance = layer.InstantiateGameObject(instanceTransformation.transform);
+        LayerLoaded layerLoaded = new LayerLoaded();
+        layerLoaded.Instance = layer.InstantiateGameObject(instanceTransformation.transform);
 
-        l.Animation = l.Instance.GetComponent<BlendShapeAnimation>();
-        if (l.Animation != null)
+        layerLoaded.Animation = layerLoaded.Instance.GetComponent<BlendShapeAnimation>();
+        if (layerLoaded.Animation != null)
         { 
-            l.Animation.InitializeBlendShapes();
-            l.Animation.Playing = AnimationPlaying;
-            l.Animation.CurrentTime = AnimationTime;
-            l.Animation.SpeedNormalized = AnimationSpeed;
+            layerLoaded.Animation.InitializeBlendShapes();
+            layerLoaded.Animation.Playing = AnimationPlaying;
+            layerLoaded.Animation.CurrentTime = AnimationTime;
+            layerLoaded.Animation.SpeedNormalized = AnimationSpeed;
         }
 
         // Assign material to all MeshRenderer and SkinnedMeshRenderer inside
-        foreach (var renderer in l.Instance.GetComponentsInChildren<Renderer>()) { 
+        foreach (var renderer in layerLoaded.Instance.GetComponentsInChildren<Renderer>()) { 
             renderer.sharedMaterial = LayerMaterial(layer);
         }
 
         // update layersLoaded dictionary
-        layersLoaded[layer] = l;
+        layersLoaded[layer] = layerLoaded;
     }
 
     /* Returns BlendShapeAnimation within any LayerLoaded with Animation component != null 
