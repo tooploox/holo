@@ -28,7 +28,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public PressableButtonHoloLens2 ButtonTransparency;
     public PressableButtonHoloLens2 ButtonPlateTransform;
     public ManipulationHandler manipulationHandler;
-    public ObjectManipulator objectManipulator;
+    public ObjectManipulator objectManipulatorTranslation;
+    public ObjectManipulator objectManipulatorRotation;
+    public ObjectManipulator objectManipulatorScale;
     public GameObject ButtonLayerTemplate;
     public Texture2D ButtonIconPlay;
     public Texture2D ButtonIconPause;
@@ -150,6 +152,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         //        AnimationSpeed = SliderAnimationSpeed.GetComponent<PinchSlider>().SliderValue;
         //    }
         //);
+        objectManipulatorTranslation.enabled = false;
+        objectManipulatorRotation.enabled = false;
+        objectManipulatorScale.enabled = false;
     }
 
     /* Number of "add" buttons we have in the scene. */
@@ -480,8 +485,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             ModelClipPlaneCtrl.ClippingPlaneState = ModelClippingPlaneControl.ClipPlaneState.Active;
 
         // turn on/off translation manipulation
-        objectManipulator.enabled = newState == TransformationState.Translate;
-
+        objectManipulatorTranslation.enabled = newState == TransformationState.Translate;
+        objectManipulatorRotation.enabled = newState == TransformationState.Rotate;
+        objectManipulatorScale.enabled = newState == TransformationState.Scale;
         // turn on/off rotation manipulation
         /*
          * We do not switch BoundingBoxRig enabled now.
@@ -493,7 +499,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         rotationBoxRig.enabled = newState == TransformationState.Rotate;
         */
         // call rotationBoxRig.Activate or Deactivate
-        
+
         bool rotationBoxRigActiveNew = newState == TransformationState.Rotate;
         if (rotationBoxRigActiveOld != rotationBoxRigActiveNew && rotationBoxRig != null)
         {
