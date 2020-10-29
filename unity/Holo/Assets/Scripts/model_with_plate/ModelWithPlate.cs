@@ -28,6 +28,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public PressableButtonHoloLens2 ButtonTransparency;
     public PressableButtonHoloLens2 ButtonPlateTransform;
     public ManipulationHandler manipulationHandler;
+    public ObjectManipulator objectManipulator;
     public GameObject ButtonLayerTemplate;
     public Texture2D ButtonIconPlay;
     public Texture2D ButtonIconPause;
@@ -479,7 +480,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             ModelClipPlaneCtrl.ClippingPlaneState = ModelClippingPlaneControl.ClipPlaneState.Active;
 
         // turn on/off translation manipulation
-        manipulationHandler.enabled = newState == TransformationState.Translate;
+        objectManipulator.enabled = newState == TransformationState.Translate;
 
         // turn on/off rotation manipulation
         /*

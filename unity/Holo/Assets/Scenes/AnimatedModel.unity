@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 170076734}
-  m_IndirectSpecularColor: {r: 0.44657844, g: 0.49641222, b: 0.57481694, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1060,7 +1060,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 400068886}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -7366,7 +7366,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1935332896
 Transform:
   m_ObjectHideFlags: 0
@@ -7761,6 +7761,7 @@ MonoBehaviour:
   ButtonTransparency: {fileID: 698538908}
   ButtonPlateTransform: {fileID: 1893210979}
   manipulationHandler: {fileID: 0}
+  objectManipulator: {fileID: 2089537080}
   ButtonLayerTemplate: {fileID: 1369398331179101479, guid: 75c2436faa2a2f14f98315a55e0a52c8,
     type: 3}
   ButtonIconPlay: {fileID: 2800000, guid: f1ded036bb8ebaa40970e0d680757311, type: 3}
@@ -7805,7 +7806,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hostTransform: {fileID: 2089537076}
-  manipulationType: -1
+  manipulationType: 2
   twoHandedManipulationType: 1
   allowFarManipulation: 1
   useForcesForNearManipulation: 0
