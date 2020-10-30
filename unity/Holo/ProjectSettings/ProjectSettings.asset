@@ -588,7 +588,7 @@ PlayerSettings:
   webGLThreadsSupport: 0
   webGLWasmStreaming: 0
   scriptingDefineSymbols:
-    14: 
+    14: Debug
   platformArchitecture: {}
   scriptingBackend:
     Windows Store Apps: 2

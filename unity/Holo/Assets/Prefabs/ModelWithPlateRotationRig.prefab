@@ -73,8 +73,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetObject: {fileID: 2104341562774896234}
-  boundsOverride: {fileID: 0}
-  boundsCalculationMethod: 0
+  boundsOverride: {fileID: 6760340147669039560}
+  boundsCalculationMethod: 2
   activation: 0
   flattenAxis: 0
   boxPadding: {x: 0, y: 0, z: 0}

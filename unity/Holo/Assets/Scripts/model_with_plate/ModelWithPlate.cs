@@ -602,7 +602,6 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         // Disable the component, to not prevent mouse clicking on buttons.
         // It will be taken into account to calculate bbox in BoundingBoxRig anyway,
         // since inside BoundingBox.GetColliderBoundsPoints it looks at all GetComponentsInChildren<Collider>() .
-        rotationBoxCollider.enabled = false;
 
         // reset animation speed slider to value 1
         animationSpeed = 1f;
@@ -618,7 +617,6 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         {
             // add button to scene
             GameObject buttonGameObject = Instantiate<GameObject>(ButtonLayerTemplate, LayersSection.transform);
-            var buttonInteractable = buttonGameObject.GetComponent<Interactable>();
             buttonGameObject.transform.localPosition =
                 buttonGameObject.transform.localPosition + new Vector3(0f, 0f, buttonLayerHeight * buttonIndex);
             buttonIndex++;
@@ -626,14 +624,16 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             // configure button text
             PressableButtonHoloLens2 button = buttonGameObject.GetComponent<PressableButtonHoloLens2>();
             if (button == null) {
-                Debug.LogWarning("Missing component CompoundButton in ButtonLayerTemplate");
+                Debug.LogWarning("Missing component PressableButtonHoloLens2 in ButtonLayerTemplate");
                 continue;
             }
             button.GetComponent<ButtonConfigHelper>().MainLabelText = layer.Caption;
 
-            // extend ButtonsClickReceiver.interactables
-            ButtonsClickReceiver clickReceiver = GetComponent<ButtonsClickReceiver>();
-            clickReceiver.AddInteractable(buttonInteractable);
+
+            button.GetComponent<Interactable>().OnClick.AddListener(() => Click(buttonGameObject));
+            //// extend ButtonsClickReceiver.interactables
+            //ButtonsClickReceiver clickReceiver = GetComponent<ButtonsClickReceiver>();
+            //clickReceiver.AddInteractable(button.GetComponent<Interactable>());
 
             // update layersButtons dictionary
             layersButtons[layer] = button;
@@ -673,7 +673,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             return;
         }
 
-        LayerLoaded layerLoaded = new LayerLoaded();
+        var layerLoaded = new LayerLoaded();
         layerLoaded.Instance = layer.InstantiateGameObject(instanceTransformation.transform);
 
         layerLoaded.Animation = layerLoaded.Instance.GetComponent<BlendShapeAnimation>();
