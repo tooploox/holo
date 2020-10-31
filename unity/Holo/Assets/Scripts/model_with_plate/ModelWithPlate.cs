@@ -27,7 +27,6 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public PressableButtonHoloLens2 ButtonScale;
     public PressableButtonHoloLens2 ButtonTransparency;
     public PressableButtonHoloLens2 ButtonPlateTransform;
-    public ManipulationHandler manipulationHandler;
     public ObjectManipulator objectManipulatorTranslation;
     public ObjectManipulator objectManipulatorRotation;
     public ObjectManipulator objectManipulatorScale;
@@ -127,9 +126,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
     private void Start()
     {
-        /* Adding components using code, simply because it's more friendly to version control */
-        manipulationHandler = gameObject.AddComponent<ManipulationHandler>();
-        GetComponent<ManipulationHandler>().enabled = false;
+        GetComponent<ObjectManipulator>().enabled = false;
 
         ModelClipPlaneCtrl = ModelClipPlane.GetComponentInChildren<ModelClippingPlaneControl>();
         // Turn off the clipping plane on start
@@ -254,10 +251,10 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     {
         if (focusObject.name == "Slider")
         {
-            StoreManipulatableModelActiveState = GetComponent<ManipulationHandler>().enabled;
-            StoreHandDraggableClipPlaneActiveState = ModelClipPlane.GetComponent<ManipulationHandler>().enabled;
-            GetComponent<ManipulationHandler>().enabled = false;
-            ModelClipPlane.GetComponent<ManipulationHandler>().enabled = false;
+            StoreManipulatableModelActiveState = GetComponent<ObjectManipulator>().enabled;
+            StoreHandDraggableClipPlaneActiveState = ModelClipPlane.GetComponent<ObjectManipulator>().enabled;
+            GetComponent<ObjectManipulator>().enabled = false;
+            ModelClipPlane.GetComponent<ObjectManipulator>().enabled = false;
         }
     }
 
@@ -265,8 +262,8 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     {
         if (focusObject.name == "Slider")
         {
-            GetComponent<ManipulationHandler>().enabled = StoreManipulatableModelActiveState;
-            ModelClipPlane.GetComponent<ManipulationHandler>().enabled = StoreHandDraggableClipPlaneActiveState;
+            GetComponent<ObjectManipulator>().enabled = StoreManipulatableModelActiveState;
+            ModelClipPlane.GetComponent<ObjectManipulator>().enabled = StoreHandDraggableClipPlaneActiveState;
         }
     }
 
@@ -516,9 +513,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         if (scaleBoxRigActiveOld != scaleBoxRigActiveNew)
         {
             if (scaleBoxRigActiveNew) {
-                GetComponent<ManipulationHandler>().enabled = true;
+                GetComponent<ObjectManipulator>().enabled = true;
             } else {
-                GetComponent<ManipulationHandler>().enabled = false;
+                GetComponent<ObjectManipulator>().enabled = false;
             }
         }
     }
@@ -832,10 +829,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         set
         {
             plateTransform = value;
-            manipulationHandler.GetComponent<Collider>().enabled = plateTransform;
-            manipulationHandler.enabled = plateTransform;
-            manipulationHandler.TwoHandedManipulationType = plateTransform ? ManipulationHandler.TwoHandedManipulation.Rotate : ManipulationHandler.TwoHandedManipulation.MoveScale;
-            HoloUtilities.SetButtonState(ButtonPlateTransform, PlateTransform);
+            GetComponent<ObjectManipulator>().enabled = plateTransform;
         }
     }
 }

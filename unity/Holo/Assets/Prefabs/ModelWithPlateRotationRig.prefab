@@ -75,12 +75,14 @@ MonoBehaviour:
   targetObject: {fileID: 2104341562774896234}
   boundsOverride: {fileID: 6760340147669039560}
   boundsCalculationMethod: 2
-  activation: 0
+  activation: 4
   flattenAxis: 0
   boxPadding: {x: 0, y: 0, z: 0}
-  boxDisplayConfiguration: {fileID: 0}
+  boxDisplayConfiguration: {fileID: 114307133794489298, guid: 937ce507dd7ee334ba569554e24adbdd,
+    type: 3}
   linksConfiguration: {fileID: 0}
-  scaleHandlesConfiguration: {fileID: 0}
+  scaleHandlesConfiguration: {fileID: 114688429180390370, guid: 937ce507dd7ee334ba569554e24adbdd,
+    type: 3}
   rotationHandlesConfiguration: {fileID: 0}
   translationHandlesConfiguration: {fileID: 0}
   handleProximityEffectConfiguration: {fileID: 0}
