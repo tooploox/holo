@@ -588,7 +588,7 @@ PlayerSettings:
   webGLThreadsSupport: 0
   webGLWasmStreaming: 0
   scriptingDefineSymbols:
-    14: Debug
+    14: release;Debug
   platformArchitecture: {}
   scriptingBackend:
     Windows Store Apps: 2
@@ -604,7 +604,7 @@ PlayerSettings:
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
   metroPackageName: EssentialVision
-  metroPackageVersion: 1.0.12.0
+  metroPackageVersion: 1.0.15.0
   metroCertificatePath: Assets\WSATestCertificate.pfx
   metroCertificatePassword: 
   metroCertificateSubject: MicroscopeIT

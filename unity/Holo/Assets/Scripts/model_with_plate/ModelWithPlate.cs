@@ -383,15 +383,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         // update ButtonTogglePlay caption and icon
         bool playing = AnimationPlaying;
         string playOrPauseText = playing ? "PAUSE" : "PLAY";
-        // FIXME
-        // ButtonTogglePlay.GetComponent<ButtonConfigHelper>().MainLabelText = playOrPauseText;
-        // Texture2D playOrPatseIcon = playing ? ButtonIconPause : ButtonIconPlay;
-        // MeshRenderer iconRenderer = ButtonTogglePlay.GetComponent<ButtonConfigHelper>().GetComponent<MeshRenderer>();
-        //if (iconRenderer != null) {
-        //    iconRenderer.sharedMaterial.mainTexture = playOrPatseIcon;
-        //} else {
-        //    Debug.LogWarning("ButtonTogglePlay icon does not have MeshRenderer");
-        //}
+        ButtonTogglePlay.GetComponent<ButtonConfigHelper>().MainLabelText = playOrPauseText;
+        string playOrPauseIconName = playing ? ButtonIconPause.name : ButtonIconPlay.name;
+        ButtonTogglePlay.GetComponent<ButtonConfigHelper>().SetQuadIconByName(playOrPauseIconName);
     }
 
     private void UnloadLayer(ModelLayer layer)
