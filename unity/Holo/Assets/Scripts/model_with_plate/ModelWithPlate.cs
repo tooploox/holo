@@ -143,12 +143,12 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         // This sets proper state of buttons and components like handDraggable
         ClickChangeTransformationState(TransformationState.None);
 
-        // Animation speed slider
-        //SliderAnimationSpeed.GetComponent<PinchSlider>().OnValueUpdated.AddListener(
-        //    delegate { 
-        //        AnimationSpeed = SliderAnimationSpeed.GetComponent<PinchSlider>().SliderValue;
-        //    }
-        //);
+        SliderAnimationSpeed.GetComponent<PinchSlider>().OnValueUpdated.AddListener(
+            delegate
+            {
+                AnimationSpeed = SliderAnimationSpeed.GetComponent<PinchSlider>().SliderValue;
+            }
+        );
         objectManipulatorTranslation.enabled = false;
         objectManipulatorRotation.enabled = false;
         objectManipulatorScale.enabled = false;
@@ -764,7 +764,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             if (layersLoaded != null) {
                 foreach (LayerLoaded l in layersLoaded.Values) {
                     if (l.Animation != null) { 
-                        l.Animation.SpeedNormalized = value;
+                        l.Animation.SpeedNormalized = value * 5;
                     }
                 }
                 RefreshUserInterface();
@@ -823,7 +823,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         set
         {
             plateTransform = value;
-            GetComponent<ObjectManipulator>().enabled = plateTransform;
+            ButtonTranslate.gameObject.SetActive(plateTransform);
+            ButtonRotate.gameObject.SetActive(plateTransform);
+            ButtonScale.gameObject.SetActive(plateTransform);
         }
     }
 }
