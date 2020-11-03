@@ -517,6 +517,41 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &5262234351775472721
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7587460322224531738}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1410eac1ae94b4d4492a09cc368e152c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  states: {fileID: 11400000, guid: 5eac1712038236e4b8ffdb3893804fe1, type: 2}
+  InputActionId: 0
+  isGlobal: 0
+  Dimensions: 1
+  dimensionIndex: 0
+  startDimensionIndex: 0
+  CanSelect: 1
+  CanDeselect: 1
+  VoiceCommand: 
+  voiceRequiresFocus: 1
+  profiles:
+  - Target: {fileID: 7587460322224531738}
+    Themes:
+    - {fileID: 11400000, guid: cbde7890146c3024d928b7afc2e16065, type: 2}
+  - Target: {fileID: 7587460322224531738}
+    Themes:
+    - {fileID: 11400000, guid: d37afabc007bf774d9431b9a7cbe6fba, type: 2}
+  OnClick:
+    m_PersistentCalls:
+      m_Calls: []
+  Events: []
+  resetOnDestroy: 0
+  enabledOnStart: 1
 --- !u!1 &8339267759352382572
 GameObject:
   m_ObjectHideFlags: 0
@@ -2255,6 +2290,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f635754a70283df4a95287065e6d2437, type: 3}
+--- !u!1 &7587460322224531738 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5466227435875137674, guid: f635754a70283df4a95287065e6d2437,
+    type: 3}
+  m_PrefabInstance: {fileID: 2492709489019752848}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &7586110943809044098 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5463048485302726418, guid: f635754a70283df4a95287065e6d2437,
