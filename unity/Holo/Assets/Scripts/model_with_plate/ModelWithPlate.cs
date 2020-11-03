@@ -34,8 +34,6 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     // Drop here "Prefabs/ModelWithPlateRotationRig"
     public GameObject RotationBoxRigTemplate;
     public GameObject AddButtonsCollection;
-    public float IconScale = 1f;
-    public float IconShiftY = 0f;
 
     public enum TransformationState
     {
@@ -177,13 +175,12 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             button.SetActive(true);
 
             string modelName = ModelsCollection.Singleton.BundleCaption(i);
-            button.transform.Find("IconAndText").transform.Find("Text").GetComponent<TextMeshPro>().text = modelName;
+            button.transform.Find("IconAndText/Text").GetComponent<TextMeshPro>().text = modelName;
 
             Texture2D icon = ModelsCollection.Singleton.BundleIcon(i);
             if (icon != null) {
-                //button.GetComponent<CompoundButtonIcon>().IconScale = IconScale;
-                //button.GetComponent<CompoundButtonIcon>().IconShiftY = IconShiftY;
-                //button.GetComponent<CompoundButtonIcon>().SetIconOverride(icon);
+                button.transform.Find("IconAndText/UIButtonSquareIcon").GetComponent<MeshRenderer>().material.SetTexture("_MainTex", icon);
+                button.transform.Find("IconAndText/UIButtonSquareIcon").GetComponent<MeshRenderer>().enabled = true;
             }
         }
 
