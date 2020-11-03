@@ -518,7 +518,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             }
         }
 
-        if(!rotationBoxRigActiveNew && !scaleBoxRigActiveNew)
+        if(!rotationBoxRigActiveNew && !scaleBoxRigActiveNew && rotationBoxRig != null)
         {
             rotationBoxRig.GetComponent<BoundsControl>().Active = false;
         }
