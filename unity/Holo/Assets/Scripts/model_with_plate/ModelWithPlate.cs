@@ -1,5 +1,6 @@
 ﻿using Microsoft.MixedReality.Toolkit.UI;
 using Microsoft.MixedReality.Toolkit.UI.BoundsControl;
+using Microsoft.MixedReality.Toolkit.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,9 +28,6 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public PressableButtonHoloLens2 ButtonScale;
     public PressableButtonHoloLens2 ButtonTransparency;
     public PressableButtonHoloLens2 ButtonPlateTransform;
-    public ObjectManipulator objectManipulatorTranslation;
-    public ObjectManipulator objectManipulatorRotation;
-    public ObjectManipulator objectManipulatorScale;
     public GameObject ButtonLayerTemplate;
     public Texture2D ButtonIconPlay;
     public Texture2D ButtonIconPause;
@@ -149,9 +147,6 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
                 AnimationSpeed = SliderAnimationSpeed.GetComponent<PinchSlider>().SliderValue;
             }
         );
-        objectManipulatorTranslation.enabled = false;
-        objectManipulatorRotation.enabled = false;
-        objectManipulatorScale.enabled = false;
     }
 
     /* Number of "add" buttons we have in the scene. */
@@ -298,21 +293,30 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         UnloadInstance();
         RefreshUserInterface();
     }
+    public void ClickToggleLayersState()
+    {
+        var layerState = !LayersSection.activeSelf;
+        CloseSubmenus();
+        LayersSection.SetActive(layerState);
+    }
     private void ClickTransform()
     {
+        var modelTransformState = ModelTransform;
         CloseSubmenus();
-        ModelTransform = !ModelTransform;
+        ModelTransform = !modelTransformState;
     }
     private void ClickClipping()
     {
+        var clipPlaneState = ModelClipPlaneCtrl.ClippingPlaneState;
         CloseSubmenus();
-        ModelClipPlaneCtrl.ClippingPlaneState = ModelClippingPlaneControl.ClipPlaneState.Active;
+        ModelClipPlaneCtrl.ClippingPlaneState = clipPlaneState == ModelClippingPlaneControl.ClipPlaneState.Active ? ModelClippingPlaneControl.ClipPlaneState.Disabled : ModelClippingPlaneControl.ClipPlaneState.Active;
     }
 
     private void ClickAnimationSpeed()
     {
+        var animationSubmenuState = AnimationSubmenu.activeSelf;
         CloseSubmenus();
-        AnimationSubmenu.SetActive(!AnimationSubmenu.activeSelf);
+        AnimationSubmenu.SetActive(!animationSubmenuState);
     }
 
     private void ClickTransparency()
@@ -351,12 +355,6 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         LoadInstance(instanceBundle.Name, false);
         LoadInitialLayers();
         RefreshUserInterface();
-    }
-
-    public void ClickToggleLayersState()
-    {
-        CloseSubmenus();
-        LayersSection.SetActive(!LayersSection.activeSelf);
     }
 
     private void ClickChangeLayerState(ModelLayer layer)
@@ -489,30 +487,23 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         if (newState != TransformationState.None && ModelClipPlaneCtrl.ClippingPlaneState != ModelClippingPlaneControl.ClipPlaneState.Disabled)
             ModelClipPlaneCtrl.ClippingPlaneState = ModelClippingPlaneControl.ClipPlaneState.Active;
 
-        // turn on/off translation manipulation
-        objectManipulatorTranslation.enabled = newState == TransformationState.Translate;
-        objectManipulatorRotation.enabled = newState == TransformationState.Rotate;
-        objectManipulatorScale.enabled = newState == TransformationState.Scale;
-        // turn on/off rotation manipulation
-        /*
-         * We do not switch BoundingBoxRig enabled now.
-         * It would serve no purpose (calling Activate or Deactivate is enough),
-         * and it woud actually break Activate (because you cannot call Activate in the same
-         * frame as setting enabled=true for the 1st frame, this causes problems in BoundingBoxRig
-         * as private "objectToBound" is only assigned in BoundingBoxRig.Start).
-         *
-        rotationBoxRig.enabled = newState == TransformationState.Rotate;
-        */
-        // call rotationBoxRig.Activate or Deactivate
+        if (newState == TransformationState.Translate)
+        {
+            GetComponent<ObjectManipulator>().enabled = true;
+        }
+        else
+        {
+            GetComponent<ObjectManipulator>().enabled = false;
+        }
 
         bool rotationBoxRigActiveNew = newState == TransformationState.Rotate;
         if (rotationBoxRigActiveOld != rotationBoxRigActiveNew && rotationBoxRig != null)
         {
             if (rotationBoxRigActiveNew) {
                 rotationBoxRig.GetComponent<BoundsControl>().Active = true;
-            } else {
-                rotationBoxRig.GetComponent<BoundsControl>().Active = false;
-            }
+                rotationBoxRig.GetComponent<RotationAxisConstraint>().ConstraintOnRotation = AxisFlags.XAxis | AxisFlags.ZAxis;
+                rotationBoxRig.GetComponent<MinMaxScaleConstraint>().enabled = true;
+            } 
         }
 
         /* As with rotationBoxRig, note that you cannot toggle enabled below.
@@ -521,10 +512,15 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         if (scaleBoxRigActiveOld != scaleBoxRigActiveNew)
         {
             if (scaleBoxRigActiveNew) {
-                GetComponent<ObjectManipulator>().enabled = true;
-            } else {
-                GetComponent<ObjectManipulator>().enabled = false;
+                rotationBoxRig.GetComponent<BoundsControl>().Active = true;
+                rotationBoxRig.GetComponent<RotationAxisConstraint>().ConstraintOnRotation = AxisFlags.XAxis | AxisFlags.YAxis | AxisFlags.ZAxis;
+                rotationBoxRig.GetComponent<MinMaxScaleConstraint>().enabled = false;
             }
+        }
+
+        if(!rotationBoxRigActiveNew && !scaleBoxRigActiveNew)
+        {
+            rotationBoxRig.GetComponent<BoundsControl>().Active = false;
         }
     }
 
