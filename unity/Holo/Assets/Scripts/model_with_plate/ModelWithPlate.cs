@@ -85,13 +85,13 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
     public Quaternion ModelRotation
     {
-        get { 
-            return rotationBoxRig != null ? rotationBoxRig.transform.localRotation : Quaternion.identity; 
+        get {
+            return rotationBoxRig != null ? rotationBoxRig.transform.localRotation : Quaternion.identity;
         }
-        set { 
+        set {
             if (rotationBoxRig != null) {
                 rotationBoxRig.transform.localRotation = value;
-            } 
+            }
             // TODO: otherwise ignore, we do not synchronize rotation for unloaded models now
         }
     }
@@ -103,7 +103,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         {
             uint result = 0;
             if (layersLoaded != null) {
-                foreach (ModelLayer layer in layersLoaded.Keys) { 
+                foreach (ModelLayer layer in layersLoaded.Keys) {
                     result |= ((uint)1 << layer.LayerIndex);
                 }
             }
@@ -112,7 +112,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         set
         {
             uint currentLayers = InstanceLayers;
-            foreach (ModelLayer layer in instanceBundle.Layers) { 
+            foreach (ModelLayer layer in instanceBundle.Layers) {
                 uint layerMask = (uint)1 << layer.LayerIndex;
                 if ((layerMask & value) != 0 && (layerMask & currentLayers) == 0) {
                     LoadLayer(layer);
@@ -185,7 +185,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             button.transform.Find("IconAndText").transform.Find("Text").GetComponent<TextMeshPro>().text = modelName;
 
             Texture2D icon = ModelsCollection.Singleton.BundleIcon(i);
-            if (icon != null) { 
+            if (icon != null) {
                 //button.GetComponent<CompoundButtonIcon>().IconScale = IconScale;
                 //button.GetComponent<CompoundButtonIcon>().IconShiftY = IconShiftY;
                 //button.GetComponent<CompoundButtonIcon>().SetIconOverride(icon);
@@ -217,13 +217,15 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             case "Speed": ClickSpeed(); break;
             case "ConfirmPreview": ClickConfirmPreview(); break;
             case "CancelPreview": ClickCancelPreview(); break;
+            case "ButtonLayers": ClickToggleLayersState(); break;
+            case "ButtonTransform": ClickTransform(); break;
             case "ButtonTranslate": ClickChangeTransformationState(TransformationState.Translate); break;
             case "ButtonRotate": ClickChangeTransformationState(TransformationState.Rotate); break;
             case "ButtonScale": ClickChangeTransformationState(TransformationState.Scale); break;
-            case "ButtonLayers": ClickToggleLayersState(); break;
-            case "ButtonAnimationSpeed": AnimationSubmenu.SetActive(!AnimationSubmenu.activeSelf); break;
+            case "ButtonClipping": ClickClipping(); break;
+            case "ButtonAnimationSpeed": ClickAnimationSpeed(); break;
             case "ButtonTransparency": ClickTransparency(); break;
-            case "ButtonPlateTransform": ClickPlateTransform(); break;
+
 
             default:
                 {
@@ -296,15 +298,26 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         UnloadInstance();
         RefreshUserInterface();
     }
+    private void ClickTransform()
+    {
+        CloseSubmenus();
+        ModelTransform = !ModelTransform;
+    }
+    private void ClickClipping()
+    {
+        CloseSubmenus();
+        ModelClipPlaneCtrl.ClippingPlaneState = ModelClippingPlaneControl.ClipPlaneState.Active;
+    }
+
+    private void ClickAnimationSpeed()
+    {
+        CloseSubmenus();
+        AnimationSubmenu.SetActive(!AnimationSubmenu.activeSelf);
+    }
 
     private void ClickTransparency()
     {
         Transparent = !Transparent;
-    }
-
-    private void ClickPlateTransform()
-    {
-        PlateTransform = !PlateTransform;
     }
 
     /* Load new model or unload.
@@ -342,6 +355,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
     public void ClickToggleLayersState()
     {
+        CloseSubmenus();
         LayersSection.SetActive(!LayersSection.activeSelf);
     }
 
@@ -817,15 +831,23 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         }
     }
 
-    private bool plateTransform;
-    public bool PlateTransform {
-        get { return plateTransform; }
+    private void CloseSubmenus()
+    {
+        LayersSection.SetActive(false);
+        ModelTransform = false;
+        ModelClipPlaneCtrl.ClippingPlaneState = ModelClippingPlaneControl.ClipPlaneState.Disabled;
+        AnimationSubmenu.SetActive(false);
+    }
+
+    private bool modelTransform;
+    public bool ModelTransform {
+        get { return modelTransform; }
         set
         {
-            plateTransform = value;
-            ButtonTranslate.gameObject.SetActive(plateTransform);
-            ButtonRotate.gameObject.SetActive(plateTransform);
-            ButtonScale.gameObject.SetActive(plateTransform);
+            modelTransform = value;
+            ButtonTranslate.gameObject.SetActive(modelTransform);
+            ButtonRotate.gameObject.SetActive(modelTransform);
+            ButtonScale.gameObject.SetActive(modelTransform);
         }
     }
 }
