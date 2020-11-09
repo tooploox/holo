@@ -45,11 +45,9 @@ public static class HoloUtilities
         }
         // using material, not sharedMaterial, deliberately: we only change color of this material instance
         Color newColor = active ? ButtonActiveColor : ButtonInactiveColor;
-        //Debug.Log("changing color of " + button.name + " to " + newColor.ToString());
+        Debug.Log("changing color of " + button.name + " to " + newColor.ToString());
         // both _EmissiveColor and _Color (Albedo in editor) should be set to make proper effect.
-        MeshRenderer renderer = textMesh.GetComponent<MeshRenderer>();
-        renderer.material.SetColor("_EmissiveColor", newColor);
-        renderer.material.SetColor("_Color", newColor);
+        textMesh.color = newColor;
     }
 
     public static string SuffixRemove(string suffix, string s)

@@ -102,12 +102,10 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
 
             case "ButtonClippingTranslation":
                 ClippingPlaneState = ClippingPlaneState == ClipPlaneState.Translation ? ClipPlaneState.Active : ClipPlaneState.Translation;
-                //ModelWithPlate.GetComponent<ManipulationHandler>().enabled = true;
                 break;
 
             case "ButtonClippingRotation":
                 ClippingPlaneState = ClippingPlaneState == ClipPlaneState.Rotation ? ClipPlaneState.Active : ClipPlaneState.Rotation;
-                //ModelWithPlate.GetComponent<ManipulationHandler>().enabled = false;
                 break;
         }
     }

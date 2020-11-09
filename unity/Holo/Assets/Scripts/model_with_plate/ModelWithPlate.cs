@@ -14,26 +14,30 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public GameObject SliderAnimationSpeed;
     public GameObject ButtonsModel;
     public GameObject ButtonsModelPreview;
+    public GameObject LayerSubmenu;
     public GameObject PlateAnimated;
-    public GameObject LayersSection;
-    public GameObject AnimationSubmenu;
+
     public Material DefaultModelMaterial;
     public Material DefaultModelTransparentMaterial;
     public Material DataVisualizationMaterial;
     public Material DefaultVolumetricMaterial;
     public Transform InstanceParent;
     public PressableButtonHoloLens2 ButtonTogglePlay;
+    public PressableButtonHoloLens2 ButtonLayerSubmenu;
+    public PressableButtonHoloLens2 ButtonTransform;
     public PressableButtonHoloLens2 ButtonTranslate;
     public PressableButtonHoloLens2 ButtonRotate;
     public PressableButtonHoloLens2 ButtonScale;
+    public PressableButtonHoloLens2 ButtonAnimationSubmenu;
     public PressableButtonHoloLens2 ButtonTransparency;
-    public PressableButtonHoloLens2 ButtonPlateTransform;
     public GameObject ButtonLayerTemplate;
     public Texture2D ButtonIconPlay;
     public Texture2D ButtonIconPause;
     // Drop here "Prefabs/ModelWithPlateRotationRig"
     public GameObject RotationBoxRigTemplate;
     public GameObject AddButtonsCollection;
+
+    private float SliderSpeedFactor = 5.0f;
 
     public enum TransformationState
     {
@@ -130,8 +134,8 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         DefaultModelTransparentMaterial.DisableKeyword("CLIPPING_ON");
         DataVisualizationMaterial.DisableKeyword("CLIPPING_ON");
 
-        LayersSection.SetActive(false);
-        AnimationSubmenu.SetActive(false);
+        LayerSubmenuState = false;
+        AnimationSpeedSubmenu = false;
 
         RefreshUserInterface();
         InitializeAddButtons();
@@ -142,7 +146,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         SliderAnimationSpeed.GetComponent<PinchSlider>().OnValueUpdated.AddListener(
             delegate
             {
-                AnimationSpeed = SliderAnimationSpeed.GetComponent<PinchSlider>().SliderValue;
+                AnimationSpeed = SliderAnimationSpeed.GetComponent<PinchSlider>().SliderValue * SliderSpeedFactor;
+                Debug.Log(SliderAnimationSpeed.GetComponent<PinchSlider>().SliderValue.ToString());
+                SliderAnimationSpeed.transform.Find("ThumbRoot/SpeedValue").GetComponent<TextMeshPro>().text = Math.Round(AnimationSpeed, 2).ToString();
             }
         );
     }
@@ -209,7 +215,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             case "Speed": ClickSpeed(); break;
             case "ConfirmPreview": ClickConfirmPreview(); break;
             case "CancelPreview": ClickCancelPreview(); break;
-            case "ButtonLayers": ClickToggleLayersState(); break;
+            case "ButtonLayers": ClickToggleLayersState(clickObject.GetComponent<PressableButtonHoloLens2>()); break;
             case "ButtonTransform": ClickTransform(); break;
             case "ButtonTranslate": ClickChangeTransformationState(TransformationState.Translate); break;
             case "ButtonRotate": ClickChangeTransformationState(TransformationState.Rotate); break;
@@ -282,7 +288,8 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         const float MaxSpeed = 5f;
         float newSpeed = Mathf.Min(MaxSpeed, AnimationSpeed * 2);
         AnimationSpeed = newSpeed;
-        //SliderAnimationSpeed.GetComponent<PinchSlider>().SliderValue = newSpeed;
+        SliderAnimationSpeed.GetComponent<PinchSlider>().SliderValue = newSpeed / SliderSpeedFactor;
+        Debug.Log(SliderAnimationSpeed.GetComponent<PinchSlider>().SliderValue.ToString());
     }
 
     private void ClickCancelPreview()
@@ -290,11 +297,11 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         UnloadInstance();
         RefreshUserInterface();
     }
-    public void ClickToggleLayersState()
+    public void ClickToggleLayersState(PressableButtonHoloLens2 button)
     {
-        var layerState = !LayersSection.activeSelf;
+        var layerState = LayerSubmenuState;
         CloseSubmenus();
-        LayersSection.SetActive(layerState);
+        LayerSubmenuState = !layerState;
     }
     private void ClickTransform()
     {
@@ -311,9 +318,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
     private void ClickAnimationSpeed()
     {
-        var animationSubmenuState = AnimationSubmenu.activeSelf;
+        var animationSubmenuState = AnimationSpeedSubmenu;
         CloseSubmenus();
-        AnimationSubmenu.SetActive(!animationSubmenuState);
+        AnimationSpeedSubmenu = !animationSubmenuState;
     }
 
     private void ClickTransparency()
@@ -603,7 +610,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
         // reset animation speed slider to value 1
         animationSpeed = 1f;
-        //SliderAnimationSpeed.GetComponent<PinchSlider>().SliderValue = animationSpeed;
+        SliderAnimationSpeed.GetComponent<PinchSlider>().SliderValue = animationSpeed / SliderSpeedFactor;
 
         // reset transparency to false
         Transparent = false;
@@ -614,7 +621,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         foreach (ModelLayer layer in instanceBundle.Layers)
         {
             // add button to scene
-            GameObject buttonGameObject = Instantiate<GameObject>(ButtonLayerTemplate, LayersSection.transform);
+            GameObject buttonGameObject = Instantiate<GameObject>(ButtonLayerTemplate, LayerSubmenu.transform);
             buttonGameObject.transform.localPosition =
                 buttonGameObject.transform.localPosition + new Vector3(0f, 0f, buttonLayerHeight * buttonIndex);
             buttonIndex++;
@@ -771,7 +778,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             if (layersLoaded != null) {
                 foreach (LayerLoaded l in layersLoaded.Values) {
                     if (l.Animation != null) { 
-                        l.Animation.SpeedNormalized = value * 5;
+                        l.Animation.SpeedNormalized = value;
                     }
                 }
                 RefreshUserInterface();
@@ -824,12 +831,38 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         }
     }
 
+    private bool layerSubmenuState;
+    public bool LayerSubmenuState {
+        get { return layerSubmenuState; }
+        set
+        {
+            layerSubmenuState = value;
+            HoloUtilities.SetButtonState(ButtonLayerSubmenu, value);
+            LayerSubmenu.SetActive(value);
+
+        }
+
+    }
+
+    private bool animationSpeedSubmenu;
+    public bool AnimationSpeedSubmenu {
+        get { return animationSpeedSubmenu; }
+        set
+        {
+            animationSpeedSubmenu = value;
+            HoloUtilities.SetButtonState(ButtonAnimationSubmenu, value);
+            ButtonAnimationSubmenu.gameObject.transform.parent.Find("AnimationSpeedSubMenu").gameObject.SetActive(value);
+
+        }
+    }
+
+
     private void CloseSubmenus()
     {
-        LayersSection.SetActive(false);
+        LayerSubmenuState =  false;
         ModelTransform = false;
         ModelClipPlaneCtrl.ClippingPlaneState = ModelClippingPlaneControl.ClipPlaneState.Disabled;
-        AnimationSubmenu.SetActive(false);
+        AnimationSpeedSubmenu = false;
     }
 
     private bool modelTransform;
@@ -838,6 +871,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         set
         {
             modelTransform = value;
+            HoloUtilities.SetButtonState(ButtonTransform, value);
             ButtonTranslate.gameObject.SetActive(modelTransform);
             ButtonRotate.gameObject.SetActive(modelTransform);
             ButtonScale.gameObject.SetActive(modelTransform);
