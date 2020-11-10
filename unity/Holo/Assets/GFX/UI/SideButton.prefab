@@ -488,6 +488,7 @@ GameObject:
   - component: {fileID: 5420360880497943650}
   - component: {fileID: 9175290533601117426}
   - component: {fileID: 7908655470986475181}
+  - component: {fileID: 1321836227602170063}
   - component: {fileID: 4998172198415160097}
   m_Layer: 5
   m_Name: SideButton
@@ -584,6 +585,41 @@ MonoBehaviour:
   localCenter: {x: 0, y: 0, z: -0.01}
   bounds: {x: 0.12, y: 0.12}
   touchableCollider: {fileID: 5420360880497943650}
+--- !u!114 &1321836227602170063
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5466227435875137674}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1410eac1ae94b4d4492a09cc368e152c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  states: {fileID: 11400000, guid: 5eac1712038236e4b8ffdb3893804fe1, type: 2}
+  InputActionId: 0
+  isGlobal: 0
+  Dimensions: 1
+  dimensionIndex: 0
+  startDimensionIndex: 0
+  CanSelect: 1
+  CanDeselect: 1
+  VoiceCommand: 
+  voiceRequiresFocus: 1
+  profiles:
+  - Target: {fileID: 5465849767920255998}
+    Themes:
+    - {fileID: 11400000, guid: cbde7890146c3024d928b7afc2e16065, type: 2}
+  - Target: {fileID: 5465761936706746774}
+    Themes:
+    - {fileID: 11400000, guid: cbde7890146c3024d928b7afc2e16065, type: 2}
+  OnClick:
+    m_PersistentCalls:
+      m_Calls: []
+  Events: []
+  resetOnDestroy: 0
+  enabledOnStart: 1
 --- !u!114 &4998172198415160097
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -597,7 +633,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mainLabelText: {fileID: 890872820803839532}
-  interactable: {fileID: 0}
+  interactable: {fileID: 1321836227602170063}
   seeItSayItLabel: {fileID: 0}
   seeItSatItLabelText: {fileID: 0}
   iconStyle: 0

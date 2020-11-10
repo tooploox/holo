@@ -1,7 +1,7 @@
 ﻿using Microsoft.MixedReality.Toolkit.UI;
 using Microsoft.MixedReality.Toolkit.Input;
 using UnityEngine;
-
+using Microsoft.MixedReality.Toolkit.UI.BoundsControl;
 
 public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
 {
@@ -9,10 +9,6 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
     public PressableButtonHoloLens2 ButtonClippingPlaneTranslation;
     public PressableButtonHoloLens2 ButtonClippingPlaneRotation;
     public ModelWithPlate ModelWithPlate;
-
-    private BoundingBox clipPlaneQuadBbox;
-
-    ManipulationHandler HandTranslation;
 
     public enum ClipPlaneState
     {
@@ -29,9 +25,11 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
 
     private ClipPlaneState clippingPlaneState = ClipPlaneState.Disabled;
 
-    public ClipPlaneState ClippingPlaneState {
+    public ClipPlaneState ClippingPlaneState
+    {
         get { return clippingPlaneState; }
-        set {
+        set
+        {
             if (!ModelWithPlate.InstanceLoaded)
             {
                 // This is normal if you try to turn on clipping plane before a model is loaded
@@ -44,19 +42,30 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
             HoloUtilities.SetButtonState(ButtonClippingPlaneTranslation, value == ClipPlaneState.Translation);
             HoloUtilities.SetButtonState(ButtonClippingPlaneRotation, value == ClipPlaneState.Rotation);
 
-            // FIXME !!!
-    //        HandTranslation.enabled = value == ClipPlaneState.Translation;
+            if (value == ClipPlaneState.Translation)
+            {
+                GetComponent<MoveAxisConstraint>().enabled = false;
+                GetComponent<RotationAxisConstraint>().enabled = true;
+            }
+            if (value == ClipPlaneState.Rotation)
+            {
 
-    //        if (value == ClipPlaneState.Active || value == ClipPlaneState.Disabled)
-    //            clipPlaneQuadBbox.Active = false;
-    //        else
-    //            clipPlaneQuadBbox.Active = true;
+                GetComponent<BoundsControl>().enabled = true;
+                GetComponent<RotationAxisConstraint>().enabled = false;
+                GetComponent<MoveAxisConstraint>().enabled = true;
+            }
+            else
+            {
+                GetComponent<BoundsControl>().enabled = false;
+            }
 
             if (value == ClipPlaneState.Disabled)
             {
-    //            ModelWithPlate.DefaultModelMaterial.DisableKeyword("CLIPPING_ON");
-				//ModelWithPlate.DefaultModelTransparentMaterial.DisableKeyword("CLIPPING_ON");
-    //            ModelWithPlate.DataVisualizationMaterial.DisableKeyword("CLIPPING_ON");
+                //            ModelWithPlate.DefaultModelMaterial.DisableKeyword("CLIPPING_ON");
+                //ModelWithPlate.DefaultModelTransparentMaterial.DisableKeyword("CLIPPING_ON");
+                //            ModelWithPlate.DataVisualizationMaterial.DisableKeyword("CLIPPING_ON");
+
+                gameObject.SetActive(false);
 
                 ButtonClippingPlaneTranslation.gameObject.SetActive(false);
                 ButtonClippingPlaneRotation.gameObject.SetActive(false);
@@ -64,36 +73,26 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
             }
             else
             {
-    //            ModelWithPlate.DefaultModelMaterial.EnableKeyword("CLIPPING_ON");
-				//ModelWithPlate.DefaultModelTransparentMaterial.EnableKeyword("CLIPPING_ON");
-    //            ModelWithPlate.DataVisualizationMaterial.EnableKeyword("CLIPPING_ON");
+                //            ModelWithPlate.DefaultModelMaterial.EnableKeyword("CLIPPING_ON");
+                //ModelWithPlate.DefaultModelTransparentMaterial.EnableKeyword("CLIPPING_ON");
+                //            ModelWithPlate.DataVisualizationMaterial.EnableKeyword("CLIPPING_ON");
+                gameObject.SetActive(true);
 
                 ButtonClippingPlaneTranslation.gameObject.SetActive(true);
                 ButtonClippingPlaneRotation.gameObject.SetActive(true);
                 HoloUtilities.SetButtonState(ButtonClippingPlane, true);
             }
-
-            // disable model transformation if clipping plane transformation enabled
-            //if (value == ClipPlaneState.Translation || value == ClipPlaneState.Rotation) 
-            //    ModelWithPlate.ClickChangeTransformationState(ModelWithPlate.TransformationState.None);
         }
     }
 
     void Start()
     {
-        // FIXME
-        //HandTranslation = GetComponent<ManipulationHandler>();
-        //HandTranslation.enabled = false;
-        //GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        //clipPlaneQuadBbox = cube.AddComponent<BoundingBox>();
-        ButtonClippingPlaneTranslation.gameObject.SetActive(false);
-        ButtonClippingPlaneRotation.gameObject.SetActive(false);
-        //clipPlaneQuadBbox.Active = false;
+
     }
 
     public void Click(GameObject clickObj)
     {
-        Debug.Log("Clicked obj: " + clickObj.name);
+        Debug.Log("Clicked obj: " + clickObj.name + "Current Clipping State: " + clippingPlaneState);
         switch (clickObj.name)
         {
             case "ButtonClipping":

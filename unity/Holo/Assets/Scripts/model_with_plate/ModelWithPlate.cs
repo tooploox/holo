@@ -313,7 +313,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     {
         var clipPlaneState = ModelClipPlaneCtrl.ClippingPlaneState;
         CloseSubmenus();
-        ModelClipPlaneCtrl.ClippingPlaneState = clipPlaneState == ModelClippingPlaneControl.ClipPlaneState.Active ? ModelClippingPlaneControl.ClipPlaneState.Disabled : ModelClippingPlaneControl.ClipPlaneState.Active;
+        ModelClipPlaneCtrl.ClippingPlaneState = clipPlaneState;
     }
 
     private void ClickAnimationSpeed()
@@ -410,6 +410,12 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             Debug.LogWarning("Cannot unload layer " + layer.Caption + ", it is not loaded yet");
             return;
         }
+        foreach (var renderer in layersLoaded[layer].Instance.GetComponentsInChildren<Renderer>())
+        {
+            renderer.sharedMaterial = LayerMaterial(layer);
+            ModelClipPlane.GetComponent<ClippingPlane>().RemoveRenderer(renderer);
+        }
+
         Destroy(layersLoaded[layer].Instance);
         layersLoaded.Remove(layer);
     }
@@ -693,10 +699,16 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         // Assign material to all MeshRenderer and SkinnedMeshRenderer inside
         foreach (var renderer in layerLoaded.Instance.GetComponentsInChildren<Renderer>()) { 
             renderer.sharedMaterial = LayerMaterial(layer);
+            ModelClipPlane.GetComponent<ClippingPlane>().AddRenderer(renderer);
         }
 
-        // update layersLoaded dictionary
-        layersLoaded[layer] = layerLoaded;
+        {
+
+            Debug.Log("MeshRenderer Loaded to the Clipping Plane");
+        }
+
+       // update layersLoaded dictionary
+       layersLoaded[layer] = layerLoaded;
     }
 
     /* Returns BlendShapeAnimation within any LayerLoaded with Animation component != null 
