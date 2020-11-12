@@ -102,9 +102,9 @@ Material:
     - _EnvironmentColorIntensity: 0.5
     - _EnvironmentColorThreshold: 1.5
     - _EnvironmentColoring: 0
-    - _FadeBeginDistance: 5.14
-    - _FadeCompleteDistance: 0.39
-    - _FadeMinValue: 0
+    - _FadeBeginDistance: 3.54
+    - _FadeCompleteDistance: 1.38
+    - _FadeMinValue: 0.362
     - _FluentLightIntensity: 1
     - _GlossMapScale: 1
     - _Glossiness: 0.5
@@ -113,7 +113,7 @@ Material:
     - _IgnoreZScale: 0
     - _IndependentCorners: 0
     - _InnerGlow: 1
-    - _InnerGlowPower: 19.6
+    - _InnerGlowPower: 4.2
     - _InstancedColor: 0
     - _Iridescence: 0
     - _IridescenceAngle: -0.78
@@ -134,7 +134,7 @@ Material:
     - _RefractiveIndex: 0
     - _RenderQueueOverride: -1
     - _RimLight: 1
-    - _RimPower: 5.33
+    - _RimPower: 4.95
     - _RoundCornerMargin: 0.01
     - _RoundCornerRadius: 0.25
     - _RoundCorners: 0
