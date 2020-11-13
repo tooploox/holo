@@ -6,16 +6,14 @@ using Microsoft.MixedReality.Toolkit.UI.BoundsControl;
 public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
 {
     public PressableButtonHoloLens2 ButtonClippingPlane;
-    public PressableButtonHoloLens2 ButtonClippingPlaneTranslation;
-    public PressableButtonHoloLens2 ButtonClippingPlaneRotation;
+    public PressableButtonHoloLens2 ButtonClippingPlaneManipulation;
     public ModelWithPlate ModelWithPlate;
 
     public enum ClipPlaneState
     {
         Disabled,
         Active,
-        Translation,
-        Rotation
+        Manipulation
     }
 
     //
@@ -39,72 +37,48 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
 
             clippingPlaneState = value;
 
-            HoloUtilities.SetButtonState(ButtonClippingPlaneTranslation, value == ClipPlaneState.Translation);
-            HoloUtilities.SetButtonState(ButtonClippingPlaneRotation, value == ClipPlaneState.Rotation);
+            HoloUtilities.SetButtonState(ButtonClippingPlaneManipulation, value == ClipPlaneState.Manipulation);
 
-            if (value == ClipPlaneState.Translation)
+            if (value == ClipPlaneState.Manipulation)
             {
-                GetComponent<MoveAxisConstraint>().enabled = false;
-                GetComponent<RotationAxisConstraint>().enabled = true;
-            }
-            if (value == ClipPlaneState.Rotation)
-            {
-
+                GetComponent<ObjectManipulator>().enabled = true;
                 GetComponent<BoundsControl>().enabled = true;
-                GetComponent<RotationAxisConstraint>().enabled = false;
-                GetComponent<MoveAxisConstraint>().enabled = true;
+                gameObject.transform.Find("Quad").gameObject.SetActive(true);
             }
             else
             {
+                GetComponent<ObjectManipulator>().enabled = false;
                 GetComponent<BoundsControl>().enabled = false;
+                gameObject.transform.Find("Quad").gameObject.SetActive(false);
             }
 
             if (value == ClipPlaneState.Disabled)
             {
-                //            ModelWithPlate.DefaultModelMaterial.DisableKeyword("CLIPPING_ON");
-                //ModelWithPlate.DefaultModelTransparentMaterial.DisableKeyword("CLIPPING_ON");
-                //            ModelWithPlate.DataVisualizationMaterial.DisableKeyword("CLIPPING_ON");
-
                 gameObject.SetActive(false);
 
-                ButtonClippingPlaneTranslation.gameObject.SetActive(false);
-                ButtonClippingPlaneRotation.gameObject.SetActive(false);
+                ButtonClippingPlaneManipulation.gameObject.SetActive(false);
                 HoloUtilities.SetButtonState(ButtonClippingPlane, false);
             }
             else
             {
-                //            ModelWithPlate.DefaultModelMaterial.EnableKeyword("CLIPPING_ON");
-                //ModelWithPlate.DefaultModelTransparentMaterial.EnableKeyword("CLIPPING_ON");
-                //            ModelWithPlate.DataVisualizationMaterial.EnableKeyword("CLIPPING_ON");
                 gameObject.SetActive(true);
 
-                ButtonClippingPlaneTranslation.gameObject.SetActive(true);
-                ButtonClippingPlaneRotation.gameObject.SetActive(true);
+                ButtonClippingPlaneManipulation.gameObject.SetActive(true);
                 HoloUtilities.SetButtonState(ButtonClippingPlane, true);
             }
         }
     }
 
-    void Start()
-    {
-
-    }
-
     public void Click(GameObject clickObj)
     {
-        Debug.Log("Clicked obj: " + clickObj.name + "Current Clipping State: " + clippingPlaneState);
         switch (clickObj.name)
         {
             case "ButtonClipping":
                 ClippingPlaneState = ClippingPlaneState == ClipPlaneState.Disabled ? ClipPlaneState.Active : ClipPlaneState.Disabled;
                 break;
 
-            case "ButtonClippingTranslation":
-                ClippingPlaneState = ClippingPlaneState == ClipPlaneState.Translation ? ClipPlaneState.Active : ClipPlaneState.Translation;
-                break;
-
-            case "ButtonClippingRotation":
-                ClippingPlaneState = ClippingPlaneState == ClipPlaneState.Rotation ? ClipPlaneState.Active : ClipPlaneState.Rotation;
+            case "ButtonClippingManipulation":
+                ClippingPlaneState = ClippingPlaneState == ClipPlaneState.Manipulation ? ClipPlaneState.Active : ClipPlaneState.Manipulation;
                 break;
         }
     }
