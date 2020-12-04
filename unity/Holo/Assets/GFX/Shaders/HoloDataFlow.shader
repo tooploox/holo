@@ -35,6 +35,10 @@
 				float3 normal : NORMAL;
 				float4 tangent : TANGENT;
 				float2 uv : TEXCOORD0;
+				/* Support single-pass stereo rendering
+				   https://docs.unity3d.com/Manual/SinglePassStereoRenderingHoloLens.html */
+				UNITY_VERTEX_OUTPUT_STEREO
+				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
 			struct g2f
@@ -43,6 +47,9 @@
 				float2 uv : TEXCOORD0;
 				float4 col : COLOR;
 				float4 tan : TEXCOORD1;
+				// Support single-pass stereo rendering
+				UNITY_VERTEX_OUTPUT_STEREO
+				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
 			sampler2D _MainTex;
@@ -54,6 +61,10 @@
 			v2g vert(appdata_tan v)
 			{
 				v2g o;
+				// Support single-pass stereo rendering
+				UNITY_SETUP_INSTANCE_ID(v);
+				UNITY_TRANSFER_INSTANCE_ID(v, o);
+				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 				o.vertex = v.vertex;
 				o.uv = TRANSFORM_TEX(v.texcoord, _MainTex);
 				o.normal = v.normal;
@@ -111,12 +122,17 @@
 
 				float4 vertexObject;
 
+				// Support single-pass stereo rendering
+				UNITY_TRANSFER_INSTANCE_ID(IN[0], o);
+				UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(IN[0], o);
+				// Pass tangent to the fragment shader
+				o.tan = IN[0].tangent;
+
 			//-----
 				vertexObject = IN[0].vertex - float4(normalFace, 0) * _WeightFactor;
 				o.pos = UnityObjectToClipPos(vertexObject); //1
 				o.uv = float2(0.,0.) + offset;
 				o.col = startColor;
-				o.tan = IN[0].tangent;
 				tristream.Append(o);
 
 				vertexObject = IN[0].vertex - float4(crossNormalFace, 0) * _WeightFactor;
@@ -199,6 +215,10 @@
 
 			fixed4 frag(g2f i) : SV_Target
 			{
+				// Support single-pass stereo rendering
+				// https://docs.unity3d.com/Manual/SinglePassStereoRenderingHoloLens.html
+				UNITY_SETUP_INSTANCE_ID(i);
+
 				fixed4 col = i.col;
 				col.a = i.col.a;
 
