@@ -10,14 +10,16 @@ namespace Assets.SharedExperience.Scripts.UI
 {
     class UIController: MonoBehaviour
     {
-        public GameObject ActivateOnStart;
-        
+        public GameObject ModelWithPlate;
+        public GameObject DebugWindow;
+        ScrollingSessionListUIController scrollingUIControl;
         NetworkDiscoveryWithAnchors networkDiscovery;
 
 
         private void Start()
         {
             networkDiscovery = NetworkDiscoveryWithAnchors.Instance;
+            scrollingUIControl = ScrollingSessionListUIController.Instance;
         }
 
         public void StartSession()
@@ -27,20 +29,25 @@ namespace Assets.SharedExperience.Scripts.UI
                 networkDiscovery.StartHosting("SuperRad");
             }
         }
+
+        public void JoinSession()
+        {
+            scrollingUIControl.JoinSelectedSession();
+        }
         
         public void OfflineMode()
         {
             Debug.Log("Offline mode activated!");
             gameObject.SetActive(false);
-            if (ActivateOnStart != null)
+            if (ModelWithPlate != null)
             {
-                ActivateOnStart.SetActive(true);
+                ModelWithPlate.SetActive(true);
             }
         }
 
         public void ScrollButton(int direction)
         {
-            ScrollingSessionListUIController.Instance.ScrollSessions(direction);
+            scrollingUIControl.ScrollSessions(direction);
         }
 
         public void ToogleSharing()
@@ -48,8 +55,11 @@ namespace Assets.SharedExperience.Scripts.UI
             Debug.Log("Toggle sharing");
         }
 
-
-
-
+        private bool isDebugWindowActive = false;
+        public void ToggleDebugWindow()
+        {
+            isDebugWindowActive = !isDebugWindowActive;
+            DebugWindow.SetActive(isDebugWindowActive);
+        }
     }
 }

@@ -22,6 +22,7 @@ public class ScrollingSessionListUIController : SingleInstance<ScrollingSessionL
         networkDiscovery.SessionListChanged += NetworkDiscovery_SessionListChanged;
         networkDiscovery.ConnectionStatusChanged += NetworkDiscovery_ConnectionStatusChanged;
         sessionList = networkDiscovery.remoteSessions;
+        Debug.Log("Number of sessions: " + sessionList.Count().ToString());
         ScrollSessions(0);
     }
 
@@ -57,7 +58,6 @@ public class ScrollingSessionListUIController : SingleInstance<ScrollingSessionL
     {
         int sessionCount = sessionList == null ? 0 : sessionList.Count;
         SessionIndex = Mathf.Clamp(SessionIndex + Direction, 0, Mathf.Max(0,sessionCount - SessionControls.Length));
-        
         for(int index=0;index<SessionControls.Length;index++)
         {
             if (SessionIndex + index < sessionCount)
@@ -72,6 +72,17 @@ public class ScrollingSessionListUIController : SingleInstance<ScrollingSessionL
             }
         }
     }
+
+    public void ClickSession(GameObject sessionButton)
+    {
+        const string SessionPrefix = "Session";
+        int sessionInstanceIndex;
+        if (int.TryParse(sessionButton.name.Substring(SessionPrefix.Length), out sessionInstanceIndex))
+        {
+            SetSelectedSession(sessionList.Values.ElementAt(sessionInstanceIndex));
+        }
+    }
+
 
     public void SetSelectedSession(NetworkDiscoveryWithAnchors.SessionInfo sessionInfo)
     {

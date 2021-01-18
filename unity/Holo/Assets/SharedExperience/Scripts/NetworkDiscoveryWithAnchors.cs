@@ -30,7 +30,6 @@ namespace HoloToolkit.Examples.SharingWithUNET
             get
             {
                 NetworkDiscoveryWithAnchors[] objects = FindObjectsOfType<NetworkDiscoveryWithAnchors>();
-                Debug.Log("List Length: " + objects.Length.ToString());
                 if (objects.Length != 1)
                 {
                     Debug.LogFormat("Expected exactly 1 {0} but found {1}", typeof(NetworkDiscoveryWithAnchors).ToString(), objects.Length);
