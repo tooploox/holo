@@ -201,10 +201,10 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     /* Handle a click on some button inside. Called by ButtonsClickReceiver. */
     public void Click(GameObject clickObject)
     {
-        //  if (SharingSceneData.Singleton.isClient &&
-        //!SharingSceneData.Singleton.isServer) {
-        //      return;
-        //  }
+        if (SharingSceneData.Singleton.isClient && !SharingSceneData.Singleton.isServer) 
+        {
+              return;
+        }
         Debug.Log("ModelWithPlate Click: " + clickObject.name);
 
         switch (clickObject.name)
@@ -884,6 +884,10 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         {
             modelTransform = value;
             HoloUtilities.SetButtonState(ButtonTransform, value);
+            if (value == false)
+            {
+                ClickChangeTransformationState(TransformationState.None);
+            }
             ButtonTranslate.gameObject.SetActive(modelTransform);
             ButtonRotate.gameObject.SetActive(modelTransform);
             ButtonScale.gameObject.SetActive(modelTransform);

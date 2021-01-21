@@ -1,4 +1,4 @@
-﻿// DataFlow shader for Essential Vision ( https://www.essential-vision.org/ ).
+// DataFlow shader for Essential Vision ( https://www.essential-vision.org/ ).
 // For copyright and license see https://github.com/tooploox/holo .
 //
 // Based on Mrtk2 standard shader, original copyright and license:
