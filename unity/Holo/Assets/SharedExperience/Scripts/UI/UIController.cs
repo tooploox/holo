@@ -45,11 +45,6 @@ namespace Assets.SharedExperience.Scripts.UI
             }
         }
 
-        public void ScrollButton(int direction)
-        {
-            scrollingUIControl.ScrollSessions(direction);
-        }
-
         public void ToogleSharing()
         {
             Debug.Log("Toggle sharing");
