@@ -22,10 +22,10 @@ class LocalConfig : ScriptableObject
     #else
         // On PC, rely on Resources/LocalConfig.asset to define bundles path
         LocalConfig instance = Resources.Load<LocalConfig>("LocalConfig");
-        if (instance == null || string.IsNullOrEmpty(instance.GetBundlesDirectory()))
+        if (instance == null || string.IsNullOrEmpty(instance.BundlesDirectory))
         {
             Debug.LogWarning("No \"Assets/Resources/LocalConfig.asset\", or \"BundlesDirectory\" not set. Create LocalConfig.asset from Unity Editor by \"Holo -> Create Local Configuration\"");
-            return;
+            return null;
         }
         return instance.BundlesDirectory;
     #endif
