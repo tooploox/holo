@@ -14,12 +14,20 @@ class LocalConfig : ScriptableObject
     public string BundlesDirectory;
     #pragma warning restore CS0649
 
-    public string GetBundlesDirectory()
+    public static string GetBundlesDirectory()
     {
     #if ENABLE_WINMD_SUPPORT
+        // On Hololens, do not require the Resources/LocalConfig.asset to even exist
         return Application.persistentDataPath;
     #else
-        return BundlesDirectory;
+        // On PC, rely on Resources/LocalConfig.asset to define bundles path
+        LocalConfig instance = Resources.Load<LocalConfig>("LocalConfig");
+        if (instance == null || string.IsNullOrEmpty(instance.GetBundlesDirectory()))
+        {
+            Debug.LogWarning("No \"Assets/Resources/LocalConfig.asset\", or \"BundlesDirectory\" not set. Create LocalConfig.asset from Unity Editor by \"Holo -> Create Local Configuration\"");
+            return;
+        }
+        return instance.BundlesDirectory;
     #endif
     }
 
