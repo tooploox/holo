@@ -43,7 +43,7 @@ Open Unity project from unity/EVPreprocessing.
 
 1. Go to Windows Device Portal of Hololens headset
 2. Go to _**System -> File Explorer**_
-3. Navigate to: _**User Folders \ LocalAppData \ EssentialVision\_1.0.0.0_x86\_\_<hash/crc> \ LocalState**_
+3. Navigate to: _**User Folders \ LocalAppData \ EssentialVision\_1.0.\<version\>.0_\<architecture\>\_\_<hash/crc> \ LocalState**_ (where `<architecture>` is `x86` for Hololens 1, `arm64` for Hololens 2)
 4. Upload Asset Bundle files (**\_bundle** along with **\_bundle.manifet**) in to **LocalState** directory one by one with the *Upload* button (first you need to select file from hard drive, you can drag and drop it as well)
 
 ## Usage
