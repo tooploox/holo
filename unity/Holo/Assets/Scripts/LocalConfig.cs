@@ -8,7 +8,7 @@ using UnityEditor;
 /* Local (not committed to GIT) configuration settings. */
 class LocalConfig : ScriptableObject
 {
-    // Disable warning: this field is never by code, but it set in Unity Editor and (de)serialized
+    // Disable warning: this field is never set by code, but it is set in Unity Editor and (de)serialized
     #pragma warning disable CS0649
     // Directory with asset bundles (on non-Hololens)
     public string BundlesDirectory;
