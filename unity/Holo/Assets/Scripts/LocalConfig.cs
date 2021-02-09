@@ -8,18 +8,26 @@ using UnityEditor;
 /* Local (not committed to GIT) configuration settings. */
 class LocalConfig : ScriptableObject
 {
-    // Disable warning: this field is never by code, but it set in Unity Editor and (de)serialized
+    // Disable warning: this field is never set by code, but it is set in Unity Editor and (de)serialized
     #pragma warning disable CS0649
     // Directory with asset bundles (on non-Hololens)
     public string BundlesDirectory;
     #pragma warning restore CS0649
 
-    public string GetBundlesDirectory()
+    public static string GetBundlesDirectory()
     {
     #if ENABLE_WINMD_SUPPORT
+        // On Hololens, do not require the Resources/LocalConfig.asset to even exist
         return Application.persistentDataPath;
     #else
-        return BundlesDirectory;
+        // On PC, rely on Resources/LocalConfig.asset to define bundles path
+        LocalConfig instance = Resources.Load<LocalConfig>("LocalConfig");
+        if (instance == null || string.IsNullOrEmpty(instance.BundlesDirectory))
+        {
+            Debug.LogWarning("No \"Assets/Resources/LocalConfig.asset\", or \"BundlesDirectory\" not set. Create LocalConfig.asset from Unity Editor by \"Holo -> Create Local Configuration\"");
+            return null;
+        }
+        return instance.BundlesDirectory;
     #endif
     }
 
