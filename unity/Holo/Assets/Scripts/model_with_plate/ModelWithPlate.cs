@@ -30,6 +30,8 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public PressableButtonHoloLens2 ButtonScale;
     public PressableButtonHoloLens2 ButtonAnimationSubmenu;
     public PressableButtonHoloLens2 ButtonTransparency;
+    public PressableButtonHoloLens2 ButtonPlateRotation;
+    public GameObject PlateButtonCollection;
     public GameObject ButtonLayerTemplate;
     public Texture2D ButtonIconPlay;
     public Texture2D ButtonIconPause;
@@ -223,6 +225,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             case "ButtonClipping": ClickClipping(); break;
             case "ButtonAnimationSpeed": ClickAnimationSpeed(); break;
             case "ButtonTransparency": ClickTransparency(); break;
+            case "ButtonPlateRotation": ClickPlateRotation(); break;
 
 
             default:
@@ -235,7 +238,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
                     {
                         const string addPrefix = "Add";
                         int addInstanceIndex;
-                        if (clickObject.name.StartsWith(addPrefix) &&
+                        if (clickObject.name.StartsWith(addPrefix) && !PlateRotation &&
                             int.TryParse(clickObject.name.Substring(addPrefix.Length), out addInstanceIndex))
                         {
                             ClickAdd(ModelsCollection.Singleton.BundleName(addInstanceIndex));
@@ -326,6 +329,12 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     private void ClickTransparency()
     {
         Transparent = !Transparent;
+    }
+
+    private void ClickPlateRotation()
+    {
+        CloseSubmenus();
+        PlateRotation = !PlateRotation;
     }
 
     /* Load new model or unload.
@@ -868,6 +877,16 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         }
     }
 
+    private bool plateRotation = false;
+    public bool PlateRotation{
+        get { return plateRotation; }
+        set
+        {
+            plateRotation = value;
+            HoloUtilities.SetButtonState(ButtonPlateRotation, value);
+            PlateButtonCollection.GetComponent<ObjectManipulator>().enabled = value;
+        }
+    }
 
     private void CloseSubmenus()
     {

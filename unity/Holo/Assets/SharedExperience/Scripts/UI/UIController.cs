@@ -26,12 +26,14 @@ namespace Assets.SharedExperience.Scripts.UI
         {
             if (networkDiscovery.running)
             {
+                MovePlateToFront();
                 networkDiscovery.StartHosting("SuperRad");
             }
         }
 
         public void JoinSession()
         {
+            MovePlateToFront();
             scrollingUIControl.JoinSelectedSession();
         }
         
@@ -41,6 +43,7 @@ namespace Assets.SharedExperience.Scripts.UI
             gameObject.SetActive(false);
             if (ModelWithPlate != null)
             {
+                MovePlateToFront();
                 ModelWithPlate.SetActive(true);
             }
         }
@@ -55,6 +58,12 @@ namespace Assets.SharedExperience.Scripts.UI
         {
             isDebugWindowActive = !isDebugWindowActive;
             DebugWindow.SetActive(isDebugWindowActive);
+        }
+
+        private void MovePlateToFront()
+        {
+            ModelWithPlate.transform.position = gameObject.transform.position + gameObject.transform.TransformDirection(new Vector3(0, 0, 3f));
+            ModelWithPlate.transform.rotation = gameObject.transform.rotation;
         }
     }
 }

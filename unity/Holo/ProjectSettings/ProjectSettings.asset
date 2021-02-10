@@ -606,7 +606,7 @@ PlayerSettings:
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
   metroPackageName: EssentialVision
-  metroPackageVersion: 1.0.39.0
+  metroPackageVersion: 1.0.41.0
   metroCertificatePath: Assets\WSATestCertificate.pfx
   metroCertificatePassword: 
   metroCertificateSubject: MicroscopeIT

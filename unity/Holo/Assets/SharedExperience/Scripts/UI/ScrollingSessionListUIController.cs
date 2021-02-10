@@ -43,9 +43,9 @@ public class ScrollingSessionListUIController : SingleInstance<ScrollingSessionL
         {
             GameObject CurrentSessionButton = GridObjectCollection.transform.Find("SessionButton" + buttonNumber.ToString()).gameObject;
             CurrentSessionButton.SetActive(true);
-            CurrentSessionButton.transform.Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().text = sessionEntry.Key;
-            
-                if (buttonNumber == 9) break;
+            CurrentSessionButton.transform.Find("Text").transform.Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().text =
+                $"{sessionEntry.Value.SessionName}: {sessionEntry.Key}";
+            if (buttonNumber == 9) break;
             buttonNumber++;
         }
 
