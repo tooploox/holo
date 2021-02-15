@@ -33,18 +33,16 @@ public class ScrollingSessionListUIController : SingleInstance<ScrollingSessionL
 
     private void NetworkDiscovery_SessionListChanged(object sender, EventArgs e)
     {
-        sessionList = networkDiscovery.remoteSessions;
         bool sessionsFound = sessionList.Count > 0;
         SessionSearch.SetActive(!sessionsFound);
         GridObjectCollection.SetActive(sessionsFound);
 
+        List<GameObject> buttonList = GridObjectCollection.GetComponent<ButtonListScript>().ButtonList;
         int buttonNumber = 0;
-        foreach (KeyValuePair<string, NetworkDiscoveryWithAnchors.SessionInfo> sessionEntry in sessionList)
+        foreach (KeyValuePair<string, NetworkDiscoveryWithAnchors.SessionInfo> sessionEntry in networkDiscovery.remoteSessions)
         {
-            GameObject CurrentSessionButton = GridObjectCollection.transform.Find("SessionButton" + buttonNumber.ToString()).gameObject;
-            CurrentSessionButton.SetActive(true);
-            CurrentSessionButton.transform.Find("Text").transform.Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().text =
-                $"{sessionEntry.Value.SessionName}: {sessionEntry.Key}";
+            GameObject CurrentSessionButton = buttonList[buttonNumber];
+            CurrentSessionButton.GetComponent<SessionListButton>().SetSessionInfo(sessionEntry.Value);
             if (buttonNumber == 9) break;
             buttonNumber++;
         }
@@ -54,7 +52,7 @@ public class ScrollingSessionListUIController : SingleInstance<ScrollingSessionL
             for (int i = buttonNumber; i <= 9; i++)
             {
                 GameObject CurrentSessionButton = GridObjectCollection.transform.Find("SessionButton" + i.ToString()).gameObject;
-                CurrentSessionButton.SetActive(false);
+                CurrentSessionButton.GetComponent<SessionListButton>().SetSessionInfo(null);
             }
         }
 
@@ -72,17 +70,6 @@ public class ScrollingSessionListUIController : SingleInstance<ScrollingSessionL
             bc.enabled = Enabled;
         }
     }
-
-    public void ClickSession(GameObject sessionButton)
-    {
-        const string SessionPrefix = "SessionButton";
-        int sessionInstanceIndex;
-        if (int.TryParse(sessionButton.name.Substring(SessionPrefix.Length), out sessionInstanceIndex))
-        {
-            SetSelectedSession(sessionList.Values.ElementAt(sessionInstanceIndex));
-        }
-    }
-
 
     public void SetSelectedSession(NetworkDiscoveryWithAnchors.SessionInfo sessionInfo)
     {

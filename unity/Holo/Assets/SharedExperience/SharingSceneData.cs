@@ -58,7 +58,6 @@ public class SharingSceneData : NetworkBehaviour
         ClipPlaneManager = ModelManager.ModelClipPlane.GetComponent<ModelClippingPlaneControl>();
         ColorMapManager = gameObject.GetComponent<ColorMap>();
         hostInstanceName = ModelManager.InstanceName;
-        Debug.Log("Boink: " + hostInstanceName);
         hostInstanceLayers = ModelManager.InstanceLayers;
         hostPlatePosition = transform.localPosition;
         hostPlateScale = transform.localScale;

@@ -143,7 +143,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         InitializeAddButtons();
 
         // This sets proper state of buttons and components like handDraggable
-        ClickChangeTransformationState(TransformationState.None);
+        ChangeTransformationState(TransformationState.None);
 
         SliderAnimationSpeed.GetComponent<PinchSlider>().OnValueUpdated.AddListener(
             delegate
@@ -219,9 +219,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             case "CancelPreview": ClickCancelPreview(); break;
             case "ButtonLayers": ClickToggleLayersState(clickObject.GetComponent<PressableButtonHoloLens2>()); break;
             case "ButtonTransform": ClickTransform(); break;
-            case "ButtonTranslate": ClickChangeTransformationState(TransformationState.Translate); break;
-            case "ButtonRotate": ClickChangeTransformationState(TransformationState.Rotate); break;
-            case "ButtonScale": ClickChangeTransformationState(TransformationState.Scale); break;
+            case "ButtonTranslate": ChangeTransformationState(TransformationState.Translate); break;
+            case "ButtonRotate": ChangeTransformationState(TransformationState.Rotate); break;
+            case "ButtonScale": ChangeTransformationState(TransformationState.Scale); break;
             case "ButtonClipping": ClickClipping(); break;
             case "ButtonAnimationSpeed": ClickAnimationSpeed(); break;
             case "ButtonTransparency": ClickTransparency(); break;
@@ -487,7 +487,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         }
     }
 
-    public void ClickChangeTransformationState(TransformationState newState)
+    public void ChangeTransformationState(TransformationState newState)
     {
         bool rotationBoxRigActiveOld = transformationState == TransformationState.Rotate;
         bool scaleBoxRigActiveOld = transformationState == TransformationState.Scale;
@@ -591,16 +591,12 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         instanceIsPreview = newIsPreview;
         layersLoaded = new Dictionary<ModelLayer, LayerLoaded>();
 
-        /* Instantiate BoundingBoxRig dynamically, as in the next frame (when BoundingBoxRig.Start is run)
-         * it will assume that bounding box of children is not empty.
-         * So we cannot create BoundingBoxRig (for rotations) earlier.
-         * We also cannot create it later, right before calling Activate, as then BoundingBoxRig.Activate would
-         * happen before BoundingBoxRig.Start.
-         */
         rotationBoxRig = Instantiate<GameObject>(RotationBoxRigTemplate, InstanceParent.transform);
 
         instanceTransformation = new GameObject("InstanceTransformation");
         instanceTransformation.transform.parent = rotationBoxRig.transform;
+
+
        
         Vector3 boundsSize = Vector3.one;
         float scale = 1f;
@@ -613,6 +609,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             }
             instanceTransformation.transform.localScale = new Vector3(scale, scale, scale);
             instanceTransformation.transform.localPosition = -b.center * scale + instanceMove;
+
+            //FIXME: this is a hack on instance not rotating properly if we move plate
+            instanceTransformation.transform.localRotation = new Quaternion(0f, 0f, 0f, 0f);
         }
 
         // set proper BoxCollider bounds
@@ -648,12 +647,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
                 continue;
             }
             button.GetComponent<ButtonConfigHelper>().MainLabelText = layer.Caption;
-
-
             button.GetComponent<Interactable>().OnClick.AddListener(() => Click(buttonGameObject));
-            //// extend ButtonsClickReceiver.interactables
-            //ButtonsClickReceiver clickReceiver = GetComponent<ButtonsClickReceiver>();
-            //clickReceiver.AddInteractable(button.GetComponent<Interactable>());
 
             // update layersButtons dictionary
             layersButtons[layer] = button;
@@ -905,7 +899,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             HoloUtilities.SetButtonState(ButtonTransform, value);
             if (value == false)
             {
-                ClickChangeTransformationState(TransformationState.None);
+                ChangeTransformationState(TransformationState.None);
             }
             ButtonTranslate.gameObject.SetActive(modelTransform);
             ButtonRotate.gameObject.SetActive(modelTransform);

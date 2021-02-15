@@ -1,9 +1,4 @@
 ﻿using HoloToolkit.Examples.SharingWithUNET;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Assets.SharedExperience.Scripts.UI
@@ -28,6 +23,7 @@ namespace Assets.SharedExperience.Scripts.UI
             {
                 MovePlateToFront();
                 networkDiscovery.StartHosting("SuperRad");
+                gameObject.SetActive(false);
             }
         }
 
@@ -35,6 +31,7 @@ namespace Assets.SharedExperience.Scripts.UI
         {
             MovePlateToFront();
             scrollingUIControl.JoinSelectedSession();
+            gameObject.SetActive(false);
         }
         
         public void OfflineMode()
@@ -45,6 +42,7 @@ namespace Assets.SharedExperience.Scripts.UI
             {
                 MovePlateToFront();
                 ModelWithPlate.SetActive(true);
+                gameObject.SetActive(false);
             }
         }
 

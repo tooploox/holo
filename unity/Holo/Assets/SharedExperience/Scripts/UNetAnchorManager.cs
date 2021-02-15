@@ -300,23 +300,25 @@ namespace HoloToolkit.Examples.SharingWithUNET
             {
                 exportingAnchorName = PlayerPrefs.GetString(SavedAnchorKey);
                 Debug.Log("found " + AnchorName + " again");
-                
             }
             else
             {
                 exportingAnchorName = Guid.NewGuid().ToString();
             }
-            
+
             WorldAnchorTransferBatch watb = new WorldAnchorTransferBatch();
             WorldAnchor worldAnchor = objectToAnchor.GetComponent<WorldAnchor>();
             if (worldAnchor == null)
             {
+                Debug.Log("Boink 11");
                 string name = gameObject.GetComponent<WorldAnchorManager>().AttachAnchor(objectToAnchor, exportingAnchorName);
+                Debug.Log("Boink 12");
                 Debug.Log("Added anchor: " + name);
 
             }
             else
             {
+                Debug.Log("Boink 13");
                 if (worldAnchor.name != null)
                 {
                     Debug.Log("Updating anchor: " + worldAnchor.name);
@@ -325,7 +327,9 @@ namespace HoloToolkit.Examples.SharingWithUNET
 
             Debug.Log("exporting " + exportingAnchorName);
             watb.AddWorldAnchor(exportingAnchorName, worldAnchor);
+            Debug.Log("Boink 16");
             WorldAnchorTransferBatch.ExportAsync(watb, WriteBuffer, ExportComplete);
+            Debug.Log("Boink 17");
         }
 
         /// <summary>

@@ -66,6 +66,7 @@ public class ColorMap : MonoBehaviour, IClickHandler
 
     private void ClickSetColorMap(string colorMapName, GameObject currentButton)
     {
+        Debug.Log($"Boink1: {colorMapName}");
         MapName = colorMapName;
         foreach (GameObject button in colorMapButtons.Keys) {
             HoloUtilities.SetButtonStateText(button.GetComponent<PressableButtonHoloLens2>(), currentButton == button);
