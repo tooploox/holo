@@ -33265,6 +33265,7 @@ MonoBehaviour:
   RotationBoxRigTemplate: {fileID: 2104341562774896234, guid: f9a982f2e1821a7489200706ab8903e2,
     type: 3}
   AddButtonsCollection: {fileID: 2092623789}
+  ColorMap: {fileID: 2089537079}
   ModelClipPlane: {fileID: 1935332895}
 --- !u!114 &2089537078
 MonoBehaviour:

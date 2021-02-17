@@ -38,6 +38,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     // Drop here "Prefabs/ModelWithPlateRotationRig"
     public GameObject RotationBoxRigTemplate;
     public GameObject AddButtonsCollection;
+    public ColorMap ColorMap;
 
     private float SliderSpeedFactor = 5.0f;
 
@@ -54,21 +55,12 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
     private ModelClippingPlaneControl ModelClipPlaneCtrl;
 
-    private class LayerLoaded
-    {
-        // Instance on scene.
-        public GameObject Instance;
-        // Shortcut for Instance.GetComponent<BlendShapeAnimation>().
-        // May be null for layers not animated using BlendShapeAnimation.
-        public BlendShapeAnimation Animation;
-    }
-
     public bool InstanceLoaded { get; private set; } = false;
     /* All the variables below are non-null
      * only when instanceLoaded,
      * that is only after LoadInstance call (and before UnloadInstance). */
     private AssetBundleLoader instanceBundle;
-    private Dictionary<ModelLayer, LayerLoaded> layersLoaded;
+    private LayersLoaded layersLoaded;
     private Dictionary<ModelLayer, PressableButtonHoloLens2> layersButtons;
     private GameObject instanceTransformation;
     private bool instanceIsPreview = false;
@@ -442,6 +434,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
                 Destroy(l.Instance);
             }
             layersLoaded = null;
+            ColorMap.LayersLoaded = null;
         }
 
         if (layersButtons != null) {
@@ -589,7 +582,8 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             instanceBundle.LoadVolumetricData();
         }
         instanceIsPreview = newIsPreview;
-        layersLoaded = new Dictionary<ModelLayer, LayerLoaded>();
+        layersLoaded = new LayersLoaded();
+        ColorMap.LayersLoaded = layersLoaded;
 
         rotationBoxRig = Instantiate<GameObject>(RotationBoxRigTemplate, InstanceParent.transform);
 

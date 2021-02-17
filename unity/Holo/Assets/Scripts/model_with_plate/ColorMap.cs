@@ -10,6 +10,9 @@ public class ColorMap : MonoBehaviour, IClickHandler
     public Material DataVisualizationMaterial;
     public List<GameObject> ColorButtons;
 
+    // must be set if there's a model currently loaded
+    public LayersLoaded LayersLoaded;
+
     // Map from button instance to the corresponding colormap name (texture name)
     private Dictionary<GameObject, string> colorMapButtons;
 
@@ -84,10 +87,24 @@ public class ColorMap : MonoBehaviour, IClickHandler
         }
         set
         {
-            if (mapName != value) { 
+            if (mapName != value) {
                 mapName = value;
                 Texture2D colorMapTexture = Resources.Load<Texture2D>("Colormaps/" + value);
                 DataVisualizationMaterial.SetTexture("_ColorMap", colorMapTexture);
+
+                /* Change also current instances of materials, because
+                   MaterialInstance.cs from Mrtk (required by ClippingPlane of Mrtk)
+                   changes shared materials into non-shared. */
+                if (LayersLoaded != null) {
+                    foreach (var layerPair in LayersLoaded)
+                    {
+                        if (layerPair.Key.Simulation) {
+                            foreach (var renderer in layerPair.Value.Instance.GetComponentsInChildren<Renderer>()) {
+                                renderer.material.SetTexture("_ColorMap", colorMapTexture);
+                            }
+                        }
+                    }
+                }
             }
         }
     }
