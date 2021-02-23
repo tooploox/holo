@@ -76,11 +76,16 @@ public class ScrollingSessionListUIController : SingleInstance<ScrollingSessionL
         SelectedSession = sessionInfo;
     }
 
-    public void JoinSelectedSession()
+    public bool JoinSelectedSession()
     {
         if (SelectedSession != null && networkDiscovery.running)
         {
             networkDiscovery.JoinSession(SelectedSession);
+            return true;
+        }
+        else
+        {
+            return false;
         }
     }
 }

@@ -19,8 +19,14 @@ public class SharingSceneData : NetworkBehaviour
     [SyncVar(hook = "OnChangeHostPlateScale")]
     Vector3 hostPlateScale;
 
+    [SyncVar(hook = "OnChangeHostModelPosition")]
+    Vector3 hostModelPosition;
+
     [SyncVar(hook = "OnChangeHostModelRotation")]
     Quaternion hostModelRotation;
+
+    [SyncVar(hook = "OnChangeHostModelScale")]
+    Vector3 hostModelScale;
 
     [SyncVar(hook = "OnChangeHostClippingPlaneActive")]
     bool hostClippingPlaneActive;
@@ -64,6 +70,7 @@ public class SharingSceneData : NetworkBehaviour
 
         hostClippingPlaneActive = ClipPlaneManager.ClippingPlaneState != ModelClippingPlaneControl.ClipPlaneState.Disabled;
         hostClippingPlanePosition = ModelManager.ModelClipPlane.transform.localPosition;
+        hostClippingPlaneRotation = ModelManager.ModelClipPlane.transform.localRotation;
         hostColorMap = ColorMapManager.MapName;
         singleton = this;
 
@@ -88,7 +95,9 @@ public class SharingSceneData : NetworkBehaviour
             hostInstanceLayers = ModelManager.InstanceLayers;
             if (!string.IsNullOrEmpty(ModelManager.InstanceName))
             {
+                hostModelPosition = ModelManager.ModelPosition;
                 hostModelRotation = ModelManager.ModelRotation;
+                hostModelScale = ModelManager.ModelScale;
                 hostClippingPlanePosition = ModelManager.ModelClipPlane.transform.localPosition;
                 hostClippingPlaneRotation = ModelManager.ModelClipPlane.transform.localRotation;
                 hostColorMap = ColorMapManager.MapName;
@@ -136,7 +145,15 @@ public class SharingSceneData : NetworkBehaviour
             ModelManager.InstanceLayers = hostInstanceLayersChange;
         }
     }
-    
+
+    void OnChangeHostModelPosition(Vector3 hostModelPositionChange)
+    {
+        if (!isServer && !string.IsNullOrEmpty(hostInstanceName))
+        {
+            ModelManager.ModelPosition = hostModelPositionChange;
+        }
+    }
+
     void OnChangeHostModelRotation(Quaternion hostModelRotationChange) 
     {
         if (!isServer && !string.IsNullOrEmpty(hostInstanceName))
@@ -144,7 +161,15 @@ public class SharingSceneData : NetworkBehaviour
             ModelManager.ModelRotation = hostModelRotationChange;
         }
     }
-
+    
+    void OnChangeHostModelScale(Vector3 hostModelScaleChange)
+    {
+        if (!isServer && !string.IsNullOrEmpty(hostInstanceName))
+        {
+            ModelManager.ModelScale = hostModelScaleChange;
+        }
+    }
+    
     void OnChangeHostClippingPlaneActive(bool hostClippingPlaneActiveChange) 
     {
         if (!isServer && !string.IsNullOrEmpty(hostInstanceName))

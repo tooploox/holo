@@ -29,9 +29,8 @@ namespace Assets.SharedExperience.Scripts.UI
 
         public void JoinSession()
         {
-            MovePlateToFront();
-            scrollingUIControl.JoinSelectedSession();
-            gameObject.SetActive(false);
+            bool connected = scrollingUIControl.JoinSelectedSession();
+            gameObject.SetActive(!connected);
         }
         
         public void OfflineMode()

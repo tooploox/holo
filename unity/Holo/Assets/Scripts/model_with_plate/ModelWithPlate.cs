@@ -77,6 +77,22 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         }
     }
 
+    public Vector3 ModelPosition
+    {
+        get
+        {
+            return rotationBoxRig != null ? rotationBoxRig.transform.localPosition : Vector3.one;
+        }
+        set
+        {
+            if (rotationBoxRig != null)
+            {
+                rotationBoxRig.transform.localPosition = value;
+            }
+            // TODO: otherwise ignore, we do not synchronize position for unloaded models now
+        }
+    }
+
     public Quaternion ModelRotation
     {
         get {
@@ -87,6 +103,22 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
                 rotationBoxRig.transform.localRotation = value;
             }
             // TODO: otherwise ignore, we do not synchronize rotation for unloaded models now
+        }
+    }
+
+    public Vector3 ModelScale
+    {
+        get
+        {
+            return rotationBoxRig != null ? rotationBoxRig.transform.localScale : Vector3.one;
+        }
+        set
+        {
+            if (rotationBoxRig != null)
+            {
+                rotationBoxRig.transform.localScale = value;
+            }
+            // TODO: otherwise ignore, we do not synchronize scale for unloaded models now
         }
     }
 
@@ -234,6 +266,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
                             int.TryParse(clickObject.name.Substring(addPrefix.Length), out addInstanceIndex))
                         {
                             ClickAdd(ModelsCollection.Singleton.BundleName(addInstanceIndex));
+                            CloseSubmenus();
                         }
                     }
                     break;
