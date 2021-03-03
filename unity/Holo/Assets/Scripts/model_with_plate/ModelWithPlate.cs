@@ -1,6 +1,7 @@
 ﻿using Microsoft.MixedReality.Toolkit.UI;
 using Microsoft.MixedReality.Toolkit.UI.BoundsControl;
 using Microsoft.MixedReality.Toolkit.Utilities;
+using Microsoft.MixedReality.Toolkit.Experimental.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -64,6 +65,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     private Dictionary<ModelLayer, PressableButtonHoloLens2> layersButtons;
     private GameObject instanceTransformation;
     private bool instanceIsPreview = false;
+    private DirectionalIndicator directionalIndicator;
 
     // Created only when instance != null, as it initializes bbox in Start and assumes it's not empty
     private GameObject rotationBoxRig;
@@ -155,6 +157,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         GetComponent<ObjectManipulator>().enabled = false;
 
         ModelClipPlaneCtrl = ModelClipPlane.GetComponentInChildren<ModelClippingPlaneControl>();
+        directionalIndicator = gameObject.GetComponentInChildren<DirectionalIndicator>();
         // Turn off the clipping plane on start
         DefaultModelMaterial.DisableKeyword("CLIPPING_ON");
         DefaultModelTransparentMaterial.DisableKeyword("CLIPPING_ON");
@@ -224,7 +227,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         }
     }
 
-    /* Handle a click on some button inside. Called by ButtonsClickReceiver. */
+     /* Handle a click on some button inside. Called by ButtonsClickReceiver. */
     public void Click(GameObject clickObject)
     {
         if (SharingSceneData.Singleton.isClient && !SharingSceneData.Singleton.isServer) 
@@ -490,6 +493,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         }
 
         InstanceLoaded = false;
+        directionalIndicator.DirectionalTarget = InstanceParent;
     }
 
     /* Resulting instance will be in box of max size instanceMaxSize,
@@ -679,6 +683,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             // update layersButtons dictionary
             layersButtons[layer] = button;
         }
+        directionalIndicator.DirectionalTarget = instanceTransformation.transform;
     }
 
     private void LoadInitialLayers()

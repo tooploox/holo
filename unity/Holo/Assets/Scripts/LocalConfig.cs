@@ -5,6 +5,10 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
+#if ENABLE_WINMD_SUPPORT
+using Windows.Storage;
+#endif
+
 /* Local (not committed to GIT) configuration settings. */
 class LocalConfig : ScriptableObject
 {
@@ -12,14 +16,14 @@ class LocalConfig : ScriptableObject
     #pragma warning disable CS0649
     // Directory with asset bundles (on non-Hololens)
     public string BundlesDirectory;
-    #pragma warning restore CS0649
+#pragma warning restore CS0649
 
     public static string GetBundlesDirectory()
     {
-    #if ENABLE_WINMD_SUPPORT
+#if ENABLE_WINMD_SUPPORT
         // On Hololens, do not require the Resources/LocalConfig.asset to even exist
-        return Application.persistentDataPath;
-    #else
+        return KnownFolders.Objects3D.Path;
+#else
         // On PC, rely on Resources/LocalConfig.asset to define bundles path
         LocalConfig instance = Resources.Load<LocalConfig>("LocalConfig");
         if (instance == null || string.IsNullOrEmpty(instance.BundlesDirectory))
@@ -28,7 +32,7 @@ class LocalConfig : ScriptableObject
             return null;
         }
         return instance.BundlesDirectory;
-    #endif
+#endif
     }
 
 #if UNITY_EDITOR

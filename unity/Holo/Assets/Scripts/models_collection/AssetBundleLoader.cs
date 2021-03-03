@@ -54,10 +54,18 @@ public class AssetBundleLoader
             return;
         }
 
-        assetBundle = AssetBundle.LoadFromFile(bundlePath);
+        /* We use LoadFromMemory as there is some bug in AssetBundle class preventing 
+         * from using LoadFromFile when using path from KnownFolders.Objects3D.Path 
+         * on target device */
+        assetBundle = AssetBundle.LoadFromMemory(File.ReadAllBytes(bundlePath));
+
         if (assetBundle == null)
         {
             throw new Exception("Failed to load AssetBundle from " + bundlePath);
+        }
+        else
+        {
+            Debug.Log("Asset Bundle " + bundlePath + " loaded!");
         }
         LoadIcon();
         LoadState = LoadState.Metadata;
