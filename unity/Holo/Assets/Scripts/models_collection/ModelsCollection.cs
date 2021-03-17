@@ -33,14 +33,8 @@ public class ModelsCollection : MonoBehaviour
         bundlesFiles = new string[] { };
         bundles = new AssetBundleLoader[] { };
 
-        LocalConfig localConfig = Resources.Load<LocalConfig>("LocalConfig");
-        if (localConfig == null || string.IsNullOrEmpty(localConfig.GetBundlesDirectory()))
-        {
-            Debug.LogWarning("No \"Assets/Resources/LocalConfig.asset\", or \"BundlesDirectory\" not set. Create LocalConfig.asset from Unity Editor by \"Holo -> Create Local Configuration\"");
-            return;
-        }
+        string dir = LocalConfig.GetBundlesDirectory();
 
-        string dir = localConfig.GetBundlesDirectory();
         try {
             bundlesFiles = Directory.GetFiles(dir, "*" + bundleFileSuffix);
         } catch (Exception e) {
@@ -48,7 +42,7 @@ public class ModelsCollection : MonoBehaviour
             return;
         }
         if (bundlesFiles.Length == 0) {
-            Debug.LogWarning("No asset bundles found in directory \"" + dir + "\". Make sure to set correct BundlesDirectory in LocalConfig in Assets/Resources/LocalConfig.asset.");
+            Debug.LogWarning("No asset bundles found in directory \"" + dir + "\". On PC, make sure to set correct BundlesDirectory in LocalConfig in Assets/Resources/LocalConfig.asset. On Hololens, make sure to upload the bundles using the device portal.");
             return;
         }
 

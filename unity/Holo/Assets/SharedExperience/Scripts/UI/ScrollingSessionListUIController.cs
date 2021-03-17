@@ -1,34 +1,29 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
 using System;
 using System.Linq;
+using TMPro;
+using UnityEngine;
 using HoloToolkit.Examples.SharingWithUNET;
-using HoloToolkit.Unity;
 
 public class ScrollingSessionListUIController : SingleInstance<ScrollingSessionListUIController>
 {
     NetworkDiscoveryWithAnchors networkDiscovery;
     //CurrentSessionManager 
     Dictionary<string, NetworkDiscoveryWithAnchors.SessionInfo> sessionList;
-    int SessionIndex = 0;
 
-    public SessionListButton[] SessionControls;
+    public GameObject SessionSearch;
+    public GameObject GridObjectCollection;
+
     public NetworkDiscoveryWithAnchors.SessionInfo SelectedSession { get; private set; }
 
     // Use this for initialization
     void Start()
     {
-        if (UnityEngine.XR.WSA.HolographicSettings.IsDisplayOpaque == true)
-        {
-            gameObject.GetComponent<SimpleTagalong>().TagalongDistance = 1;
-        }
-
         networkDiscovery = NetworkDiscoveryWithAnchors.Instance;
         networkDiscovery.SessionListChanged += NetworkDiscovery_SessionListChanged;
         networkDiscovery.ConnectionStatusChanged += NetworkDiscovery_ConnectionStatusChanged;
         sessionList = networkDiscovery.remoteSessions;
-        ScrollSessions(0);
+        Debug.Log("Number of sessions: " + sessionList.Count().ToString());
     }
 
     private void NetworkDiscovery_ConnectionStatusChanged(object sender, EventArgs e)
@@ -38,12 +33,29 @@ public class ScrollingSessionListUIController : SingleInstance<ScrollingSessionL
 
     private void NetworkDiscovery_SessionListChanged(object sender, EventArgs e)
     {
-        sessionList = networkDiscovery.remoteSessions;
-        // note that this looks off by one, but we're going to repurpose the last index to be the 
-        // new session door, so it's okay. :)
-        SessionIndex = Mathf.Min(SessionIndex, sessionList.Count);
+        bool sessionsFound = sessionList.Count > 0;
+        SessionSearch.SetActive(!sessionsFound);
+        GridObjectCollection.SetActive(sessionsFound);
 
-        ScrollSessions(0);
+        List<GameObject> buttonList = GridObjectCollection.GetComponent<ButtonListScript>().ButtonList;
+        int buttonNumber = 0;
+        foreach (KeyValuePair<string, NetworkDiscoveryWithAnchors.SessionInfo> sessionEntry in networkDiscovery.remoteSessions)
+        {
+            GameObject CurrentSessionButton = buttonList[buttonNumber];
+            CurrentSessionButton.GetComponent<SessionListButton>().SetSessionInfo(sessionEntry.Value);
+            if (buttonNumber == 9) break;
+            buttonNumber++;
+        }
+
+        if (buttonNumber < 9)
+        {
+            for (int i = buttonNumber; i <= 9; i++)
+            {
+                GameObject CurrentSessionButton = GridObjectCollection.transform.Find("SessionButton" + i.ToString()).gameObject;
+                CurrentSessionButton.GetComponent<SessionListButton>().SetSessionInfo(null);
+            }
+        }
+
     }
 
     void SetChildren(bool Enabled)
@@ -59,37 +71,21 @@ public class ScrollingSessionListUIController : SingleInstance<ScrollingSessionL
         }
     }
 
-    public void ScrollSessions(int Direction)
-    {
-        int sessionCount = sessionList == null ? 0 : sessionList.Count;
-        SessionIndex = Mathf.Clamp(SessionIndex + Direction, 0, Mathf.Max(0,sessionCount - SessionControls.Length));
-        
-        for(int index=0;index<SessionControls.Length;index++)
-        {
-            if (SessionIndex + index < sessionCount)
-            {
-                SessionControls[index].gameObject.SetActive(true);
-                NetworkDiscoveryWithAnchors.SessionInfo sessionInfo = sessionList.Values.ElementAt(SessionIndex + index);
-                SessionControls[index].SetSessionInfo(sessionInfo);
-            }
-            else
-            {
-                SessionControls[index].gameObject.SetActive(false);
-            }
-        }
-    }
-
     public void SetSelectedSession(NetworkDiscoveryWithAnchors.SessionInfo sessionInfo)
     {
         SelectedSession = sessionInfo;
-        ScrollSessions(0);
     }
 
-    public void JoinSelectedSession()
+    public bool JoinSelectedSession()
     {
         if (SelectedSession != null && networkDiscovery.running)
         {
             networkDiscovery.JoinSession(SelectedSession);
+            return true;
+        }
+        else
+        {
+            return false;
         }
     }
 }

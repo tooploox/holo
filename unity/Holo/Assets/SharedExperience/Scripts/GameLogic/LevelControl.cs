@@ -1,14 +1,12 @@
 ﻿//#define LINE_REND 
 // LINE_REND is for debugging the gaze ray.
 
-using System.Collections;
+using System;
 using System.Collections.Generic;
+using Microsoft.MixedReality.Toolkit.Input;
 using UnityEngine;
 using UnityEngine.Networking;
-using HoloToolkit.Examples.SharingWithUNET;
-using HoloToolkit.Unity.InputModule;
-using System;
-using HoloToolkit.Unity;
+
 
 /// <summary>
 /// This script has the primary game state logic for the Shared Mixed Reality 250 app.
@@ -139,7 +137,6 @@ public class LevelControl : NetworkBehaviour
     /// <summary>
     /// Script which allows us to move the camera position independently from the HMD
     /// </summary>
-    MixedRealityTeleport warper;
 
     /// <summary>
     /// When immersed we have some invisible colliders to prevent users from walking off the edges.
@@ -218,14 +215,6 @@ public class LevelControl : NetworkBehaviour
     LineRenderer lineRend;
 #endif
 
-    public void LevelLocalTransformChanging(Vector3 old, Vector3 updated)
-    {
-        if (warper != null)
-        {
-            warper.SetWorldPosition(warper.transform.position + (updated - old) + Camera.main.transform.localPosition);
-        }
-    }
-
     void Start()
     {
 #if LINE_REND
@@ -235,8 +224,6 @@ public class LevelControl : NetworkBehaviour
         Vector3[] points = new Vector3[] { Vector3.zero, Vector3.one };
         lineRend.SetPositions(points);
 #endif
-
-        warper = MixedRealityTeleport.Instance;
         startScale = transform.localScale;
         SafetyColliders.SetActive(false);
         Debug.LogFormat("{0} {1}", gameObject.name, this.netId);
@@ -251,7 +238,7 @@ public class LevelControl : NetworkBehaviour
         if (Immersed)
         {
             // Calculate the remote gaze vectors for other players
-            DrawRemoteGaze();
+            //DrawRemoteGaze();
 
             // calculate the rotation from our model rotation to our player rotation
             Quaternion rotToSend = Quaternion.Inverse(ParentObject.transform.rotation);
@@ -351,6 +338,7 @@ public class LevelControl : NetworkBehaviour
     /// <summary>
     /// Calculates where a remote users's gaze cursor should be when a user is immersed 
     /// </summary>
+    /* FIXME
     void DrawRemoteGaze()
     {
         foreach (KeyValuePair<string, LevelPlayerStateData> players in systemIdToPlayerState)
@@ -363,10 +351,10 @@ public class LevelControl : NetworkBehaviour
                 // need to cast a ray from this transform's pov in our scaled up space.
                 // 
                 Transform remotePlayerTransform = players.Value.FullAvatar.transform;
-                GazeStabilizer gazeStab = players.Value.GazeIndicator.GetComponent<GazeStabilizer>();
+                GazeProvider gazeStab = players.Value.GazeIndicator.GetComponent<GazeProvider>();
                 if (gazeStab == null)
                 {
-                    gazeStab = players.Value.GazeIndicator.AddComponent<GazeStabilizer>();
+                    gazeStab = players.Value.GazeIndicator.AddComponent<GazeProvider>();
                 }
                 gazeStab.UpdateStability(remotePlayerTransform.position, remotePlayerTransform.rotation);
 
@@ -402,7 +390,7 @@ public class LevelControl : NetworkBehaviour
             }
         }
     }
-
+    */
     /// <summary>
     /// Sets up the proper avatars for each remote player based on the local
     /// player's path index and the remote player's path index.

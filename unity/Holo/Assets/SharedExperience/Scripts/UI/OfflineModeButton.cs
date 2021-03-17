@@ -1,22 +1,35 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using HoloToolkit.Unity.InputModule;
+﻿using Microsoft.MixedReality.Toolkit.Input;
 using UnityEngine;
-using HoloToolkit.Examples.SharingWithUNET;
 
-public class OfflineModeButton : MonoBehaviour, IInputClickHandler
+public class OfflineModeButton : MonoBehaviour, IMixedRealityPointerHandler
 {
     public GameObject ActivateOnStart;
     public GameObject DeactivateOnStart;
 
-    public void OnInputClicked(InputClickedEventData eventData)
+    public void OnPointerClicked(MixedRealityPointerEventData eventData)
     {
-        if (DeactivateOnStart != null) {
+        if (DeactivateOnStart != null)
+        {
             DeactivateOnStart.SetActive(false);
         }
-        if (ActivateOnStart != null) {
+        if (ActivateOnStart != null)
+        {
             ActivateOnStart.SetActive(true);
         }
+    }
+
+    public void OnPointerDown(MixedRealityPointerEventData eventData)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void OnPointerDragged(MixedRealityPointerEventData eventData)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void OnPointerUp(MixedRealityPointerEventData eventData)
+    {
+        throw new System.NotImplementedException();
     }
 }

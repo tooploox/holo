@@ -1,11 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using HoloToolkit.Unity.InputModule;
-using System;
+﻿using UnityEngine;
+using Microsoft.MixedReality.Toolkit.Input;
 using HoloToolkit.Examples.SharingWithUNET;
 
-public class JoinSelectedSessionButton : MonoBehaviour, IInputClickHandler
+public class JoinSelectedSessionButton : MonoBehaviour, IMixedRealityPointerHandler
 {
     TextMesh textMesh;
     Material textMaterial;
@@ -42,11 +39,26 @@ public class JoinSelectedSessionButton : MonoBehaviour, IInputClickHandler
         }
     }
 
-    public void OnInputClicked(InputClickedEventData eventData)
+    public void OnPointerClicked(MixedRealityPointerEventData eventData)
     {
         ScrollingSessionListUIController.Instance.JoinSelectedSession();
 
         //disable side menu
 
+    }
+
+    public void OnPointerDown(MixedRealityPointerEventData eventData)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void OnPointerDragged(MixedRealityPointerEventData eventData)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void OnPointerUp(MixedRealityPointerEventData eventData)
+    {
+        throw new System.NotImplementedException();
     }
 }

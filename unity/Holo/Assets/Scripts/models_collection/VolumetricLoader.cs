@@ -61,8 +61,6 @@ public class VolumetricLoader : MonoBehaviour
         SetSizes();
         if (File.Exists(filePath))
         {
-            LocalConfig localConfig = Resources.Load<LocalConfig>("LocalConfig");
-            string dir = localConfig.GetBundlesDirectory();
             Debug.Log("Going to load micro data [size: " + size * 2 + "] from: " + filePath);
             var s = new FileStream(filePath, FileMode.Open);
             BinaryReader br = new BinaryReader(s);

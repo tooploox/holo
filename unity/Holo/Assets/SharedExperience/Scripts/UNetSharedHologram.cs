@@ -1,14 +1,11 @@
-﻿using HoloToolkit.Unity.InputModule;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
 using UnityEngine.Networking;
-using System;
+using Microsoft.MixedReality.Toolkit.Input;
 using HoloToolkit.Examples.SharingWithUNET;
-using HoloToolkit.Unity.SpatialMapping;
 
 #pragma warning disable CS0618 // using deprecated Unity stuff (TODO: upgrade in Holo project in the future)
-public class UNetSharedHologram : NetworkBehaviour, IInputClickHandler
+public class UNetSharedHologram : NetworkBehaviour, IMixedRealityPointerHandler
 #pragma warning restore CS0618 // using deprecated Unity stuff (TODO: upgrade in Holo project in the future)
 {
 
@@ -23,10 +20,12 @@ public class UNetSharedHologram : NetworkBehaviour, IInputClickHandler
     void xformchange(Vector3 update)
     {
         Debug.Log(localPosition+" xform change "+update);
+        /* FIXME Mixed reality
         if (isOpaque)
         {
            LevelControl.Instance.LevelLocalTransformChanging(localPosition, update);
         }
+        */
         localPosition = update;
         
     }
@@ -57,7 +56,6 @@ public class UNetSharedHologram : NetworkBehaviour, IInputClickHandler
 
     bool Moving = false;
     int layerMask;
-    InputManager inputManager;
     public Vector3 movementOffset = Vector3.zero;
     bool isOpaque;
     
@@ -71,22 +69,10 @@ public class UNetSharedHologram : NetworkBehaviour, IInputClickHandler
             localPosition = transform.localPosition;
             localRotation = transform.localRotation;
         }
-
-        if (SpatialMappingManager.Instance != null)
-        {
-            layerMask = SpatialMappingManager.Instance.LayerMask;
-        } else
-        {
-            Debug.LogWarning("SpatialMappingManager.Instance is null at UNetSharedHologram.Start");
-            layerMask = (1 << /*PhysicsLayer*/31);
-        }
-        
-        inputManager = InputManager.Instance;
-        
     }
-	
-	// Update is called once per frame
-	void Update () {
+
+    // Update is called once per frame
+    void Update () {
        
         if (Moving)
         {
@@ -119,28 +105,13 @@ public class UNetSharedHologram : NetworkBehaviour, IInputClickHandler
         return retval;
     }
 
-    public void OnInputClicked(InputClickedEventData eventData)
+    public void OnPointerClicked(MixedRealityPointerEventData eventData)
     {
         if (isOpaque == false)
         {
             Moving = !Moving;
-            if (Moving)
+            if (!Moving)
             {
-                inputManager.AddGlobalListener(this.gameObject);
-               
-                if (SpatialMappingManager.Instance != null)
-                {
-                    SpatialMappingManager.Instance.DrawVisualMeshes = true;
-                }
-            }
-            else
-            {
-                inputManager.RemoveGlobalListener(this.gameObject);
-               
-                if (SpatialMappingManager.Instance != null)
-                {
-                    SpatialMappingManager.Instance.DrawVisualMeshes = false;
-                }
 
                 // Depending on if you are host or client, either setting the SyncVar (host) 
                 // or calling the Cmd (client) will update the other users in the session.
@@ -152,9 +123,23 @@ public class UNetSharedHologram : NetworkBehaviour, IInputClickHandler
                     HoloToolkit.Examples.SharingWithUNET.PlayerController.Instance.SendSharedTransform(this.gameObject, localPosition, localRotation);
                 }
             }
-
             eventData.Use();
         }
+    }
+
+    public void OnPointerDown(MixedRealityPointerEventData eventData)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void OnPointerDragged(MixedRealityPointerEventData eventData)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void OnPointerUp(MixedRealityPointerEventData eventData)
+    {
+        throw new NotImplementedException();
     }
 }
 

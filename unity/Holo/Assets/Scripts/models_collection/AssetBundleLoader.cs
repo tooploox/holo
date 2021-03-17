@@ -3,7 +3,6 @@ using System.Collections.ObjectModel;
 using System;
 using System.IO;
 using System.Linq;
-using UnityEditor;
 using UnityEngine;
 
 public enum LoadState {
@@ -18,7 +17,6 @@ public class AssetBundleLoader
     private string bundlePath;
     private List<ModelLayer> layers;
     private Bounds? bounds;
-    private int blendShapeCount;
     public Texture2D Icon { get; private set; }
 
     /* Uniquely identifies this bundle (across all running instances of the application). */
@@ -46,7 +44,7 @@ public class AssetBundleLoader
      */
     public Bounds? Bounds { get { return bounds;  } }
 
-    public int BlendShapeCount { get { return blendShapeCount;  } }
+    public int BlendShapeCount { get; private set; }
 
     public void LoadBundleMetadata()
     {
@@ -56,10 +54,18 @@ public class AssetBundleLoader
             return;
         }
 
-        assetBundle = AssetBundle.LoadFromFile(bundlePath);
+        /* We use LoadFromMemory as there is some bug in AssetBundle class preventing 
+         * from using LoadFromFile when using path from KnownFolders.Objects3D.Path 
+         * on target device */
+        assetBundle = AssetBundle.LoadFromMemory(File.ReadAllBytes(bundlePath));
+
         if (assetBundle == null)
         {
             throw new Exception("Failed to load AssetBundle from " + bundlePath);
+        }
+        else
+        {
+            Debug.Log("Asset Bundle " + bundlePath + " loaded!");
         }
         LoadIcon();
         LoadState = LoadState.Metadata;
@@ -227,10 +233,10 @@ public class AssetBundleLoader
 
         if (!newBlendShapesCount.HasValue) {
             Debug.LogWarning("Not animated model, no layers with blend shapes");
-            blendShapeCount = 0;
+            BlendShapeCount = 0;
         } else { 
-            blendShapeCount = newBlendShapesCount.Value;
-            Debug.Log("Loaded model with blend shapes " + blendShapeCount.ToString());
+            BlendShapeCount = newBlendShapesCount.Value;
+            Debug.Log("Loaded model with blend shapes " + BlendShapeCount.ToString());
         }
     }
 

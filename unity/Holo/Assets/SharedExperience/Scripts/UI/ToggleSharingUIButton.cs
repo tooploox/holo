@@ -1,9 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using Microsoft.MixedReality.Toolkit.Input;
 using UnityEngine;
-using HoloToolkit.Unity.InputModule;
 
-public class ToggleSharingUIButton : MonoBehaviour, IInputClickHandler
+
+public class ToggleSharingUIButton : MonoBehaviour, IMixedRealityPointerHandler
 {
 
 	// Use this for initialization
@@ -16,8 +15,23 @@ public class ToggleSharingUIButton : MonoBehaviour, IInputClickHandler
 		
 	}
 
-    public void OnInputClicked(InputClickedEventData eventData)
+    public void OnPointerDown(MixedRealityPointerEventData eventData)
     {
         Debug.Log("Toggle sharing");
+    }
+
+    public void OnPointerDragged(MixedRealityPointerEventData eventData)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void OnPointerUp(MixedRealityPointerEventData eventData)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void OnPointerClicked(MixedRealityPointerEventData eventData)
+    {
+        throw new System.NotImplementedException();
     }
 }

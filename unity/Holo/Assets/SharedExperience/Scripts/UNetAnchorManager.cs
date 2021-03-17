@@ -1,14 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using UnityEngine;
+using Microsoft.MixedReality.Toolkit.Experimental.Utilities;
+using System;
 using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.Networking;
-using HoloToolkit.Unity;
 using UnityEngine.XR.WSA;
+using UnityEngine.XR.WSA.Persistence;
 using UnityEngine.XR.WSA.Sharing;
 
-using System;
 
 #pragma warning disable CS0618 // using deprecated Unity stuff (TODO: upgrade in Holo project in the future)
 
@@ -231,6 +232,19 @@ namespace HoloToolkit.Examples.SharingWithUNET
                 DownloadingAnchor);
         }
 
+        private WorldAnchorStore anchorStore = null;
+
+        private void Awake()
+        {
+            Debug.Log("AnchorMaker: Looking for anchors...");
+            WorldAnchorStore.GetAsync(StoreLoaded);
+        }
+
+        private void StoreLoaded(WorldAnchorStore store)
+        {
+            anchorStore = store;
+        }
+
         private void Start()
         {
             if (!CheckConfiguration())
@@ -286,23 +300,36 @@ namespace HoloToolkit.Examples.SharingWithUNET
             {
                 exportingAnchorName = PlayerPrefs.GetString(SavedAnchorKey);
                 Debug.Log("found " + AnchorName + " again");
-                
             }
             else
             {
                 exportingAnchorName = Guid.NewGuid().ToString();
             }
-            
+
             WorldAnchorTransferBatch watb = new WorldAnchorTransferBatch();
             WorldAnchor worldAnchor = objectToAnchor.GetComponent<WorldAnchor>();
             if (worldAnchor == null)
             {
-                worldAnchor = objectToAnchor.AddComponent<WorldAnchor>();
+                Debug.Log("Boink 11");
+                string name = gameObject.GetComponent<WorldAnchorManager>().AttachAnchor(objectToAnchor, exportingAnchorName);
+                Debug.Log("Boink 12");
+                Debug.Log("Added anchor: " + name);
+
             }
-            
+            else
+            {
+                Debug.Log("Boink 13");
+                if (worldAnchor.name != null)
+                {
+                    Debug.Log("Updating anchor: " + worldAnchor.name);
+                }
+            }
+
             Debug.Log("exporting " + exportingAnchorName);
             watb.AddWorldAnchor(exportingAnchorName, worldAnchor);
+            Debug.Log("Boink 16");
             WorldAnchorTransferBatch.ExportAsync(watb, WriteBuffer, ExportComplete);
+            Debug.Log("Boink 17");
         }
 
         /// <summary>
@@ -329,7 +356,6 @@ namespace HoloToolkit.Examples.SharingWithUNET
                 return false;
             }
 #if UNITY_WSA
-            UnityEngine.XR.WSA.Persistence.WorldAnchorStore anchorStore = WorldAnchorManager.Instance.AnchorStore;
             Debug.Log("Looking for " + CachedAnchorName);
             string[] ids = anchorStore.GetAllIds();
             for (int index = 0; index < ids.Length; index++)
@@ -404,7 +430,7 @@ namespace HoloToolkit.Examples.SharingWithUNET
             if (located)
             {
                 AnchorEstablished = true;
-                WorldAnchorManager.Instance.AnchorStore.Save(AnchorName, self);
+                anchorStore.Save(AnchorName, self);
                 self.OnTrackingChanged -= Anchor_OnTrackingChanged;
             }
 #endif
@@ -454,7 +480,7 @@ namespace HoloToolkit.Examples.SharingWithUNET
             }
 #if UNITY_WSA
             Debug.Log("Setting saved anchor to " + AnchorName);
-            WorldAnchorManager.Instance.AnchorStore.Save(AnchorName, objectToAnchor.GetComponent<WorldAnchor>());
+            anchorStore.Save(AnchorName, objectToAnchor.GetComponent<WorldAnchor>());
             PlayerPrefs.SetString(SavedAnchorKey, AnchorName);
             PlayerPrefs.Save();
 #endif

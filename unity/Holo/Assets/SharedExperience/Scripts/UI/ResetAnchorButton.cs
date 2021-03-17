@@ -1,14 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using HoloToolkit.Examples.SharingWithUNET;
+using Microsoft.MixedReality.Toolkit.Input;
 using UnityEngine;
-using HoloToolkit.Unity.InputModule;
-using HoloToolkit.Unity;
-using System;
-using HoloToolkit.Examples.SharingWithUNET;
 
-public class ResetAnchorButton : MonoBehaviour, IInputClickHandler {
-
-    public void OnInputClicked(InputClickedEventData eventData)
+public class ResetAnchorButton : MonoBehaviour, IMixedRealityPointerHandler
+{
+    public void OnPointerClicked(MixedRealityPointerEventData eventData)
     {
         if (UnityEngine.XR.WSA.HolographicSettings.IsDisplayOpaque == false && NetworkDiscoveryWithAnchors.Instance.isServer)
         {
@@ -19,6 +15,21 @@ public class ResetAnchorButton : MonoBehaviour, IInputClickHandler {
         {
             Debug.Log("Only the server on hololens for now");
         }
+    }
+
+    public void OnPointerDown(MixedRealityPointerEventData eventData)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void OnPointerDragged(MixedRealityPointerEventData eventData)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void OnPointerUp(MixedRealityPointerEventData eventData)
+    {
+        throw new System.NotImplementedException();
     }
 
     // Use this for initialization

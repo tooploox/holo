@@ -7,43 +7,49 @@ using UnityEngine.Networking.Match;
 #pragma warning disable CS0618 // using deprecated Unity stuff (TODO: upgrade in Holo project in the future)
 public class SharingSceneData : NetworkBehaviour
 {
-    [SyncVar]
+    [SyncVar(hook = "OnChangeHostInstanceName")]
     string hostInstanceName;
 
-    [SyncVar]
+    [SyncVar(hook = "OnChangeHostInstanceLayers")]
     uint hostInstanceLayers;
 
-    [SyncVar]
+    [SyncVar(hook = "OnChangeHostPlatePosition")]
     Vector3 hostPlatePosition;
 
-    [SyncVar]
+    [SyncVar(hook = "OnChangeHostPlateScale")]
     Vector3 hostPlateScale;
 
-    [SyncVar]
+    [SyncVar(hook = "OnChangeHostModelPosition")]
+    Vector3 hostModelPosition;
+
+    [SyncVar(hook = "OnChangeHostModelRotation")]
     Quaternion hostModelRotation;
 
-    [SyncVar]
+    [SyncVar(hook = "OnChangeHostModelScale")]
+    Vector3 hostModelScale;
+
+    [SyncVar(hook = "OnChangeHostClippingPlaneActive")]
     bool hostClippingPlaneActive;
 
-    [SyncVar]
+    [SyncVar(hook = "OnChangeHostClippingPlanePostition")]
     Vector3 hostClippingPlanePosition;
 
-    [SyncVar]
+    [SyncVar(hook = "OnChangeHostClippingPlaneRotation")]
     Quaternion hostClippingPlaneRotation;
 
-    [SyncVar]
+    [SyncVar(hook = "OnChangeHostColorMap")]
     string hostColorMap;
 
-    [SyncVar]
+    [SyncVar(hook = "OnChangeHostAnimationPlaying")]
     bool hostAnimationPlaying;
 
-    [SyncVar]
+    [SyncVar(hook = "OnChangeHostAnimationTime")]
     float hostAnimationTime;
 
-    [SyncVar]
+    [SyncVar(hook = "OnChangeHostAnimationSpeed")]
     float hostAnimationSpeed;
 
-    [SyncVar]
+    [SyncVar(hook = "OnChangeHostTransparent")]
     bool hostTransparent;
 
 #pragma warning restore CS0618 // using deprecated Unity stuff (TODO: upgrade in Holo project in the future)
@@ -54,10 +60,9 @@ public class SharingSceneData : NetworkBehaviour
 
     void Start()
     {
-        ModelManager = gameObject.GetComponent<ModelWithPlate>();
+        ModelManager = gameObject.GetComponent<ModelWithPlate>();;
         ClipPlaneManager = ModelManager.ModelClipPlane.GetComponent<ModelClippingPlaneControl>();
         ColorMapManager = gameObject.GetComponent<ColorMap>();
-
         hostInstanceName = ModelManager.InstanceName;
         hostInstanceLayers = ModelManager.InstanceLayers;
         hostPlatePosition = transform.localPosition;
@@ -66,14 +71,18 @@ public class SharingSceneData : NetworkBehaviour
         hostClippingPlaneActive = ClipPlaneManager.ClippingPlaneState != ModelClippingPlaneControl.ClipPlaneState.Disabled;
         hostClippingPlanePosition = ModelManager.ModelClipPlane.transform.localPosition;
         hostClippingPlaneRotation = ModelManager.ModelClipPlane.transform.localRotation;
-
         hostColorMap = ColorMapManager.MapName;
-
         singleton = this;
+
     }
 
     static private SharingSceneData singleton;
     static public SharingSceneData Singleton { get { return singleton; } }
+
+    bool dataChanged()
+    {
+        return true;
+    }
 
     void Update()
     {
@@ -86,7 +95,9 @@ public class SharingSceneData : NetworkBehaviour
             hostInstanceLayers = ModelManager.InstanceLayers;
             if (!string.IsNullOrEmpty(ModelManager.InstanceName))
             {
+                hostModelPosition = ModelManager.ModelPosition;
                 hostModelRotation = ModelManager.ModelRotation;
+                hostModelScale = ModelManager.ModelScale;
                 hostClippingPlanePosition = ModelManager.ModelClipPlane.transform.localPosition;
                 hostClippingPlaneRotation = ModelManager.ModelClipPlane.transform.localRotation;
                 hostColorMap = ColorMapManager.MapName;
@@ -96,47 +107,125 @@ public class SharingSceneData : NetworkBehaviour
                 hostAnimationSpeed = ModelManager.AnimationSpeed;
             }
         }
-        else if(isClient)
+    }
+
+    void OnChangeHostPlatePosition(Vector3 positionChange)
+    {
+        if (!isServer)
         {
-            transform.localPosition = hostPlatePosition;
-            transform.localScale = hostPlateScale;
+            transform.localPosition = positionChange;
+        }
+    }
 
+    void OnChangeHostPlateScale(Vector3 scaleChange)
+    {
+        if (!isServer)
+        {
+            transform.localScale = scaleChange;
+        }
+    }
+
+    void OnChangeHostInstanceName(string hostInstanceNameChange) 
+    {
+        if (!isServer)
+        {
             string localInstanceName = ModelManager.InstanceName;
-            string finalHostInstanceName = hostInstanceName;
-            /* Turn "" into null for finalHostInstanceName.
-             * It would work anyway without it (ModelManager.SetInstance accepts both "" and null),
-             * but would unnecessarily keep calling ModelManager.SetInstance every frame).
-             */
-            if (finalHostInstanceName == "") {
-                finalHostInstanceName = null;
-            }
-            if (localInstanceName != finalHostInstanceName)
+            hostInstanceName = hostInstanceNameChange;
+            if (localInstanceName != hostInstanceName)
             {
-                ModelManager.SetInstance(finalHostInstanceName);
-            }
-
-            if (!string.IsNullOrEmpty(finalHostInstanceName))
-            {
-                ModelManager.InstanceLayers = hostInstanceLayers;
-                ModelManager.ModelRotation = hostModelRotation;
-
-                bool isClipingPlaneLocallyActive = ClipPlaneManager.ClippingPlaneState == ModelClippingPlaneControl.ClipPlaneState.Active;
-                if (isClipingPlaneLocallyActive != hostClippingPlaneActive) {
-                    ClipPlaneManager.ClippingPlaneState = hostClippingPlaneActive ? 
-                        ModelClippingPlaneControl.ClipPlaneState.Active : 
-                        ModelClippingPlaneControl.ClipPlaneState.Disabled;
-                }
-                ModelManager.ModelClipPlane.transform.localPosition = hostClippingPlanePosition;
-                ModelManager.ModelClipPlane.transform.localRotation = hostClippingPlaneRotation;
-                ModelManager.Transparent =  hostTransparent;
-                ModelManager.AnimationPlaying = hostAnimationPlaying;
-                // synchronize AnimationTime only when paused,  otherwise it would make jittering animation on clients
-                if (hostAnimationSpeed == 0f || !hostAnimationPlaying) { 
-                    ModelManager.AnimationTime = hostAnimationTime;
-                }
-                ModelManager.AnimationSpeed = hostAnimationSpeed;
-                ColorMapManager.MapName = hostColorMap;
+                ModelManager.SetInstance(hostInstanceName);
             }
         }
+    }
+        
+    void OnChangeHostInstanceLayers(uint hostInstanceLayersChange) 
+    {
+        if (!isServer && !string.IsNullOrEmpty(hostInstanceName))
+        {
+            ModelManager.InstanceLayers = hostInstanceLayersChange;
+        }
+    }
+
+    void OnChangeHostModelPosition(Vector3 hostModelPositionChange)
+    {
+        if (!isServer && !string.IsNullOrEmpty(hostInstanceName))
+        {
+            ModelManager.ModelPosition = hostModelPositionChange;
+        }
+    }
+
+    void OnChangeHostModelRotation(Quaternion hostModelRotationChange) 
+    {
+        if (!isServer && !string.IsNullOrEmpty(hostInstanceName))
+        {
+            ModelManager.ModelRotation = hostModelRotationChange;
+        }
+    }
+    
+    void OnChangeHostModelScale(Vector3 hostModelScaleChange)
+    {
+        if (!isServer && !string.IsNullOrEmpty(hostInstanceName))
+        {
+            ModelManager.ModelScale = hostModelScaleChange;
+        }
+    }
+    
+    void OnChangeHostClippingPlaneActive(bool hostClippingPlaneActiveChange) 
+    {
+        if (!isServer && !string.IsNullOrEmpty(hostInstanceName))
+        {
+            bool isClipingPlaneLocallyActive = ClipPlaneManager.ClippingPlaneState == ModelClippingPlaneControl.ClipPlaneState.Active;
+            if (isClipingPlaneLocallyActive != hostClippingPlaneActiveChange)
+            {
+                ClipPlaneManager.ClippingPlaneState = hostClippingPlaneActiveChange ?
+                    ModelClippingPlaneControl.ClipPlaneState.Active :
+                    ModelClippingPlaneControl.ClipPlaneState.Disabled;
+            }
+        }
+    }
+
+    void OnChangeHostClippingPlanePostition(Vector3 hostClippingPlanePositionChange) 
+    {
+        if (!isServer && !string.IsNullOrEmpty(hostInstanceName))
+        {
+            ModelManager.ModelClipPlane.transform.localPosition = hostClippingPlanePositionChange;
+        }
+    }
+    
+    void OnChangeHostClippingPlaneRotation(Quaternion hostClippingPlaneRotationChange) 
+    {
+        if (!isServer && !string.IsNullOrEmpty(hostInstanceName))
+            ModelManager.ModelClipPlane.transform.localRotation = hostClippingPlaneRotationChange;
+    }
+    
+    void OnChangeHostTransparent(bool hostTransparentChange) 
+    {
+        if (!isServer && !string.IsNullOrEmpty(hostInstanceName))
+            ModelManager.Transparent = hostTransparentChange;
+    }
+
+    void OnChangeHostAnimationPlaying(bool AnimationPlayingChange) 
+    {
+        if (!isServer && !string.IsNullOrEmpty(hostInstanceName))
+            ModelManager.AnimationPlaying = AnimationPlayingChange;
+    }
+    
+    void OnChangeHostAnimationTime(float hostAnimationTimeChange) 
+    {
+        if (!isServer && !string.IsNullOrEmpty(hostInstanceName) && (hostAnimationSpeed == 0f || !hostAnimationPlaying))
+        {
+            ModelManager.AnimationTime = hostAnimationTimeChange;
+        }
+    }
+
+    void OnChangeHostAnimationSpeed(float hostAnimationSpeedChange) 
+    {
+        if (!isServer && !string.IsNullOrEmpty(hostInstanceName))
+            ModelManager.AnimationSpeed = hostAnimationSpeedChange;
+    }
+    void OnChangeHostColorMap(string hostColorMapChange) 
+    {
+        if (!isServer && !string.IsNullOrEmpty(hostInstanceName))
+            ColorMapManager.MapName = hostColorMapChange;
     }
 }

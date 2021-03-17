@@ -3,9 +3,7 @@
 
 using UnityEngine;
 using UnityEngine.Networking;
-using HoloToolkit.Unity.InputModule;
 using System.Collections.Generic;
-using HoloToolkit.Unity;
 using UnityEngine.XR.WSA.Input;
 
 #pragma warning disable CS0618 // using deprecated Unity stuff (TODO: upgrade in Holo project in the future)
@@ -245,12 +243,14 @@ namespace HoloToolkit.Examples.SharingWithUNET
                     Debug.Log("Defaulting to bird's eye view");
                     if (opaqueDisplay)
                     {
-                         MixedRealityTeleport warper = MixedRealityTeleport.Instance;
+                        /* FIXME Mixed Reality 
+                        MixedRealityTeleport warper = MixedRealityTeleport.Instance;
                          if (warper != null)
                          {
                               //warper.ResetRotation();
                               warper.SetWorldPosition(levelState.transform.position + levelState.transform.forward * -2.5f + Vector3.up * 0.25f + levelState.transform.transform.right * Random.Range(-2f, 2.0f));
                          }
+                        */
                     }
                 }
 

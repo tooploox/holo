@@ -53,7 +53,7 @@ namespace HoloToolkit.Examples.SharingWithUNET
             get
             {
                 // we are connected if we are the server or if we aren't running discovery
-                return (isServer || !running);
+                return isServer || !running;
             }
         }
 

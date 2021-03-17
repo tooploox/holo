@@ -1,36 +1,33 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using Microsoft.MixedReality.Toolkit.UI;
+using Microsoft.MixedReality.Toolkit.Input;
 using UnityEngine;
-using HoloToolkit.Unity.Buttons;
-using HoloToolkit.Unity.InputModule;
-using HoloToolkit.Unity.UX;
+using Microsoft.MixedReality.Toolkit.UI.BoundsControl;
 
 public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
 {
-    public CompoundButton ButtonClippingPlane;
-    public CompoundButton ButtonClippingPlaneTranslation;
-    public CompoundButton ButtonClippingPlaneRotation;
+    public PressableButtonHoloLens2 ButtonClippingPlane;
+    public PressableButtonHoloLens2 ButtonClippingPlaneManipulation;
     public ModelWithPlate ModelWithPlate;
-
-    BoundingBoxRig clipPlaneQuadBbox;
-    HandDraggable HandTranslation;
 
     public enum ClipPlaneState
     {
         Disabled,
         Active,
-        Translation,
-        Rotation
+        Manipulation
     }
+
+    //
 
     public void FocusEnter(GameObject focusObject) { }
     public void FocusExit(GameObject focusObject) { }
 
     private ClipPlaneState clippingPlaneState = ClipPlaneState.Disabled;
 
-    public ClipPlaneState ClippingPlaneState {
+    public ClipPlaneState ClippingPlaneState
+    {
         get { return clippingPlaneState; }
-        set {
+        set
+        {
             if (!ModelWithPlate.InstanceLoaded)
             {
                 // This is normal if you try to turn on clipping plane before a model is loaded
@@ -40,72 +37,48 @@ public class ModelClippingPlaneControl : MonoBehaviour, IClickHandler
 
             clippingPlaneState = value;
 
-            HoloUtilities.SetButtonState(ButtonClippingPlaneTranslation, value == ClipPlaneState.Translation);
-            HoloUtilities.SetButtonState(ButtonClippingPlaneRotation, value == ClipPlaneState.Rotation);
+            HoloUtilities.SetButtonState(ButtonClippingPlaneManipulation, value == ClipPlaneState.Manipulation);
 
-            HandTranslation.enabled = value == ClipPlaneState.Translation;
-
-            if (value == ClipPlaneState.Active || value == ClipPlaneState.Disabled)
-                clipPlaneQuadBbox.Deactivate();
+            if (value == ClipPlaneState.Manipulation)
+            {
+                GetComponent<ObjectManipulator>().enabled = true;
+                GetComponent<BoundsControl>().enabled = true;
+                gameObject.transform.Find("Quad").gameObject.SetActive(true);
+            }
             else
-                clipPlaneQuadBbox.Activate();
+            {
+                GetComponent<ObjectManipulator>().enabled = false;
+                GetComponent<BoundsControl>().enabled = false;
+                gameObject.transform.Find("Quad").gameObject.SetActive(false);
+            }
 
             if (value == ClipPlaneState.Disabled)
             {
-                ModelWithPlate.DefaultModelMaterial.DisableKeyword("CLIPPING_ON");
-				ModelWithPlate.DefaultModelTransparentMaterial.DisableKeyword("CLIPPING_ON");
-                ModelWithPlate.DataVisualizationMaterial.DisableKeyword("CLIPPING_ON");
+                gameObject.SetActive(false);
 
-                ButtonClippingPlaneTranslation.gameObject.SetActive(false);
-                ButtonClippingPlaneRotation.gameObject.SetActive(false);
+                ButtonClippingPlaneManipulation.gameObject.SetActive(false);
                 HoloUtilities.SetButtonState(ButtonClippingPlane, false);
             }
             else
             {
-                ModelWithPlate.DefaultModelMaterial.EnableKeyword("CLIPPING_ON");
-				ModelWithPlate.DefaultModelTransparentMaterial.EnableKeyword("CLIPPING_ON");
-                ModelWithPlate.DataVisualizationMaterial.EnableKeyword("CLIPPING_ON");
+                gameObject.SetActive(true);
 
-                ButtonClippingPlaneTranslation.gameObject.SetActive(true);
-                ButtonClippingPlaneRotation.gameObject.SetActive(true);
+                ButtonClippingPlaneManipulation.gameObject.SetActive(true);
                 HoloUtilities.SetButtonState(ButtonClippingPlane, true);
             }
-
-            // disable model transformation if clipping plane transformation enabled
-            if (value == ClipPlaneState.Translation || value == ClipPlaneState.Rotation) 
-                ModelWithPlate.ClickChangeTransformationState(ModelWithPlate.TransformationState.None);
         }
-    }
-
-    void Start()
-    {
-        clipPlaneQuadBbox = GetComponent<BoundingBoxRig>();
-        HandTranslation = GetComponent<HandDraggable>();
-        HandTranslation.enabled = false;
-
-        ButtonClippingPlaneTranslation.gameObject.SetActive(false);
-        ButtonClippingPlaneRotation.gameObject.SetActive(false);
-        clipPlaneQuadBbox.Deactivate();
     }
 
     public void Click(GameObject clickObj)
     {
-        //Debug.Log("Clicked obj: " + clickObj.name);
         switch (clickObj.name)
         {
             case "ButtonClipping":
                 ClippingPlaneState = ClippingPlaneState == ClipPlaneState.Disabled ? ClipPlaneState.Active : ClipPlaneState.Disabled;
                 break;
 
-            case "ButtonClippingTranslation":
-                ClippingPlaneState = ClippingPlaneState == ClipPlaneState.Translation ? ClipPlaneState.Active : ClipPlaneState.Translation;
-                ModelWithPlate.GetComponent<HandDraggable>().enabled = true;
-                ModelWithPlate.GetComponent<HandDraggable>().IsDraggingEnabled = false;
-                break;
-
-            case "ButtonClippingRotation":
-                ClippingPlaneState = ClippingPlaneState == ClipPlaneState.Rotation ? ClipPlaneState.Active : ClipPlaneState.Rotation;
-                ModelWithPlate.GetComponent<HandDraggable>().enabled = false;
+            case "ButtonClippingManipulation":
+                ClippingPlaneState = ClippingPlaneState == ClipPlaneState.Manipulation ? ClipPlaneState.Active : ClipPlaneState.Manipulation;
                 break;
         }
     }
