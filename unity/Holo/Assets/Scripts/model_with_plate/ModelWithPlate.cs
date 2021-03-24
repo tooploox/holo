@@ -40,6 +40,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public GameObject RotationBoxRigTemplate;
     public GameObject AddButtonsCollection;
     public ColorMap ColorMap;
+    public GameObject SpatialMapping;
 
     private float SliderSpeedFactor = 5.0f;
 
@@ -66,6 +67,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     private GameObject instanceTransformation;
     private bool instanceIsPreview = false;
     private DirectionalIndicator directionalIndicator;
+    private SpatialPlacement spatialPlacement;
 
     // Created only when instance != null, as it initializes bbox in Start and assumes it's not empty
     private GameObject rotationBoxRig;
@@ -155,6 +157,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     private void Start()
     {
         GetComponent<ObjectManipulator>().enabled = false;
+        spatialPlacement = SpatialMapping.GetComponent<SpatialPlacement>();
 
         ModelClipPlaneCtrl = ModelClipPlane.GetComponentInChildren<ModelClippingPlaneControl>();
         directionalIndicator = gameObject.GetComponentInChildren<DirectionalIndicator>();
@@ -539,10 +542,12 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         if (newState == TransformationState.Translate)
         {
             GetComponent<ObjectManipulator>().enabled = true;
+            spatialPlacement.enabled = false;
         }
         else
         {
             GetComponent<ObjectManipulator>().enabled = false;
+            spatialPlacement.enabled = false;
         }
 
         bool rotationBoxRigActiveNew = newState == TransformationState.Rotate;
