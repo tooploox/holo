@@ -6,7 +6,7 @@ Application to visualize animated 3D medical data using Hololens, with shared ex
 
 ### Prerequisites
   * Setup Hololens with Windows Device Portal enabled: https://docs.microsoft.com/en-us/windows/iot-core/manage-your-device/deviceportal
-  * Install _Essential Vision_ application on Hololens (use relasese versions: https://github.com/MicroscopeIT/holo/releases)
+  * Install _Essential Vision_ application on Hololens (use relasese versions: https://github.com/tooploox/holo/releases)
     Application instalation: https://docs.microsoft.com/pl-pl/hololens/holographic-custom-apps
 
   **IMPORTANT**
@@ -14,7 +14,7 @@ Application to visualize animated 3D medical data using Hololens, with shared ex
 
   * Convert your input models into Asset Bundles.
 
-		The whole pipeline for converting your models into uploadable Asset Bundles can be found [here](https://github.com/MicroscopeIT/holo-preprocess/)
+		The whole pipeline for converting your models into uploadable Asset Bundles can be found [here](https://github.com/tooploox/holo-preprocess/)
 
   * Upload AssetBundles with models into Hololens headset
   * Run application
