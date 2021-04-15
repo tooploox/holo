@@ -185,6 +185,15 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         );
     }
 
+    private void Update()
+    {
+        if (transform.hasChanged)
+        {
+//            bool validTransformation = spatialPlacement.validatePosition(transform);
+            transform.hasChanged = false;
+            Debug.Log("Transformation valid: "); // + validTransformation);
+        }
+    }
     /* Number of "add" buttons we have in the scene. */
     private const int addButtonsCount = 15;
 
@@ -542,7 +551,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         if (newState == TransformationState.Translate)
         {
             GetComponent<ObjectManipulator>().enabled = true;
-            spatialPlacement.enabled = false;
+            spatialPlacement.enabled = true;
         }
         else
         {

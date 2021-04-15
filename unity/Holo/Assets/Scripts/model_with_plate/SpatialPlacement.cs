@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+using Microsoft.MixedReality.Toolkit.Extensions;
+
 using Microsoft.MixedReality.Toolkit.SpatialAwareness;
 using Microsoft.MixedReality.Toolkit;
+using MRTKExtensions.Utilities;
 
 public class SpatialPlacement : MonoBehaviour
 {
@@ -20,11 +23,26 @@ public class SpatialPlacement : MonoBehaviour
         // Check raycast hit each time transformation is changed
     }
 
+
+    public bool validatePosition(Transform position)
+    {
+        float _maxDistance = 3;
+
+#if !UNITY_EDITOR
+        var foundPosition = LookingDirectionHelpers.GetPositionOnSpatialMap(_maxDistance);
+#else
+        //Vector3? foundPosition = LookingDirectionHelpers.GetPositionInLookingDirection(_maxDistance);
+#endif
+        Debug.Log("Found position: ");// + foundPosition);
+        return true;
+    }
+
+
     void OnEnable()
     {
         if (CoreServices.SpatialAwarenessSystem != null && !IsObserverRunning)
         {
-            CoreServices.SpatialAwarenessSystem.ResumeObservers();
+            //CoreServices.SpatialAwarenessSystem.ResumeObservers();
         }
     }
 
@@ -32,8 +50,8 @@ public class SpatialPlacement : MonoBehaviour
     {
         if(CoreServices.SpatialAwarenessSystem != null && IsObserverRunning)
         {
-            CoreServices.SpatialAwarenessSystem.SuspendObservers();
-            CoreServices.SpatialAwarenessSystem.ClearObservations();
+            //CoreServices.SpatialAwarenessSystem.SuspendObservers();
+            //CoreServices.SpatialAwarenessSystem.ClearObservations();
         }
     }
 
@@ -46,10 +64,10 @@ public class SpatialPlacement : MonoBehaviour
     {
         get
         {
-            var providers =
-                ((IMixedRealityDataProviderAccess)CoreServices.SpatialAwarenessSystem)
-                .GetDataProviders<IMixedRealitySpatialAwarenessObserver>();
-            return providers.FirstOrDefault()?.IsRunning == true;
+            //var providers =
+            //    ((IMixedRealityDataProviderAccess)CoreServices.SpatialAwarenessSystem)
+            //    .GetDataProviders<IMixedRealitySpatialAwarenessObserver>();
+            return false; // providers.FirstOrDefault()?.IsRunning == true;
         }
     }
 }
