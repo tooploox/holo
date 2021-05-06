@@ -9,8 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e3c1af9621e40064b907d18085e21fb7, type: 3}
-  m_Name: EVSpatialObjectMeshObserverProfile
+  m_Script: {fileID: 11500000, guid: d561f5f963b45674aa423435fb820879, type: 3}
+  m_Name: EVMixedRealitySpatialAwarenessMeshObserverProfile
   m_EditorClassIdentifier: 
   isCustomProfile: 1
   startupBehavior: 1
@@ -26,5 +26,3 @@ MonoBehaviour:
   visibleMaterial: {fileID: 2100000, guid: 47c3d3b0d8143e3489351498fceed55d, type: 2}
   occlusionMaterial: {fileID: 2100000, guid: a809c7ea182b699409443d46d5b42435, type: 2}
   physicsMaterial: {fileID: 0}
-  spatialMeshObject: {fileID: 919132149155446097, guid: cd971749d1cda0a4c9b7e5ed8dce6c55,
-    type: 3}

@@ -2,6 +2,7 @@
 using Microsoft.MixedReality.Toolkit.UI.BoundsControl;
 using Microsoft.MixedReality.Toolkit.Utilities;
 using Microsoft.MixedReality.Toolkit.Experimental.Utilities;
+using Microsoft.MixedReality.Toolkit.Utilities.Solvers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,6 +41,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public GameObject RotationBoxRigTemplate;
     public GameObject AddButtonsCollection;
     public ColorMap ColorMap;
+    public SpatialPlacement SpatialPlacement;
 
     private float SliderSpeedFactor = 5.0f;
 
@@ -180,6 +182,48 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
                 SliderAnimationSpeed.transform.Find("ThumbRoot/SpeedValue").GetComponent<TextMeshPro>().text = Math.Round(AnimationSpeed, 2).ToString();
             }
         );
+
+        lastPosition = this.transform.position;
+        StartTapToPlace();
+    }
+
+    private void StartTapToPlace()
+    {
+        SpatialPlacement.enabled = true;
+        GetComponent<TapToPlace>().enabled = true;
+        // GetComponent<BoxCollider>().enabled = true;
+        GetComponent<TapToPlace>().StartPlacement();
+        
+    }
+
+    public void PlacmentFinished()
+    {
+        Debug.Log("Finished placing!");
+        // GetComponent<BoxCollider>().enabled = false;
+        GetComponent<TapToPlace>().StopPlacement();
+        GetComponent<TapToPlace>().enabled = false;
+        SpatialPlacement.enabled = false;
+    }
+
+    private Vector3 lastPosition;
+
+    private void Update()
+    {
+        //if (this.transform.hasChanged && this.transform.position != lastPosition)
+        //{
+        //    Debug.Log("Transform value: " + this.transform.position.ToString());
+        //    Vector3? foundPosition = SpatialPlacement.findPosition();
+        //    if (foundPosition.HasValue && (foundPosition.Value.z != this.transform.position.z))
+        //    {
+        //        Debug.Log("TEST!!! Going to change position!");
+        //        float x = this.transform.position.x;
+        //        float y = this.transform.position.y;
+        //        float z = foundPosition.Value.z - 1.0f;
+        //        this.transform.position = new Vector3(x, y, z);
+        //    }
+        //    lastPosition = this.transform.position;
+        //    this.transform.hasChanged = false;
+        //}
     }
 
     /* Number of "add" buttons we have in the scene. */
@@ -517,6 +561,12 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         }
     }
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        Debug.Log("PLATE collision enttred");
+        GetComponent<Rigidbody>().velocity = new Vector3(0,0,0);   
+    }
+
     public void ChangeTransformationState(TransformationState newState)
     {
         bool rotationBoxRigActiveOld = transformationState == TransformationState.Rotate;
@@ -539,10 +589,14 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         if (newState == TransformationState.Translate)
         {
             GetComponent<ObjectManipulator>().enabled = true;
+            // GetComponent<BoxCollider>().enabled = true;
+            SpatialPlacement.enabled = true;
         }
         else
         {
             GetComponent<ObjectManipulator>().enabled = false;
+            // GetComponent<BoxCollider>().enabled = false;
+            PlacmentFinished();
         }
 
         bool rotationBoxRigActiveNew = newState == TransformationState.Rotate;

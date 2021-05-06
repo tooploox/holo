@@ -24,7 +24,13 @@ public class SpatialPlacement : MonoBehaviour
     }
 
 
-    public bool validatePosition()
+    public void TestCall()
+    {
+        Debug.Log("TEST CALL METHOD!");
+    }
+
+
+    public Vector3? findPosition()
     {
         float _maxDistance = 3;
 
@@ -34,7 +40,7 @@ public class SpatialPlacement : MonoBehaviour
         Vector3? foundPosition = LookingDirectionHelpers.GetPositionInLookingDirection(_maxDistance);
 #endif
         Debug.Log("Found position: " + foundPosition.ToString());
-        return foundPosition != null;
+        return foundPosition;
     }
 
 
@@ -43,7 +49,7 @@ public class SpatialPlacement : MonoBehaviour
         if (CoreServices.SpatialAwarenessSystem != null && !IsObserverRunning)
         {
             CoreServices.SpatialAwarenessSystem.ResumeObservers();
-            Debug.Log("Validate position result: " + validatePosition());
+            Debug.Log("Found position result: " + findPosition());
         }
     }
 

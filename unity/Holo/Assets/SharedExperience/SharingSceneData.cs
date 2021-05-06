@@ -74,6 +74,12 @@ public class SharingSceneData : NetworkBehaviour
         hostColorMap = ColorMapManager.MapName;
         singleton = this;
 
+        ResetValues();
+    }
+
+    private void ResetValues()
+    {
+        // Reset values to NaN
     }
 
     static private SharingSceneData singleton;
