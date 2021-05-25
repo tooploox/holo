@@ -41,7 +41,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public GameObject RotationBoxRigTemplate;
     public GameObject AddButtonsCollection;
     public ColorMap ColorMap;
-    public SpatialPlacement SpatialPlacement;
+    public GameObject PlacementConstraint;
 
     private float SliderSpeedFactor = 5.0f;
 
@@ -68,6 +68,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     private GameObject instanceTransformation;
     private bool instanceIsPreview = false;
     private DirectionalIndicator directionalIndicator;
+    private SpatialPlacement spatialPlacement;
 
     // Created only when instance != null, as it initializes bbox in Start and assumes it's not empty
     private GameObject rotationBoxRig;
@@ -156,6 +157,8 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
     private void Start()
     {
+        spatialPlacement = new SpatialPlacement(GetComponent<TapToPlace>());
+
         GetComponent<ObjectManipulator>().enabled = false;
 
         ModelClipPlaneCtrl = ModelClipPlane.GetComponentInChildren<ModelClippingPlaneControl>();
@@ -189,20 +192,14 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
     private void StartTapToPlace()
     {
-        SpatialPlacement.enabled = true;
-        GetComponent<TapToPlace>().enabled = true;
-        // GetComponent<BoxCollider>().enabled = true;
-        GetComponent<TapToPlace>().StartPlacement();
-        
+        PlacementConstraint.SetActive(true);
+        spatialPlacement.StartAnchoring();
     }
 
     public void PlacmentFinished()
     {
-        Debug.Log("Finished placing!");
-        // GetComponent<BoxCollider>().enabled = false;
-        GetComponent<TapToPlace>().StopPlacement();
-        GetComponent<TapToPlace>().enabled = false;
-        SpatialPlacement.enabled = false;
+        spatialPlacement.FinishAnchoring();
+        PlacementConstraint.SetActive(false);
     }
 
     private Vector3 lastPosition;
@@ -269,6 +266,11 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             GameObject button = FindAddButton(i);
             button.SetActive(false);
         }
+    }
+
+    public void LogText(string txt)
+    {
+        Debug.Log("TEST LOG " + txt);
     }
 
      /* Handle a click on some button inside. Called by ButtonsClickReceiver. */
@@ -589,13 +591,12 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         if (newState == TransformationState.Translate)
         {
             GetComponent<ObjectManipulator>().enabled = true;
-            // GetComponent<BoxCollider>().enabled = true;
-            SpatialPlacement.enabled = true;
+            spatialPlacement.Enable();
+            PlacementConstraint.SetActive(true);
         }
         else
         {
             GetComponent<ObjectManipulator>().enabled = false;
-            // GetComponent<BoxCollider>().enabled = false;
             PlacmentFinished();
         }
 

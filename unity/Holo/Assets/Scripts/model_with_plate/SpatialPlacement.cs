@@ -4,32 +4,34 @@ using System.Linq;
 using UnityEngine;
 
 using Microsoft.MixedReality.Toolkit.Extensions;
+using Microsoft.MixedReality.Toolkit.Utilities.Solvers;
 
 using Microsoft.MixedReality.Toolkit.SpatialAwareness;
 using Microsoft.MixedReality.Toolkit;
 using MRTKExtensions.Utilities;
 
-public class SpatialPlacement : MonoBehaviour
+public class SpatialPlacement
 {
-    // Start is called before the first frame update
-    void Start()
-    {
+    private TapToPlace tapToPlace;
 
+    public SpatialPlacement(TapToPlace tapToPlace_)
+    {
+        tapToPlace = tapToPlace_;
     }
 
-    // Update is called once per frame
-    void Update()
+    public void StartAnchoring()
     {
-        // Check raycast hit each time transformation is changed
+        Enable();
+        tapToPlace.enabled = true;
+        tapToPlace.StartPlacement();
     }
 
-
-    public void TestCall()
+    public void FinishAnchoring()
     {
-        Debug.Log("TEST CALL METHOD!");
+        Disable();
+        tapToPlace.StopPlacement();
+        tapToPlace.enabled = false;
     }
-
-
     public Vector3? findPosition()
     {
         float _maxDistance = 3;
@@ -44,7 +46,7 @@ public class SpatialPlacement : MonoBehaviour
     }
 
 
-    void OnEnable()
+    public void Enable()
     {
         if (CoreServices.SpatialAwarenessSystem != null && !IsObserverRunning)
         {
@@ -53,18 +55,13 @@ public class SpatialPlacement : MonoBehaviour
         }
     }
 
-    private void OnDisable()
+    public void Disable()
     {
         if (CoreServices.SpatialAwarenessSystem != null && IsObserverRunning)
         {
             CoreServices.SpatialAwarenessSystem.SuspendObservers();
             CoreServices.SpatialAwarenessSystem.ClearObservations();
         }
-    }
-
-    void OnTransformParentChanged()
-    {
-        if (!gameObject.activeSelf) return;
     }
 
     private bool IsObserverRunning
