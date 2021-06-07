@@ -7,6 +7,7 @@ public class WallsInteraction : MonoBehaviour
     public GameObject CollisionIndicator;
     public Material CollisionMaterial;
     public Material DefautlMaterial;
+    public Material CurrentMaterial;
     // Start is called before the first frame update
     void Start()
     {
@@ -21,23 +22,29 @@ public class WallsInteraction : MonoBehaviour
 
     private void OnCollisionExit(Collision collision)
     {
-        Material currentMat = CollisionIndicator.GetComponent<Renderer>().material;
-        if (currentMat != DefautlMaterial) 
-            CollisionIndicator.GetComponent<Renderer>().material = DefautlMaterial;
+        ChangeMatterial(DefautlMaterial);
+    }
+
+    private void ChangeMatterial(Material mat)
+    {
+        var renderer = CollisionIndicator.GetComponent<Renderer>();
+
+        if(renderer.materials.Length > 1 && renderer.materials[0] != mat) {
+            var cubeMaterials = renderer.materials;
+            cubeMaterials[0] = CollisionMaterial;
+            renderer.materials = cubeMaterials;
+        }
+        else if(renderer.material != mat)
+        {
+            renderer.material = mat;
+        }
     }
 
     private void OnCollisionEnter(Collision collision)
     { 
-        Debug.Log("PLATE collision enttred / Collision pooints: " + collision.contactCount);
-
-        if(collision.contactCount > 0)
-        {
-            Material currentMat = CollisionIndicator.GetComponent<Renderer>().material;
-            if(currentMat != CollisionMaterial) 
-                CollisionIndicator.GetComponent<Renderer>().material = CollisionMaterial;
-        }
-
-        GetComponent<Rigidbody>().velocity = new Vector3(0, 0, 0);
+        //Debug.Log("PLATE collision enttred / Collision pooints: " + collision.contactCount);
+        ChangeMatterial(CollisionMaterial);
+        // GetComponent<Rigidbody>().velocity = new Vector3(0, 0, 0);
     }
 
     private void OnEnable()
