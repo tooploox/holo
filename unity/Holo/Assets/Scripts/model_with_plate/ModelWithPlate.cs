@@ -42,6 +42,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public GameObject AddButtonsCollection;
     public ColorMap ColorMap;
     public GameObject PlacementConstraint;
+    public GameObject AnchoringLabel;
 
     private float SliderSpeedFactor = 5.0f;
 
@@ -194,12 +195,14 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     {
         PlacementConstraint.SetActive(true);
         spatialPlacement.StartAnchoring();
+        AnchoringLabel.SetActive(true);
     }
 
     public void PlacmentFinished()
     {
         spatialPlacement.FinishAnchoring();
         PlacementConstraint.SetActive(false);
+        AnchoringLabel.SetActive(false);
     }
 
     private Vector3 lastPosition;

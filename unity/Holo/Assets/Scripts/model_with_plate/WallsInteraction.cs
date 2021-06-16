@@ -7,7 +7,9 @@ public class WallsInteraction : MonoBehaviour
     public GameObject CollisionIndicator;
     public Material CollisionMaterial;
     public Material DefautlMaterial;
-    public Material CurrentMaterial;
+
+    private bool InCollision = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -18,11 +20,6 @@ public class WallsInteraction : MonoBehaviour
     void Update()
     {
         
-    }
-
-    private void OnCollisionExit(Collision collision)
-    {
-        ChangeMatterial(DefautlMaterial);
     }
 
     private void ChangeMatterial(Material mat)
@@ -39,12 +36,22 @@ public class WallsInteraction : MonoBehaviour
             renderer.material = mat;
         }
     }
+    private void OnTriggerEnter(Collider other)
+    {
+        if (!InCollision)
+        {
+            InCollision = true;
+            ChangeMatterial(CollisionMaterial);
+        }
+    }
 
-    private void OnCollisionEnter(Collision collision)
-    { 
-        //Debug.Log("PLATE collision enttred / Collision pooints: " + collision.contactCount);
-        ChangeMatterial(CollisionMaterial);
-        // GetComponent<Rigidbody>().velocity = new Vector3(0, 0, 0);
+    private void OnTriggerExit(Collider other)
+    {
+        if (InCollision)
+        {
+            InCollision = false;
+            ChangeMatterial(DefautlMaterial);
+        }
     }
 
     private void OnEnable()
