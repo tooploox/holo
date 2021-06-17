@@ -8,49 +8,49 @@ using UnityEngine.Networking.Match;
 public class SharingSceneData : NetworkBehaviour
 {
     [SyncVar(hook = "OnChangeHostInstanceName")]
-    string hostInstanceName;
+    string hostInstanceName = "";
 
     [SyncVar(hook = "OnChangeHostInstanceLayers")]
-    uint hostInstanceLayers;
+    uint hostInstanceLayers = 0;
 
     [SyncVar(hook = "OnChangeHostPlatePosition")]
-    Vector3 hostPlatePosition;
+    Vector3 hostPlatePosition);
 
     [SyncVar(hook = "OnChangeHostPlateScale")]
-    Vector3 hostPlateScale;
+    Vector3 hostPlateScale);
 
     [SyncVar(hook = "OnChangeHostModelPosition")]
-    Vector3 hostModelPosition;
+    Vector3 hostModelPosition);
 
     [SyncVar(hook = "OnChangeHostModelRotation")]
-    Quaternion hostModelRotation;
+    Quaternion hostModelRotation);
 
     [SyncVar(hook = "OnChangeHostModelScale")]
-    Vector3 hostModelScale;
+    Vector3 hostModelScale);
 
     [SyncVar(hook = "OnChangeHostClippingPlaneActive")]
-    bool hostClippingPlaneActive;
+    bool hostClippingPlaneActive = false;
 
     [SyncVar(hook = "OnChangeHostClippingPlanePostition")]
-    Vector3 hostClippingPlanePosition;
+    Vector3 hostClippingPlanePosition);
 
     [SyncVar(hook = "OnChangeHostClippingPlaneRotation")]
-    Quaternion hostClippingPlaneRotation;
+    Quaternion hostClippingPlaneRotation);
 
     [SyncVar(hook = "OnChangeHostColorMap")]
-    string hostColorMap;
+    string hostColorMap = "";
 
     [SyncVar(hook = "OnChangeHostAnimationPlaying")]
-    bool hostAnimationPlaying;
+    bool hostAnimationPlaying = false;
 
     [SyncVar(hook = "OnChangeHostAnimationTime")]
-    float hostAnimationTime;
+    float hostAnimationTime = 0f;
 
     [SyncVar(hook = "OnChangeHostAnimationSpeed")]
-    float hostAnimationSpeed;
+    float hostAnimationSpeed = 1.0f;
 
     [SyncVar(hook = "OnChangeHostTransparent")]
-    bool hostTransparent;
+    bool hostTransparent = false;
 
 #pragma warning restore CS0618 // using deprecated Unity stuff (TODO: upgrade in Holo project in the future)
 
@@ -82,6 +82,28 @@ public class SharingSceneData : NetworkBehaviour
     bool dataChanged()
     {
         return true;
+    }
+
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+
+        OnChangeHostPlatePosition(hostPlatePosition);
+        OnChangeHostInstanceName(hostInstanceName);
+        OnChangeHostInstanceLayers(hostInstanceLayers);
+        OnChangeHostPlatePosition(hostPlatePosition);
+        OnChangeHostPlateScale(hostPlateScale);
+        OnChangeHostModelPosition(hostModelPosition);
+        OnChangeHostModelRotation(hostModelRotation);
+        OnChangeHostModelScale(hostModelScale);
+        OnChangeHostClippingPlaneActive(hostClippingPlaneActive);
+        OnChangeHostClippingPlanePostition(hostClippingPlanePosition);
+        OnChangeHostClippingPlaneRotation(hostClippingPlaneRotation);
+        OnChangeHostColorMap(hostColorMap);
+        OnChangeHostAnimationPlaying(hostAnimationPlaying);
+        OnChangeHostAnimationTime(hostAnimationTime);
+        OnChangeHostAnimationSpeed(hostAnimationSpeed);
+        OnChangeHostTransparent(hostTransparent);
     }
 
     void Update()
