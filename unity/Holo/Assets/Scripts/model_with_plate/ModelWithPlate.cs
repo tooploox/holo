@@ -339,6 +339,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         var modelTransformState = ModelTransform;
         CloseSubmenus();
         ModelTransform = !modelTransformState;
+        
     }
     private void ClickClipping()
     {
@@ -517,6 +518,13 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         }
     }
 
+    private void SetRotationRigHandlesVisible(BoundsControl boundsControl, bool visibility)
+    {
+        boundsControl.RotationHandlesConfig.ShowHandleForX = visibility;
+        boundsControl.RotationHandlesConfig.ShowHandleForY = visibility;
+        boundsControl.RotationHandlesConfig.ShowHandleForZ = visibility;
+    }
+
     public void ChangeTransformationState(TransformationState newState)
     {
         bool rotationBoxRigActiveOld = transformationState == TransformationState.Rotate;
@@ -549,7 +557,11 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         if (rotationBoxRigActiveOld != rotationBoxRigActiveNew && rotationBoxRig != null)
         {
             if (rotationBoxRigActiveNew) {
-                rotationBoxRig.GetComponent<BoundsControl>().Active = true;
+                var boundsControl = rotationBoxRig.GetComponent<BoundsControl>();
+                SetRotationRigHandlesVisible(boundsControl, true);
+                boundsControl.ScaleHandlesConfig.ShowScaleHandles = false;
+                boundsControl.Active = true;
+
                 rotationBoxRig.GetComponent<RotationAxisConstraint>().ConstraintOnRotation = AxisFlags.XAxis | AxisFlags.ZAxis;
                 rotationBoxRig.GetComponent<MinMaxScaleConstraint>().enabled = true;
             } 
@@ -561,7 +573,11 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         if (scaleBoxRigActiveOld != scaleBoxRigActiveNew)
         {
             if (scaleBoxRigActiveNew) {
-                rotationBoxRig.GetComponent<BoundsControl>().Active = true;
+                var boundsControl = rotationBoxRig.GetComponent<BoundsControl>();
+                boundsControl.ScaleHandlesConfig.ShowScaleHandles = true;
+                SetRotationRigHandlesVisible(boundsControl, false);
+                boundsControl.Active = true;
+
                 rotationBoxRig.GetComponent<RotationAxisConstraint>().ConstraintOnRotation = AxisFlags.XAxis | AxisFlags.YAxis | AxisFlags.ZAxis;
                 rotationBoxRig.GetComponent<MinMaxScaleConstraint>().enabled = false;
             }
@@ -569,6 +585,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
         if(!rotationBoxRigActiveNew && !scaleBoxRigActiveNew && rotationBoxRig != null)
         {
+            Debug.Log("TEST MARAS 3");
             rotationBoxRig.GetComponent<BoundsControl>().Active = false;
         }
     }
@@ -626,9 +643,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
         instanceTransformation = new GameObject("InstanceTransformation");
         instanceTransformation.transform.parent = rotationBoxRig.transform;
-
-
-       
+     
         Vector3 boundsSize = Vector3.one;
         float scale = 1f;
         if (instanceBundle.Bounds.HasValue) { 
@@ -936,6 +951,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             ButtonTranslate.gameObject.SetActive(modelTransform);
             ButtonRotate.gameObject.SetActive(modelTransform);
             ButtonScale.gameObject.SetActive(modelTransform);
+            rotationBoxRig.GetComponent<BoxCollider>().enabled = value;
         }
     }
 }
