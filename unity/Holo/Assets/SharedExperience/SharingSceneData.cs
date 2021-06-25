@@ -8,37 +8,37 @@ using UnityEngine.Networking.Match;
 public class SharingSceneData : NetworkBehaviour
 {
     [SyncVar(hook = "OnChangeHostInstanceName")]
-    string hostInstanceName = "";
+    string hostInstanceName = "invalid";
 
     [SyncVar(hook = "OnChangeHostInstanceLayers")]
     uint hostInstanceLayers = 0;
 
     [SyncVar(hook = "OnChangeHostPlatePosition")]
-    Vector3 hostPlatePosition);
+    Vector3 hostPlatePosition;
 
     [SyncVar(hook = "OnChangeHostPlateScale")]
-    Vector3 hostPlateScale);
+    Vector3 hostPlateScale;
 
     [SyncVar(hook = "OnChangeHostModelPosition")]
-    Vector3 hostModelPosition);
+    Vector3 hostModelPosition;
 
     [SyncVar(hook = "OnChangeHostModelRotation")]
-    Quaternion hostModelRotation);
+    Quaternion hostModelRotation;
 
     [SyncVar(hook = "OnChangeHostModelScale")]
-    Vector3 hostModelScale);
+    Vector3 hostModelScale;
 
     [SyncVar(hook = "OnChangeHostClippingPlaneActive")]
     bool hostClippingPlaneActive = false;
 
     [SyncVar(hook = "OnChangeHostClippingPlanePostition")]
-    Vector3 hostClippingPlanePosition);
+    Vector3 hostClippingPlanePosition;
 
     [SyncVar(hook = "OnChangeHostClippingPlaneRotation")]
-    Quaternion hostClippingPlaneRotation);
+    Quaternion hostClippingPlaneRotation;
 
     [SyncVar(hook = "OnChangeHostColorMap")]
-    string hostColorMap = "";
+    string hostColorMap = "invalid";
 
     [SyncVar(hook = "OnChangeHostAnimationPlaying")]
     bool hostAnimationPlaying = false;
@@ -88,8 +88,10 @@ public class SharingSceneData : NetworkBehaviour
     {
         base.OnStartClient();
 
-        OnChangeHostPlatePosition(hostPlatePosition);
+        Debug.Log("SYNC OnStartClient");
+
         OnChangeHostInstanceName(hostInstanceName);
+        OnChangeHostPlatePosition(hostPlatePosition);
         OnChangeHostInstanceLayers(hostInstanceLayers);
         OnChangeHostPlatePosition(hostPlatePosition);
         OnChangeHostPlateScale(hostPlateScale);
@@ -151,10 +153,12 @@ public class SharingSceneData : NetworkBehaviour
     {
         if (!isServer)
         {
+            Debug.Log("SYNC OnChangeHostInstanceName: " + hostInstanceNameChange);
             string localInstanceName = ModelManager.InstanceName;
             hostInstanceName = hostInstanceNameChange;
             if (localInstanceName != hostInstanceName)
             {
+                Debug.Log("SYNC Setting new instance");
                 ModelManager.SetInstance(hostInstanceName);
             }
         }
