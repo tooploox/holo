@@ -7,13 +7,16 @@ public class RotationModel : MonoBehaviour
     // 360 degrees / 5 sec => 2.4 degree / frame
     public float RotationSpeed = 1.0f;
     public GameObject rotationObject;
+    public GameObject clippingPlaneObject;
 
     private bool rottationRunning = false;
     private Quaternion originalRotation = new Quaternion();
+    private Quaternion originalClippingRotation = new Quaternion();
 
     private void OnEnable()
     {
         originalRotation = rotationObject.transform.rotation;
+        originalClippingRotation = clippingPlaneObject.transform.rotation;
         rottationRunning = true;
     }
 
@@ -21,6 +24,7 @@ public class RotationModel : MonoBehaviour
     {
         rottationRunning = false;
         rotationObject.transform.rotation = originalRotation;
+        clippingPlaneObject.transform.rotation = originalClippingRotation;
     }
 
     private float GetRotationDelta()
@@ -34,7 +38,9 @@ public class RotationModel : MonoBehaviour
     {
         if (rottationRunning)
         {
-            rotationObject.transform.Rotate(0, GetRotationDelta(), 0);
+            var rotDelta = GetRotationDelta();
+            rotationObject.transform.Rotate(0, rotDelta, 0, Space.World);
+            clippingPlaneObject.transform.Rotate(0, rotDelta, 0, Space.World);
         }
     }
 }
