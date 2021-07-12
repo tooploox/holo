@@ -143,6 +143,14 @@ public class HTKNetworkManager : NetworkManager {
     {
         LogEntry();
         base.OnServerAddPlayer(conn, playerControllerId);
+
+        if (conn.playerControllers.Count > 0)
+        {
+            GameObject player = conn.playerControllers[0].gameObject;
+            var playersyncer = player.GetComponent<SharingSceneData>();
+             Debug.Log("PLAYER - Added player");
+        }
+
         LogExit();
     }
 
@@ -155,7 +163,7 @@ public class HTKNetworkManager : NetworkManager {
         {
             GameObject player = conn.playerControllers[0].gameObject;
             var playersyncer = player.GetComponent<SharingSceneData>();
-            // do stuff to the player GameObject
+            Debug.Log("PLAYER - Added player");
         }
         LogExit();
     }

@@ -58,6 +58,15 @@ public class SharingSceneData : NetworkBehaviour
     ModelClippingPlaneControl ClipPlaneManager;
     ColorMap ColorMapManager;
 
+    //public void LogCurrentState()
+    //{
+    //    string msg = "SHARED DATA STATE:";
+    //    msg += "\n  hostInstanceName: " + hostInstanceName;
+    //    msg += "\n hostInstanceLayers" + hostInstanceLayers.ToString();
+    //    msg +
+    //    Debug.Log(msg);
+    //}
+
     void Start()
     {
         ModelManager = gameObject.GetComponent<ModelWithPlate>();;
