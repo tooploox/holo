@@ -40,6 +40,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public GameObject RotationBoxRigTemplate;
     public GameObject AddButtonsCollection;
     public ColorMap ColorMap;
+    public GameObject TestDataDialog;
 
     private float SliderSpeedFactor = 5.0f;
 
@@ -155,6 +156,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     private void Start()
     {
         GetComponent<ObjectManipulator>().enabled = false;
+       
 
         ModelClipPlaneCtrl = ModelClipPlane.GetComponentInChildren<ModelClippingPlaneControl>();
         directionalIndicator = gameObject.GetComponentInChildren<DirectionalIndicator>();
@@ -165,9 +167,6 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
         LayerSubmenuState = false;
         AnimationSpeedSubmenu = false;
-
-        RefreshUserInterface();
-        InitializeAddButtons();
 
         // This sets proper state of buttons and components like handDraggable
         ChangeTransformationState(TransformationState.None);
@@ -180,6 +179,33 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
                 SliderAnimationSpeed.transform.Find("ThumbRoot/SpeedValue").GetComponent<TextMeshPro>().text = Math.Round(AnimationSpeed, 2).ToString();
             }
         );
+
+        InitializeAddButtons();
+        if (ModelsCollection.Singleton == null)
+        {
+            Debug.LogError("ModelsCollection script must be executed before ModelWithPlate. Fix Unity \"Script Execution Order\".");
+            return;
+        }
+        if (ModelsCollection.Singleton.BundlesCount == 0)
+        {
+            Debug.Log("No asset bundles found!");
+            return;
+        }
+        RefreshUserInterface();
+        TestDataDialog.SetActive(false);
+    }
+
+    public void ConfirmLoadingTestData()
+    {
+        ModelsCollection.Singleton.LoadTestData();
+        RefreshUserInterface();
+        InitializeAddButtons();
+        TestDataDialog.SetActive(false);
+    }
+
+    public void DenyLoadingTestData()
+    {
+        TestDataDialog.SetActive(false);
     }
 
     /* Number of "add" buttons we have in the scene. */

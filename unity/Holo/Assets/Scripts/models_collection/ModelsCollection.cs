@@ -55,6 +55,11 @@ public class ModelsCollection : MonoBehaviour
         }
     }
 
+    public void LoadTestData()
+    {
+        Debug.Log("Loading test data!!!");
+    }
+
     public int BundlesCount
     {
         get { return bundlesFiles.Length; }
