@@ -21,6 +21,9 @@ public class ModelLayer : MonoBehaviour
     // Is this a simulation layer (using simulation shader etc.)
     public bool Simulation;
 
+    // Is this a turbulence layer (using turbulence shader etc.)
+    public bool Turbulence;
+
     // Each layer in the model can consecutive number, used to calculate ModelWithPlate.LayerMask.
     public int LayerIndex;
 

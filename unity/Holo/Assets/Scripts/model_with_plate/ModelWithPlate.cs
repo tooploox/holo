@@ -21,6 +21,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public Material DefaultModelMaterial;
     public Material DefaultModelTransparentMaterial;
     public Material DataVisualizationMaterial;
+    public Material DataTurbulenceMaterial;
     public Material DefaultVolumetricMaterial;
     public Transform InstanceParent;
     public PressableButtonHoloLens2 ButtonTogglePlay;
@@ -162,6 +163,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         DefaultModelMaterial.DisableKeyword("CLIPPING_ON");
         DefaultModelTransparentMaterial.DisableKeyword("CLIPPING_ON");
         DataVisualizationMaterial.DisableKeyword("CLIPPING_ON");
+        DataTurbulenceMaterial.DisableKeyword("CLIPPING_ON");
 
         LayerSubmenuState = false;
         AnimationSpeedSubmenu = false;
@@ -694,7 +696,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         }
 
         Assert.IsTrue(instanceBundle != null);
-        ModelLayer layer = instanceBundle.Layers.First<ModelLayer>(l => !l.Simulation);
+        ModelLayer layer = instanceBundle.Layers.First<ModelLayer>(l => !l.Simulation & !l.Turbulence);
         LoadLayer(layer);
         HoloUtilities.SetButtonStateText(layersButtons[layer], true);
     }
@@ -846,6 +848,10 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         if (layer.Simulation)
         {
             return DataVisualizationMaterial;
+        } else
+        if (layer.Turbulence)
+        {
+            return DataTurbulenceMaterial;
         } else
         if (Transparent)
         {
