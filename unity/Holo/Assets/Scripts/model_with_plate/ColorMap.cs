@@ -4,10 +4,11 @@ using UnityEngine;
 using Microsoft.MixedReality.Toolkit.UI;
 
 
-/* Configure colormap used by DataVisualizationMaterial. */
+/* Configure colormap used by DataVisualizationMaterial and DataTurbulenceMaterial. */
 public class ColorMap : MonoBehaviour, IClickHandler
 {
     public Material DataVisualizationMaterial;
+    public Material DataTurbulenceMaterial;
     public List<GameObject> ColorButtons;
 
     // must be set if there's a model currently loaded
@@ -39,11 +40,11 @@ public class ColorMap : MonoBehaviour, IClickHandler
             { FindButton("ButtonColorMapMagma"), "magma" },
             { FindButton("ButtonColorMapCividis"), "cividis" },
             { FindButton("ButtonColorMapPlasma"), "plasma" },
-            { FindButton("ButtonColorMapInferno"), "inferno" }
+            { FindButton("ButtonColorMapHeat"), "heat" }
         };
 
         // Load Player Settings
-        string initialColorMap = PlayerPrefs.GetString("ColorMap", "jet");
+        string initialColorMap = PlayerPrefs.GetString("ColorMap", "heat");
         GameObject initialColorMapButton = ButtonFromColorMapName(initialColorMap);
         ClickSetColorMap(initialColorMap, initialColorMapButton);
     }
@@ -90,6 +91,7 @@ public class ColorMap : MonoBehaviour, IClickHandler
                 mapName = value;
                 Texture2D colorMapTexture = Resources.Load<Texture2D>("Colormaps/" + value);
                 DataVisualizationMaterial.SetTexture("_ColorMap", colorMapTexture);
+                DataTurbulenceMaterial.SetTexture("_ColorMap", colorMapTexture);
 
                 /* Change also current instances of materials, because
                    MaterialInstance.cs from Mrtk (required by ClippingPlane of Mrtk)
@@ -99,6 +101,13 @@ public class ColorMap : MonoBehaviour, IClickHandler
                     {
                         if (layerPair.Key.Simulation) {
                             foreach (var renderer in layerPair.Value.Instance.GetComponentsInChildren<Renderer>()) {
+                                renderer.material.SetTexture("_ColorMap", colorMapTexture);
+                            }
+                        }
+                        else if (layerPair.Key.Turbulence)
+                        {
+                            foreach (var renderer in layerPair.Value.Instance.GetComponentsInChildren<Renderer>())
+                            {
                                 renderer.material.SetTexture("_ColorMap", colorMapTexture);
                             }
                         }
