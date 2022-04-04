@@ -5,7 +5,7 @@
 //   Copyright (c) Microsoft Corporation.
 //   Licensed under the MIT License.
 
-Shader "Holo/HoloDataFlowLine"
+Shader "Holo/DataFlowLine"
 {
 	Properties
 	{
