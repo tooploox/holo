@@ -22,6 +22,8 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public Material DefaultModelTransparentMaterial;
     public Material DataVisualizationMaterial;
     public Material DataTurbulenceMaterial;
+    public Material DataDisplacementMaterial;
+    public Material DataDisplacementTransparentMaterial;
     public Material DefaultVolumetricMaterial;
     public Transform InstanceParent;
     public PressableButtonHoloLens2 ButtonTogglePlay;
@@ -164,6 +166,8 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         DefaultModelTransparentMaterial.DisableKeyword("CLIPPING_ON");
         DataVisualizationMaterial.DisableKeyword("CLIPPING_ON");
         DataTurbulenceMaterial.DisableKeyword("CLIPPING_ON");
+        DataDisplacementMaterial.DisableKeyword("CLIPPING_ON");
+        DataDisplacementTransparentMaterial.DisableKeyword("CLIPPING_ON");
 
         LayerSubmenuState = false;
         AnimationSpeedSubmenu = false;
@@ -853,6 +857,18 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         {
             return DataTurbulenceMaterial;
         } else
+        if (layer.Displacement)
+        {
+
+            if (Transparent)
+            {
+                return DataDisplacementTransparentMaterial;
+            }
+            else
+            {
+                return DataDisplacementMaterial;
+            }
+        } else
         if (Transparent)
         {
             return DefaultModelTransparentMaterial;
@@ -873,7 +889,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             if (layersLoaded != null) { 
                 foreach (var layerPair in layersLoaded)
                 {
-                    if (!layerPair.Key.Simulation) {
+                    if (!layerPair.Key.Simulation & !layerPair.Key.Turbulence) {
                         foreach (var renderer in layerPair.Value.Instance.GetComponentsInChildren<Renderer>()) { 
                             renderer.sharedMaterial = LayerMaterial(layerPair.Key);
                         }

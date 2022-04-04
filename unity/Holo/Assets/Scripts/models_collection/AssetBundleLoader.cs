@@ -209,6 +209,7 @@ public class AssetBundleLoader
                 layer.Caption = Path.GetFileNameWithoutExtension(bundleObjectName);
                 layer.Simulation = bundleObjectName.Contains("dataflow") || bundleObjectName.Contains("simulation");
                 layer.Turbulence = bundleObjectName.Contains("turbulence");
+                layer.Displacement = bundleObjectName.Contains("displacement");
                 if (layer.Simulation)
                 {
                     int simulationsCount = layers.Count(c => c.Simulation);
@@ -219,10 +220,15 @@ public class AssetBundleLoader
                     int tubulenceCount = layers.Count(c => c.Turbulence);
                     layer.Caption = "Turbulence " + (tubulenceCount + 1).ToString();
                 }
+                else if (layer.Displacement)
+                {
+                    int displacementCount = layers.Count(c => c.Displacement);
+                    layer.Caption = "Displacement " + (displacementCount + 1).ToString();
+                }
                 layer.DataType = DataType.Mesh; // FIXME: If AB does not have ModeLayer - treat as simple mesh
                 Debug.LogWarning(layerDebugName + " does not contain ModelLayer component, guessing layer Caption (" + 
                     layer.Caption + "), simulation (" + 
-                    layer.Simulation.ToString() + ") and turbulence (" + layer.Turbulence.ToString() + ")");
+                    layer.Simulation.ToString() + "), turbulence (" + layer.Turbulence.ToString() + ") and displacement (" + layer.Displacement.ToString());
             }
 
             layer.LayerIndex = layers.Count;

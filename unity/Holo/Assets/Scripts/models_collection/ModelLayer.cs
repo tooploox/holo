@@ -24,6 +24,9 @@ public class ModelLayer : MonoBehaviour
     // Is this a turbulence layer (using turbulence shader etc.)
     public bool Turbulence;
 
+    // Is this a turbulence layer (using turbulence shader etc.)
+    public bool Displacement;
+
     // Each layer in the model can consecutive number, used to calculate ModelWithPlate.LayerMask.
     public int LayerIndex;
 
