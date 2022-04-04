@@ -322,9 +322,6 @@ Shader "Holo/DataTurbulence"
 		#if defined(_SPHERICAL_HARMONICS)
 						fixed3 ambient : COLOR1;
 		#endif
-		#if defined(_IRIDESCENCE)
-						fixed3 iridescentColor : COLOR2;
-		#endif
 		#if defined(_WORLD_POSITION)
 		#if defined(_NEAR_PLANE_FADE)
 						float4 worldPosition : TEXCOORD2;
@@ -754,7 +751,7 @@ Shader "Holo/DataTurbulence"
 						float3 rightTangent = normalize(mul((float3x3)unity_ObjectToWorld, float3(1.0, 0.0, 0.0)));
 						float3 incidentWithCenter = normalize(mul(unity_ObjectToWorld, float4(0.0, 0.0, 0.0, 1.0)) - _WorldSpaceCameraPos);
 						float tangentDotIncident = dot(rightTangent, incidentWithCenter);
-						o.iridescentColor = Iridescence(tangentDotIncident, _IridescentSpectrumMap, _IridescenceThreshold, v.uv, _IridescenceAngle, _IridescenceIntensity);
+						//o.iridescentColor = Iridescence(tangentDotIncident, _IridescentSpectrumMap, _IridescenceThreshold, v.uv, _IridescenceAngle, _IridescenceIntensity);
 		#endif
 
 		#if defined(_NORMAL)
@@ -776,8 +773,8 @@ Shader "Holo/DataTurbulence"
 					}
 
 
-					[maxvertexcount(19)]
-					void geom(triangle v2g IN[3], inout PointStream<g2f> tristream)
+					[maxvertexcount(45)]
+					void geom(triangle v2g IN[3], inout TriangleStream<g2f> tristream)
 					{
 						g2f o;
 
@@ -837,7 +834,7 @@ Shader "Holo/DataTurbulence"
 						o.ambient = IN[0].ambient;
 		#endif
 		#if defined(_IRIDESCENCE)
-						o.iridescentColor = IN[0].iridescentColor;
+						//o.iridescentColor = IN[0].iridescentColor;
 		#endif
 		#if defined(_WORLD_POSITION)
 		#if defined(_NEAR_PLANE_FADE)
@@ -863,275 +860,292 @@ Shader "Holo/DataTurbulence"
 
 						float4 vertexObject;
 
-						float4 move0 = float4(0.15, 0.0, 0.0, 0.0) * _WeightFactor;
-						float4 move1 = float4(0.0, 0.15, 0.0, 0.0) * _WeightFactor;
-						float4 move2 = float4(0.0, 0.00, 0.15, 0.0) * _WeightFactor;
+						float minLength = 0.25 * _ScaleFactor;
+						float x = 1;
+						float y = 1;
+						float total = IN[0].normal.x * x + IN[0].normal.y * y;
+						float z = - total / IN[0].normal.z;
 
+						float sum = sqrt(x * x + y * y + z * z);
+						float ratio = 1 / sum;
 
-						vertexObject = IN[0].position;
+						float4 move0 = float4(x * ratio, y * ratio, z * ratio, 0.0) * 0.1 * minLength;
+
+						float x1 = IN[0].normal.y * z - IN[0].normal.z * y;
+						float y1 = IN[0].normal.z * x - IN[0].normal.x * z;
+						float z1 = IN[0].normal.x * y - IN[0].normal.y * x;
+
+						float sum1 = sqrt(x1 * x1 + y1 * y1 + z1 * z1);
+						float ratio1 = 1 / sum1;
+						float4 move1 = float4(x1 * ratio1, y1 * ratio1, z1 * ratio1, 0.0) * 0.1 * minLength;
+
+						float4 move2 = float4(IN[0].normal / length(IN[0].normal), 0.0) * 0.1 * minLength;
+
+						// -----------------------------
+
+						vertexObject = IN[0].position + move0 + move2 + move1;
 						o.position = UnityObjectToClipPos(vertexObject); //1
 						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy;
+						o.col = float4(1.0, 1.0, 1.0, 1.0);
 						tristream.Append(o);
-						tristream.RestartStrip();
 
-						vertexObject = IN[0].position + move0;
+						vertexObject = IN[0].position - move0 + move2 + move1;
 						o.position = UnityObjectToClipPos(vertexObject); //1
 						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.8);
+						o.col = float4(1.0, 1.0, 1.0, 1.0);
 						tristream.Append(o);
-						tristream.RestartStrip();
 
-						vertexObject = IN[0].position - move0;
+						vertexObject = IN[0].position + move0 - move1 + move2;
 						o.position = UnityObjectToClipPos(vertexObject); //1
 						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.8);
+						o.col = float4(1.0, 1.0, 1.0, 1.0);
 						tristream.Append(o);
+
 						tristream.RestartStrip();
 
-						vertexObject = IN[0].position + move1;
+						// ----------------------------
+
+						vertexObject = IN[0].position - move0 + move2 + move1;
 						o.position = UnityObjectToClipPos(vertexObject); //1
 						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.8);
+						o.col = float4(1.0, 1.0, 1.0, 1.0);
 						tristream.Append(o);
-						tristream.RestartStrip();
 
-						vertexObject = IN[0].position - move1;
+						vertexObject = IN[0].position - move0 - move1 + move2;
 						o.position = UnityObjectToClipPos(vertexObject); //1
 						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.8);
+						o.col = float4(1.0, 1.0, 1.0, 1.0);
 						tristream.Append(o);
-						tristream.RestartStrip();
 
-						vertexObject = IN[0].position + move2;
+						vertexObject = IN[0].position + move0 - move1 + move2;
 						o.position = UnityObjectToClipPos(vertexObject); //1
 						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.8);
+						o.col = float4(1.0, 1.0, 1.0, 1.0);
 						tristream.Append(o);
+
 						tristream.RestartStrip();
 
-						vertexObject = IN[0].position - move2;
+						// -----------------------------
+
+						vertexObject = IN[0].position + move0 - move2 + move1;
 						o.position = UnityObjectToClipPos(vertexObject); //1
 						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.8);
+						o.col = float4(1.0, 1.0, 1.0, 1.0);
 						tristream.Append(o);
-						tristream.RestartStrip();
 
-						vertexObject = IN[0].position + move0/1.5 + move1/1.5;
+						vertexObject = IN[0].position - move0 - move2 + move1;
 						o.position = UnityObjectToClipPos(vertexObject); //1
 						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.7);
+						o.col = float4(1.0, 1.0, 1.0, 1.0);
 						tristream.Append(o);
-						tristream.RestartStrip();
 
-						vertexObject = IN[0].position - move0 / 1.5 + move1 / 1.5;
+						vertexObject = IN[0].position + move0 - move1 - move2;
 						o.position = UnityObjectToClipPos(vertexObject); //1
 						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.7);
+						o.col = float4(1.0, 1.0, 1.0, 1.0);
 						tristream.Append(o);
+
 						tristream.RestartStrip();
 
-						vertexObject = IN[0].position + move0 / 1.5 - move1 / 1.5;
+						// ----------------------------
+
+						vertexObject = IN[0].position - move0 - move2 + move1;
 						o.position = UnityObjectToClipPos(vertexObject); //1
 						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.7);
+						o.col = float4(1.0, 1.0, 1.0, 1.0);
 						tristream.Append(o);
-						tristream.RestartStrip();
 
-						vertexObject = IN[0].position - move0 / 1.5 - move1 / 1.5;
+						vertexObject = IN[0].position - move0 - move1 - move2;
 						o.position = UnityObjectToClipPos(vertexObject); //1
 						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.7);
+						o.col = float4(1.0, 1.0, 1.0, 1.0);
 						tristream.Append(o);
-						tristream.RestartStrip();
 
-						vertexObject = IN[0].position + move2 / 1.5 + move1 / 1.5;
+						vertexObject = IN[0].position + move0 - move1 - move2;
 						o.position = UnityObjectToClipPos(vertexObject); //1
 						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.7);
+						o.col = float4(1.0, 1.0, 1.0, 1.0);
 						tristream.Append(o);
+
 						tristream.RestartStrip();
 
-						vertexObject = IN[0].position - move2 / 1.5 + move1 / 1.5;
+						// -----------------------------
+
+						vertexObject = IN[0].position + move0 + move2 + move1;
 						o.position = UnityObjectToClipPos(vertexObject); //1
 						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.7);
+						o.col = float4(1.0, 1.0, 1.0, 1.0);
 						tristream.Append(o);
-						tristream.RestartStrip();
 
-						vertexObject = IN[0].position + move2 / 1.5 - move1 / 1.5;
+						vertexObject = IN[0].position + move0 + move2 - move1;
 						o.position = UnityObjectToClipPos(vertexObject); //1
 						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.7);
+						o.col = float4(1.0, 1.0, 1.0, 1.0);
 						tristream.Append(o);
-						tristream.RestartStrip();
 
-						vertexObject = IN[0].position - move2 / 1.5 - move1 / 1.5;
+						vertexObject = IN[0].position + move0 - move1 - move2;
 						o.position = UnityObjectToClipPos(vertexObject); //1
 						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.7);
+						o.col = float4(1.0, 1.0, 1.0, 1.0);
 						tristream.Append(o);
+
 						tristream.RestartStrip();
 
-						vertexObject = IN[0].position + move0 / 1.5 + move2 / 1.5;
+						// ----------------------------
+
+						vertexObject = IN[0].position + move0 + move2 + move1;
 						o.position = UnityObjectToClipPos(vertexObject); //1
 						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.7);
+						o.col = float4(1.0, 1.0, 1.0, 1.0);
 						tristream.Append(o);
-						tristream.RestartStrip();
 
-						vertexObject = IN[0].position - move0 / 1.5 + move2 / 1.5;
+						vertexObject = IN[0].position + move0 - move1 - move2;
 						o.position = UnityObjectToClipPos(vertexObject); //1
 						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.7);
+						o.col = float4(1.0, 1.0, 1.0, 1.0);
 						tristream.Append(o);
-						tristream.RestartStrip();
 
-						vertexObject = IN[0].position + move0 / 1.5 - move2 / 1.5;
+						vertexObject = IN[0].position + move0 + move1 - move2;
 						o.position = UnityObjectToClipPos(vertexObject); //1
 						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.7);
+						o.col = float4(1.0, 1.0, 1.0, 1.0);
 						tristream.Append(o);
+
 						tristream.RestartStrip();
 
-						vertexObject = IN[0].position - move0 / 1.5 - move2 / 1.5;
+
+						// -----------------------------
+
+						vertexObject = IN[0].position - move0 + move2 + move1;
 						o.position = UnityObjectToClipPos(vertexObject); //1
 						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.7);
+						o.col = float4(1.0, 1.0, 1.0, 1.0);
 						tristream.Append(o);
-						tristream.RestartStrip();
 
-						move0 = float4(0.25, 0.0, 0.0, 0.0) * _WeightFactor;
-						move1 = float4(0.0, 0.25, 0.0, 0.0) * _WeightFactor;
-						move2 = float4(0.0, 0.00, 0.25, 0.0) * _WeightFactor;
-
-
-						vertexObject = IN[0].position + move0;
+						vertexObject = IN[0].position - move0 + move2 - move1;
 						o.position = UnityObjectToClipPos(vertexObject); //1
 						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.6);
+						o.col = float4(1.0, 1.0, 1.0, 1.0);
 						tristream.Append(o);
-						tristream.RestartStrip();
 
-						vertexObject = IN[0].position - move0;
+						vertexObject = IN[0].position - move0 - move1 - move2;
 						o.position = UnityObjectToClipPos(vertexObject); //1
 						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.6);
+						o.col = float4(1.0, 1.0, 1.0, 1.0);
 						tristream.Append(o);
+
 						tristream.RestartStrip();
 
-						vertexObject = IN[0].position + move1;
+						// ----------------------------
+
+						vertexObject = IN[0].position - move0 + move2 + move1;
 						o.position = UnityObjectToClipPos(vertexObject); //1
 						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.6);
+						o.col = float4(1.0, 1.0, 1.0, 1.0);
 						tristream.Append(o);
+
+						vertexObject = IN[0].position - move0 - move1 - move2;
+						o.position = UnityObjectToClipPos(vertexObject); //1
+						o.uv = float2(0., 0.) + offset;
+						o.col = float4(1.0, 1.0, 1.0, 1.0);
+						tristream.Append(o);
+
+						vertexObject = IN[0].position - move0 + move1 - move2;
+						o.position = UnityObjectToClipPos(vertexObject); //1
+						o.uv = float2(0., 0.) + offset;
+						o.col = float4(1.0, 1.0, 1.0, 1.0);
+						tristream.Append(o);
+
 						tristream.RestartStrip();
 
-						vertexObject = IN[0].position - move1;
+						// -----------------------------
+
+						vertexObject = IN[0].position - move0 - move2 + move1;
 						o.position = UnityObjectToClipPos(vertexObject); //1
 						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.6);
+						o.col = float4(1.0, 1.0, 1.0, 1.0);
 						tristream.Append(o);
+
+						vertexObject = IN[0].position - move0 + move2 + move1;
+						o.position = UnityObjectToClipPos(vertexObject); //1
+						o.uv = float2(0., 0.) + offset;
+						o.col = float4(1.0, 1.0, 1.0, 1.0);
+						tristream.Append(o);
+
+						vertexObject = IN[0].position + move0 + move1 - move2;
+						o.position = UnityObjectToClipPos(vertexObject); //1
+						o.uv = float2(0., 0.) + offset;
+						o.col = float4(1.0, 1.0, 1.0, 1.0);
+						tristream.Append(o);
+
 						tristream.RestartStrip();
 
-						vertexObject = IN[0].position + move2;
+						// ----------------------------
+
+						vertexObject = IN[0].position - move0 + move2 + move1;
 						o.position = UnityObjectToClipPos(vertexObject); //1
 						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.6);
+						o.col = float4(1.0, 1.0, 1.0, 1.0);
 						tristream.Append(o);
+
+						vertexObject = IN[0].position + move0 + move1 + move2;
+						o.position = UnityObjectToClipPos(vertexObject); //1
+						o.uv = float2(0., 0.) + offset;
+						o.col = float4(1.0, 1.0, 1.0, 1.0);
+						tristream.Append(o);
+
+						vertexObject = IN[0].position + move0 + move1 - move2;
+						o.position = UnityObjectToClipPos(vertexObject); //1
+						o.uv = float2(0., 0.) + offset;
+						o.col = float4(1.0, 1.0, 1.0, 1.0);
+						tristream.Append(o);
+
 						tristream.RestartStrip();
 
-						vertexObject = IN[0].position - move2;
+						// -----------------------------
+
+						vertexObject = IN[0].position - move0 - move2 - move1;
 						o.position = UnityObjectToClipPos(vertexObject); //1
 						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.6);
+						o.col = float4(1.0, 1.0, 1.0, 1.0);
 						tristream.Append(o);
+
+						vertexObject = IN[0].position - move0 + move2 - move1;
+						o.position = UnityObjectToClipPos(vertexObject); //1
+						o.uv = float2(0., 0.) + offset;
+						o.col = float4(1.0, 1.0, 1.0, 1.0);
+						tristream.Append(o);
+
+						vertexObject = IN[0].position + move0 - move1 - move2;
+						o.position = UnityObjectToClipPos(vertexObject); //1
+						o.uv = float2(0., 0.) + offset;
+						o.col = float4(1.0, 1.0, 1.0, 1.0);
+						tristream.Append(o);
+
 						tristream.RestartStrip();
 
-						vertexObject = IN[0].position + move0 / 1.5 + move1 / 1.5;
-						o.position = UnityObjectToClipPos(vertexObject); //1
-						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.5);
-						tristream.Append(o);
-						tristream.RestartStrip();
+						// ----------------------------
 
-						vertexObject = IN[0].position - move0 / 1.5 + move1 / 1.5;
-						o.position = UnityObjectToClipPos(vertexObject); //1
-						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.5);
-						tristream.Append(o);
-						tristream.RestartStrip();
+						//vertexObject = IN[0].position - move0 + move2 - move1;
+						//o.position = UnityObjectToClipPos(vertexObject); //1
+						//o.uv = float2(0., 0.) + offset;
+						//o.col = float4(1.0, 1.0, 1.0, 1.0);
+						//tristream.Append(o);
 
-						vertexObject = IN[0].position + move0 / 1.5 - move1 / 1.5;
+						vertexObject = IN[0].position + move0 - move1 + move2;
 						o.position = UnityObjectToClipPos(vertexObject); //1
 						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.5);
-						tristream.Append(o);
-						tristream.RestartStrip();
+						o.col = float4(1.0, 1.0, 1.0, 1.0);
+						//tristream.Append(o);
 
-						vertexObject = IN[0].position - move0 / 1.5 - move1 / 1.5;
+						vertexObject = IN[0].position + move0 - move1 - move2;
 						o.position = UnityObjectToClipPos(vertexObject); //1
 						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.5);
-						tristream.Append(o);
-						tristream.RestartStrip();
+						o.col = float4(1.0, 1.0, 1.0, 1.0);
+						//tristream.Append(o);
 
-						vertexObject = IN[0].position + move2 / 1.5 + move1 / 1.5;
-						o.position = UnityObjectToClipPos(vertexObject); //1
-						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.5);
-						tristream.Append(o);
-						tristream.RestartStrip();
+						//tristream.RestartStrip();
 
-						vertexObject = IN[0].position - move2 / 1.5 + move1 / 1.5;
-						o.position = UnityObjectToClipPos(vertexObject); //1
-						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.5);
-						tristream.Append(o);
-						tristream.RestartStrip();
-
-						vertexObject = IN[0].position + move2 / 1.5 - move1 / 1.5;
-						o.position = UnityObjectToClipPos(vertexObject); //1
-						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.5);
-						tristream.Append(o);
-						tristream.RestartStrip();
-
-						vertexObject = IN[0].position - move2 / 1.5 - move1 / 1.5;
-						o.position = UnityObjectToClipPos(vertexObject); //1
-						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.5);
-						tristream.Append(o);
-						tristream.RestartStrip();
-
-						vertexObject = IN[0].position + move0 / 1.5 + move2 / 1.5;
-						o.position = UnityObjectToClipPos(vertexObject); //1
-						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.5);
-						tristream.Append(o);
-						tristream.RestartStrip();
-
-						vertexObject = IN[0].position - move0 / 1.5 + move2 / 1.5;
-						o.position = UnityObjectToClipPos(vertexObject); //1
-						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.5);
-						tristream.Append(o);
-						tristream.RestartStrip();
-
-						vertexObject = IN[0].position + move0 / 1.5 - move2 / 1.5;
-						o.position = UnityObjectToClipPos(vertexObject); //1
-						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.5);
-						tristream.Append(o);
-						tristream.RestartStrip();
-
-						vertexObject = IN[0].position - move0 / 1.5 - move2 / 1.5;
-						o.position = UnityObjectToClipPos(vertexObject); //1
-						o.uv = float2(0., 0.) + offset;
-						o.col = transprancy * float4(1.0, 1.0, 1.0, 0.5);
-						tristream.Append(o);
-						tristream.RestartStrip();
-							
 													}
 
 													fixed4 frag(g2f i, fixed facing : VFACE) : SV_Target
@@ -1149,7 +1163,7 @@ Shader "Holo/DataTurbulence"
 														col = i.tan * i.col;
 														#endif
 														#ifdef DISPLAY_MODE_1
-														col = tex2D(_ColorMap, float2(i.tan.x *0.5 + 0.5,0))* i.col;
+														col = tex2D(_ColorMap, float2(i.tan.x ,0)) * i.col;
 														#endif
 														#ifdef DISPLAY_MODE_2
 														col = tex2D(_ColorMap, float2((i.tan.y + 1) / 2,0)) * i.col;
