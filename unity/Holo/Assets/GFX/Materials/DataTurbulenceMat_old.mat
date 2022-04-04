@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: dataTurbMat
+  m_Name: DataTurbulenceMat_old
   m_Shader: {fileID: 4800000, guid: d2b8bcaba65a97c488ce046b93278e22, type: 3}
   m_ShaderKeywords: _DIRECTIONAL_LIGHT _HOVER_LIGHT _SPECULAR_HIGHLIGHTS
   m_LightmapFlags: 4
@@ -28,7 +28,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ColorMap:
-        m_Texture: {fileID: 2800000, guid: db4bfa26855596a44838b589c5d4014c, type: 3}
+        m_Texture: {fileID: 2800000, guid: 55020d9191c25ff4bb25fa93226153d4, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
