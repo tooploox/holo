@@ -9,7 +9,7 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: DataDisplacementTransparentMat
   m_Shader: {fileID: 4800000, guid: c0a89119f44913f45aa1ad11197a0b00, type: 3}
-  m_ShaderKeywords: _ALPHABLEND_ON _DIRECTIONAL_LIGHT _HOVER_LIGHT
+  m_ShaderKeywords: _ALPHABLEND_ON _DIRECTIONAL_LIGHT _HOVER_LIGHT _SPECULAR_HIGHLIGHTS
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -82,14 +82,14 @@ Material:
     - _BorderLightOpaqueAlpha: 1
     - _BorderLightReplacesAlbedo: 0
     - _BorderLightUsesHoverColor: 0
-    - _BorderMinValue: 0
-    - _BorderWidth: 0
+    - _BorderMinValue: 0.1
+    - _BorderWidth: 0.1
     - _BumpScale: 1
     - _ClippingBorder: 0
-    - _ClippingBorderWidth: 0
+    - _ClippingBorderWidth: 0.025
     - _ColorWriteMask: 15
     - _CullMode: 2
-    - _CustomMode: 2
+    - _CustomMode: 0
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DirectionalLight: 1
@@ -120,9 +120,9 @@ Material:
     - _InstancedColor: 0
     - _Iridescence: 0
     - _IridescenceAngle: -0.78
-    - _IridescenceIntensity: 0.327
+    - _IridescenceIntensity: 0.5
     - _IridescenceThreshold: 0.05
-    - _Metallic: 0.68
+    - _Metallic: 0
     - _Mode: 3
     - _NearLightFade: 0
     - _NearPlaneFade: 0
@@ -144,7 +144,7 @@ Material:
     - _ScaleFactor: 2
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
-    - _SpecularHighlights: 0
+    - _SpecularHighlights: 1
     - _SphericalHarmonics: 0
     - _SrcBlend: 1
     - _Stencil: 0
@@ -163,14 +163,14 @@ Material:
     - _ZWrite: 0
     m_Colors:
     - _ClippingBorderColor: {r: 1, g: 0.2, b: 0, a: 1}
-    - _Color: {r: 1, g: 1, b: 1, a: 0.4}
+    - _Color: {r: 1, g: 1, b: 1, a: 0.5019608}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _EmissiveColor: {r: 1, g: 1, b: 1, a: 0.14901961}
+    - _EmissiveColor: {r: 1, g: 1, b: 1, a: 1}
     - _EnvironmentColorX: {r: 1, g: 0, b: 0, a: 1}
     - _EnvironmentColorY: {r: 0, g: 1, b: 0, a: 1}
     - _EnvironmentColorZ: {r: 0, g: 0, b: 1, a: 1}
     - _HoverColorOverride: {r: 1, g: 1, b: 1, a: 1}
-    - _InnerGlowColor: {r: 1, g: 1, b: 1, a: 0.75}
+    - _InnerGlowColor: {r: 1, g: 1, b: 1, a: 0.8235294}
     - _ProximityLightCenterColorOverride: {r: 1, g: 0, b: 0, a: 0}
     - _ProximityLightMiddleColorOverride: {r: 0, g: 1, b: 0, a: 0.5}
     - _ProximityLightOuterColorOverride: {r: 0, g: 0, b: 1, a: 1}

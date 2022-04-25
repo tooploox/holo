@@ -7,37 +7,37 @@ Shader "Holo/DataDisplacement"
     {
         // Main maps.
         _Color("Color", Color) = (1.0, 1.0, 1.0, 1.0)
-        _MainTex("Albedo", 2D) = "white" {}
-        [Enum(AlbedoAlphaMode)] _AlbedoAlphaMode("Albedo Alpha Mode", Float) = 0// "Transparency"
-        [Toggle] _AlbedoAssignedAtRuntime("Albedo Assigned at Runtime", Float) = 0.0
-        _Cutoff("Alpha Cutoff", Range(0.0, 1.0)) = 0.5
-        _Metallic("Metallic", Range(0.0, 1.0)) = 0.0
-        _Smoothness("Smoothness", Range(0.0, 1.0)) = 0.5
-        [Toggle(_CHANNEL_MAP)] _EnableChannelMap("Enable Channel Map", Float) = 0.0
-        [NoScaleOffset] _ChannelMap("Channel Map", 2D) = "white" {}
-        [Toggle(_NORMAL_MAP)] _EnableNormalMap("Enable Normal Map", Float) = 0.0
-        [NoScaleOffset] _NormalMap("Normal Map", 2D) = "bump" {}
-        _NormalMapScale("Scale", Float) = 1.0
-        [Toggle(_EMISSION)] _EnableEmission("Enable Emission", Float) = 0.0
-        [HDR]_EmissiveColor("Emissive Color", Color) = (0.0, 0.0, 0.0, 1.0)
-        [Toggle(_TRIPLANAR_MAPPING)] _EnableTriplanarMapping("Triplanar Mapping", Float) = 0.0
-        [Toggle(_LOCAL_SPACE_TRIPLANAR_MAPPING)] _EnableLocalSpaceTriplanarMapping("Local Space", Float) = 0.0
-        _TriplanarMappingBlendSharpness("Blend Sharpness", Range(1.0, 16.0)) = 4.0
-
+        //_MainTex("Albedo", 2D) = "white" {}
+        //[Enum(AlbedoAlphaMode)] _AlbedoAlphaMode("Albedo Alpha Mode", Float) = 0 // "Transparency"
+       //[Toggle] _AlbedoAssignedAtRuntime("Albedo Assigned at Runtime", Float) = 0.0
+       //_Cutoff("Alpha Cutoff", Range(0.0, 1.0)) = 0.5
+       //_Metallic("Metallic", Range(0.0, 1.0)) = 0.0
+       //_Smoothness("Smoothness", Range(0.0, 1.0)) = 0.5
+       //[Toggle(_CHANNEL_MAP)] _EnableChannelMap("Enable Channel Map", Float) = 0.0
+       ////[NoScaleOffset] _ChannelMap("Channel Map", 2D) = "white" {}
+       //[Toggle(_NORMAL_MAP)] _EnableNormalMap("Enable Normal Map", Float) = 0.0
+       //[NoScaleOffset] _NormalMap("Normal Map", 2D) = "bump" {}
+       //_NormalMapScale("Scale", Float) = 1.0
+       //[Toggle(_EMISSION)] _EnableEmission("Enable Emission", Float) = 0.0
+       //[HDR]_EmissiveColor("Emissive Color", Color) = (0.0, 0.0, 0.0, 1.0)
+       //[Toggle(_TRIPLANAR_MAPPING)] _EnableTriplanarMapping("Triplanar Mapping", Float) = 0.0
+       //[Toggle(_LOCAL_SPACE_TRIPLANAR_MAPPING)] _EnableLocalSpaceTriplanarMapping("Local Space", Float) = 0.0
+       //_TriplanarMappingBlendSharpness("Blend Sharpness", Range(1.0, 16.0)) = 4.0
+       //
             // Rendering options.
             [Toggle(_DIRECTIONAL_LIGHT)] _DirectionalLight("Directional Light", Float) = 1.0
             [Toggle(_SPECULAR_HIGHLIGHTS)] _SpecularHighlights("Specular Highlights", Float) = 1.0
             [Toggle(_SPHERICAL_HARMONICS)] _SphericalHarmonics("Spherical Harmonics", Float) = 0.0
             [Toggle(_REFLECTIONS)] _Reflections("Reflections", Float) = 0.0
             [Toggle(_REFRACTION)] _Refraction("Refraction", Float) = 0.0
-            _RefractiveIndex("Refractive Index", Range(0.0, 3.0)) = 0.0
-            [Toggle(_RIM_LIGHT)] _RimLight("Rim Light", Float) = 0.0
-            _RimColor("Rim Color", Color) = (0.5, 0.5, 0.5, 1.0)
-            _RimPower("Rim Power", Range(0.0, 8.0)) = 0.25
-            [Toggle(_VERTEX_COLORS)] _VertexColors("Vertex Colors", Float) = 0.0
-            [Toggle(_VERTEX_EXTRUSION)] _VertexExtrusion("Vertex Extrusion", Float) = 0.0
-            _VertexExtrusionValue("Vertex Extrusion Value", Float) = 0.0
-            [Toggle(_VERTEX_EXTRUSION_SMOOTH_NORMALS)] _VertexExtrusionSmoothNormals("Vertex Extrusion Smooth Normals", Float) = 0.0
+            //_RefractiveIndex("Refractive Index", Range(0.0, 3.0)) = 0.0
+            //[Toggle(_RIM_LIGHT)] _RimLight("Rim Light", Float) = 0.0
+            //_RimColor("Rim Color", Color) = (0.5, 0.5, 0.5, 1.0)
+            //_RimPower("Rim Power", Range(0.0, 8.0)) = 0.25
+            //[Toggle(_VERTEX_COLORS)] _VertexColors("Vertex Colors", Float) = 0.0
+            //[Toggle(_VERTEX_EXTRUSION)] _VertexExtrusion("Vertex Extrusion", Float) = 0.0
+            //_VertexExtrusionValue("Vertex Extrusion Value", Float) = 0.0
+            //[Toggle(_VERTEX_EXTRUSION_SMOOTH_NORMALS)] _VertexExtrusionSmoothNormals("Vertex Extrusion Smooth Normals", Float) = 0.0
             _BlendedClippingWidth("Blended Clipping With", Range(0.0, 10.0)) = 1.0
             [Toggle(_CLIPPING_BORDER)] _ClippingBorder("Clipping Border", Float) = 0.0
             _ClippingBorderWidth("Clipping Border Width", Range(0.0, 1.0)) = 0.025
@@ -52,41 +52,41 @@ Shader "Holo/DataDisplacement"
             [Toggle(_HOVER_LIGHT)] _HoverLight("Hover Light", Float) = 1.0
             [Toggle(_HOVER_COLOR_OVERRIDE)] _EnableHoverColorOverride("Hover Color Override", Float) = 0.0
             _HoverColorOverride("Hover Color Override", Color) = (1.0, 1.0, 1.0, 1.0)
-            [Toggle(_PROXIMITY_LIGHT)] _ProximityLight("Proximity Light", Float) = 0.0
-            [Toggle(_PROXIMITY_LIGHT_COLOR_OVERRIDE)] _EnableProximityLightColorOverride("Proximity Light Color Override", Float) = 0.0
-            [HDR]_ProximityLightCenterColorOverride("Proximity Light Center Color Override", Color) = (1.0, 0.0, 0.0, 0.0)
-            [HDR]_ProximityLightMiddleColorOverride("Proximity Light Middle Color Override", Color) = (0.0, 1.0, 0.0, 0.5)
-            [HDR]_ProximityLightOuterColorOverride("Proximity Light Outer Color Override", Color) = (0.0, 0.0, 1.0, 1.0)
-            [Toggle(_PROXIMITY_LIGHT_SUBTRACTIVE)] _ProximityLightSubtractive("Proximity Light Subtractive", Float) = 0.0
-            [Toggle(_PROXIMITY_LIGHT_TWO_SIDED)] _ProximityLightTwoSided("Proximity Light Two Sided", Float) = 0.0
+            //[Toggle(_PROXIMITY_LIGHT)] _ProximityLight("Proximity Light", Float) = 0.0
+            //[Toggle(_PROXIMITY_LIGHT_COLOR_OVERRIDE)] _EnableProximityLightColorOverride("Proximity Light Color Override", Float) = 0.0
+            //[HDR]_ProximityLightCenterColorOverride("Proximity Light Center Color Override", Color) = (1.0, 0.0, 0.0, 0.0)
+            //[HDR]_ProximityLightMiddleColorOverride("Proximity Light Middle Color Override", Color) = (0.0, 1.0, 0.0, 0.5)
+            //[HDR]_ProximityLightOuterColorOverride("Proximity Light Outer Color Override", Color) = (0.0, 0.0, 1.0, 1.0)
+            //[Toggle(_PROXIMITY_LIGHT_SUBTRACTIVE)] _ProximityLightSubtractive("Proximity Light Subtractive", Float) = 0.0
+            //[Toggle(_PROXIMITY_LIGHT_TWO_SIDED)] _ProximityLightTwoSided("Proximity Light Two Sided", Float) = 0.0
             _FluentLightIntensity("Fluent Light Intensity", Range(0.0, 1.0)) = 1.0
-            [Toggle(_ROUND_CORNERS)] _RoundCorners("Round Corners", Float) = 0.0
-            _RoundCornerRadius("Round Corner Radius", Range(0.0, 0.5)) = 0.25
-            _RoundCornerMargin("Round Corner Margin", Range(0.0, 0.5)) = 0.01
-            [Toggle(_INDEPENDENT_CORNERS)] _IndependentCorners("Independent Corners", Float) = 0.0
-            _RoundCornersRadius("Round Corners Radius", Vector) = (0.5 ,0.5, 0.5, 0.5)
-            [Toggle(_BORDER_LIGHT)] _BorderLight("Border Light", Float) = 0.0
-            [Toggle(_BORDER_LIGHT_USES_HOVER_COLOR)] _BorderLightUsesHoverColor("Border Light Uses Hover Color", Float) = 0.0
-            [Toggle(_BORDER_LIGHT_REPLACES_ALBEDO)] _BorderLightReplacesAlbedo("Border Light Replaces Albedo", Float) = 0.0
-            [Toggle(_BORDER_LIGHT_OPAQUE)] _BorderLightOpaque("Border Light Opaque", Float) = 0.0
-            _BorderWidth("Border Width", Range(0.0, 1.0)) = 0.1
-            _BorderMinValue("Border Min Value", Range(0.0, 1.0)) = 0.1
-            _EdgeSmoothingValue("Edge Smoothing Value", Range(0.0, 0.2)) = 0.002
-            _BorderLightOpaqueAlpha("Border Light Opaque Alpha", Range(0.0, 1.0)) = 1.0
-            [Toggle(_INNER_GLOW)] _InnerGlow("Inner Glow", Float) = 0.0
-            _InnerGlowColor("Inner Glow Color (RGB) and Intensity (A)", Color) = (1.0, 1.0, 1.0, 0.75)
-            _InnerGlowPower("Inner Glow Power", Range(2.0, 32.0)) = 4.0
-            [Toggle(_IRIDESCENCE)] _Iridescence("Iridescence", Float) = 0.0
-            [NoScaleOffset] _IridescentSpectrumMap("Iridescent Spectrum Map", 2D) = "white" {}
-            _IridescenceIntensity("Iridescence Intensity", Range(0.0, 1.0)) = 0.5
-            _IridescenceThreshold("Iridescence Threshold", Range(0.0, 1.0)) = 0.05
-            _IridescenceAngle("Iridescence Angle", Range(-0.78, 0.78)) = -0.78
-            [Toggle(_ENVIRONMENT_COLORING)] _EnvironmentColoring("Environment Coloring", Float) = 0.0
-            _EnvironmentColorThreshold("Environment Color Threshold", Range(0.0, 3.0)) = 1.5
-            _EnvironmentColorIntensity("Environment Color Intensity", Range(0.0, 1.0)) = 0.5
-            _EnvironmentColorX("Environment Color X (RGB)", Color) = (1.0, 0.0, 0.0, 1.0)
-            _EnvironmentColorY("Environment Color Y (RGB)", Color) = (0.0, 1.0, 0.0, 1.0)
-            _EnvironmentColorZ("Environment Color Z (RGB)", Color) = (0.0, 0.0, 1.0, 1.0)
+            //[Toggle(_ROUND_CORNERS)] _RoundCorners("Round Corners", Float) = 0.0
+            //_RoundCornerRadius("Round Corner Radius", Range(0.0, 0.5)) = 0.25
+            //_RoundCornerMargin("Round Corner Margin", Range(0.0, 0.5)) = 0.01
+            //[Toggle(_INDEPENDENT_CORNERS)] _IndependentCorners("Independent Corners", Float) = 0.0
+            //_RoundCornersRadius("Round Corners Radius", Vector) = (0.5 ,0.5, 0.5, 0.5)
+            //[Toggle(_BORDER_LIGHT)] _BorderLight("Border Light", Float) = 0.0
+            //[Toggle(_BORDER_LIGHT_USES_HOVER_COLOR)] _BorderLightUsesHoverColor("Border Light Uses Hover Color", Float) = 0.0
+            //[Toggle(_BORDER_LIGHT_REPLACES_ALBEDO)] _BorderLightReplacesAlbedo("Border Light Replaces Albedo", Float) = 0.0
+            //[Toggle(_BORDER_LIGHT_OPAQUE)] _BorderLightOpaque("Border Light Opaque", Float) = 0.0
+            //_BorderWidth("Border Width", Range(0.0, 1.0)) = 0.1
+            //_BorderMinValue("Border Min Value", Range(0.0, 1.0)) = 0.1
+            //_EdgeSmoothingValue("Edge Smoothing Value", Range(0.0, 0.2)) = 0.002
+            //_BorderLightOpaqueAlpha("Border Light Opaque Alpha", Range(0.0, 1.0)) = 1.0
+            //[Toggle(_INNER_GLOW)] _InnerGlow("Inner Glow", Float) = 0.0
+            //_InnerGlowColor("Inner Glow Color (RGB) and Intensity (A)", Color) = (1.0, 1.0, 1.0, 0.75)
+            //_InnerGlowPower("Inner Glow Power", Range(2.0, 32.0)) = 4.0
+            //[Toggle(_IRIDESCENCE)] _Iridescence("Iridescence", Float) = 0.0
+            //[NoScaleOffset] _IridescentSpectrumMap("Iridescent Spectrum Map", 2D) = "white" {}
+            //_IridescenceIntensity("Iridescence Intensity", Range(0.0, 1.0)) = 0.5
+            //_IridescenceThreshold("Iridescence Threshold", Range(0.0, 1.0)) = 0.05
+            //_IridescenceAngle("Iridescence Angle", Range(-0.78, 0.78)) = -0.78
+            //[Toggle(_ENVIRONMENT_COLORING)] _EnvironmentColoring("Environment Coloring", Float) = 0.0
+            //_EnvironmentColorThreshold("Environment Color Threshold", Range(0.0, 3.0)) = 1.5
+            //_EnvironmentColorIntensity("Environment Color Intensity", Range(0.0, 1.0)) = 0.5
+            //_EnvironmentColorX("Environment Color X (RGB)", Color) = (1.0, 0.0, 0.0, 1.0)
+            //_EnvironmentColorY("Environment Color Y (RGB)", Color) = (0.0, 1.0, 0.0, 1.0)
+            //_EnvironmentColorZ("Environment Color Z (RGB)", Color) = (0.0, 0.0, 1.0, 1.0)
 
                 // Advanced options.
                 [Enum(RenderingMode)] _Mode("Rendering Mode", Float) = 0                                     // "Opaque"
@@ -109,8 +109,8 @@ Shader "Holo/DataDisplacement"
                 [Enum(UnityEngine.Rendering.StencilOp)]_StencilOperation("Stencil Operation", Int) = 0
 
                 // HoloDataFlow specific options
-                _ColorMap("Color Map (RGB)", 2D) = "black" {}
                 _ScaleFactor("Scale Factor", Range(.0, 5.0)) = 2.0
+                _ColorMap("Color Map (RGB)", 2D) = "black" {}
     }
 
         SubShader
@@ -246,30 +246,35 @@ Shader "Holo/DataDisplacement"
     #else
                 #undef _UV
     #endif
-                #define _UV 
+                #define _UV
 
                 struct appdata_t
                 {
                     float4 vertex : POSITION;
                     // The default UV channel used for texturing.
                     float2 uv : TEXCOORD0;
+
                     // Reserved for Unity's light map UVs.
                     float2 uv1 : TEXCOORD1;
+
                     // Used for smooth normal data (or UGUI scaling data).
                     float4 uv2 : TEXCOORD2;
                     // Used for UGUI scaling data.
                     float2 uv3 : TEXCOORD3;
-    #if defined(_VERTEX_COLORS)
+
                     fixed4 color : COLOR0;
-    #endif
+
                     fixed3 normal : NORMAL;
+
                     fixed4 tangent : TANGENT;
+
                     UNITY_VERTEX_INPUT_INSTANCE_ID
                 };
 
                 struct v2f
                 {
                     float4 position : SV_POSITION;
+                    fixed4 color : COLOR0;
     #if defined(_BORDER_LIGHT)
                     float4 uv : TEXCOORD0;
     #elif defined(_UV)
@@ -277,9 +282,6 @@ Shader "Holo/DataDisplacement"
     #endif
     #if defined(LIGHTMAP_ON)
                     float2 lightMapUV : TEXCOORD1;
-    #endif
-    #if defined(_VERTEX_COLORS)
-                    fixed4 color : COLOR0;
     #endif
     #if defined(_SPHERICAL_HARMONICS)
                     fixed3 ambient : COLOR1;
@@ -325,6 +327,11 @@ Shader "Holo/DataDisplacement"
     #endif
                 sampler2D _MainTex;
                 fixed4 _MainTex_ST;
+
+                // HoloDataFlow parameters
+                sampler2D _ColorMap;
+                float4 _ColorMap_ST;
+                float _ScaleFactor;
 
     #if defined(_ALPHA_CLIP)
                 fixed _Cutoff;
@@ -476,10 +483,6 @@ Shader "Holo/DataDisplacement"
                 fixed3 _EnvironmentColorY;
                 fixed3 _EnvironmentColorZ;
     #endif
-                // HoloDataFlow parameters
-                sampler2D _ColorMap;
-                float4 _ColorMap_ST;
-                float _ScaleFactor;
 
     #if defined(_DIRECTIONAL_LIGHT)
                 static const fixed _MinMetallicLightContribution = 0.7;
@@ -572,6 +575,7 @@ Shader "Holo/DataDisplacement"
                 v2f vert(appdata_t v)
                 {
                     v2f o;
+                    o.color = v.color;
 
                     UNITY_SETUP_INSTANCE_ID(v);
                     UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
@@ -717,7 +721,7 @@ Shader "Holo/DataDisplacement"
     #endif
 
     #if defined(_VERTEX_COLORS)
-                    o.color = tex2Dlod(_ColorMap, float4(v.tangent.x, 1, 1, 0.2));
+                    
     #endif
 
     #if defined(_SPHERICAL_HARMONICS)
@@ -751,6 +755,11 @@ Shader "Holo/DataDisplacement"
     #else
                     o.worldNormal = worldNormal;
     #endif
+    #endif
+    #if defined(_CLIPPING_BORDER)
+                    o.uv = float4(v.tangent.x, 1, 1, 1);
+    #else
+                    o.uv = float2(v.tangent.x, 1);
     #endif
 
                     return o;
@@ -786,9 +795,11 @@ Shader "Holo/DataDisplacement"
                                     tex2D(_MainTex, uvY) * triplanarBlend.y +
                                     tex2D(_MainTex, uvZ) * triplanarBlend.z;
     #else
-                    fixed4 albedo = tex2D(_MainTex, i.uv);
+                    //else albedo = tex2D(_MainTex, i.uv);
     #endif
     #endif
+                    _MainTex = _ColorMap;
+                    fixed4 albedo = fixed4(tex2Dlod(_MainTex, float4(i.uv.x, 1, 1, 1.0)));
 
     #ifdef LIGHTMAP_ON
                     albedo.rgb *= DecodeLightmap(UNITY_SAMPLE_TEX2D(unity_Lightmap, i.lightMapUV));
@@ -884,7 +895,7 @@ Shader "Holo/DataDisplacement"
     #endif
 
     #if defined(_VERTEX_COLORS)
-                    albedo *= i.color;
+                    //albedo *= i.color;
     #endif
 
     #if defined(_IRIDESCENCE)
@@ -1220,5 +1231,5 @@ Shader "Holo/DataDisplacement"
             }
 
                 Fallback "Hidden/InternalErrorShader"
-                        // CustomEditor "Microsoft.MixedReality.Toolkit.Editor.MixedRealityStandardShaderGUI"
+                        //CustomEditor "Microsoft.MixedReality.Toolkit.Editor.MixedRealityStandardShaderGUI"
 }
