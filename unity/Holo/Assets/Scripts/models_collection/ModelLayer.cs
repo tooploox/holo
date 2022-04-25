@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 
-/* Information about layer.
+/** Information about layer.
  * It should be present in asset bundle for each GameObject representing a layer.
+ * The script is also present in the holo-preprocessing app with the same name.
  */
 
 public enum DataType
@@ -24,8 +25,10 @@ public class ModelLayer : MonoBehaviour
     // Is this a turbulence layer (using turbulence shader etc.)
     public bool Turbulence;
 
-    // Is this a turbulence layer (using turbulence shader etc.)
+    // Is this a surface displacement layer (using displacement shader etc.)
     public bool Displacement;
+
+    public bool RGB;
 
     // Each layer in the model can consecutive number, used to calculate ModelWithPlate.LayerMask.
     public int LayerIndex;

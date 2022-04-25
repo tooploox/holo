@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
-/* Add this to any GameObject in a scene, to initialize and keep updating available model bundles. */
+/** Add this to any GameObject in a scene, to initialize and keep updating available model bundles. */
 public class ModelsCollection : MonoBehaviour
 {
     private static ModelsCollection singleton;
@@ -27,6 +27,10 @@ public class ModelsCollection : MonoBehaviour
         LoadBundlesFiles();
     }
 
+    /** Loads asset bundles from file upon app start.
+     * On the HoloLens the asset bundles must be in the 3D object folder.
+     * The local (on computer) folder of the asset bundle files can be specified in Assets/Resources/LocalConfig.asset as Bundles Directory.
+     */
     private void LoadBundlesFiles()
     {
         // Set empty, but valid, state. This way we work OK even when indicated directory is not valid.
@@ -60,7 +64,7 @@ public class ModelsCollection : MonoBehaviour
         get { return bundlesFiles.Length; }
     }
 
-    /* Nice user-friendly name of the model bundle.
+    /** Nice user-friendly name of the model bundle.
      * i is an index of the bundle, 0 <= i < BundlesCount.
      */
     public string BundleCaption(int i)
@@ -68,7 +72,7 @@ public class ModelsCollection : MonoBehaviour
         return BundleName(i); // TODO for now return the filename
     }
 
-    /* Internal model bundle name (to uniquely identify it in the application).
+    /** Internal model bundle name (to uniquely identify it in the application).
      * i is an index of the bundle, 0 <= i < BundlesCount.
      */
     public string BundleName(int i)
@@ -82,7 +86,7 @@ public class ModelsCollection : MonoBehaviour
         return result;
     }
 
-    // Icon associated with the bundle.
+    /** Icon associated with the bundle. */
     public Texture2D BundleIcon(int i)
     {
         if (i < 0 || i >= BundlesCount) {
@@ -111,7 +115,7 @@ public class ModelsCollection : MonoBehaviour
         return bundles[i];
     }
 
-    /* Find bundle with matching name.
+    /** Find bundle with matching name.
      * BundleName(result) returns this name,
      * BundleLoad(result) returns AssetBundleLoader with matching AssetBundleLoader.Name.
      * 

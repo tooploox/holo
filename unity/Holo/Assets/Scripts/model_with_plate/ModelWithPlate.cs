@@ -20,11 +20,26 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
 
     public Material DefaultModelMaterial;
     public Material DefaultModelTransparentMaterial;
+    /** The Material used to display flow or fibre asset bundle layers as points with vectors.
+     * The colors and vecotr-length are determined by the colors resp. scalar specified in the vtk file of the pre-rpcesssing step.
+     * Normally set to DataFlowMat.*/
     public Material DataVisualizationMaterial;
+    /** The Material used to display turbulence asset bundle layers as small cube-clouds.
+     * The colors are determind by the colors specified in the vtk file of the pre-processing step.
+     * Normally set to DataTurbulenceMat.*/
     public Material DataTurbulenceMaterial;
+    /** The Material used for multicolored asset bundle layers based on a one scalar value per point/vertecy. 
+     * Normally set to DataDisplacementMat.*/
     public Material DataDisplacementMaterial;
     public Material DataDisplacementTransparentMaterial;
+    /** The Material used for single colored asset bundle layers. 
+     * Normally set to DataColorMat.
+     * The color is set in the ModelConfig file in the pre-processing step.*/
+    public Material DataColorMaterial;
+    public Material DataColorTransparentMaterial;
+
     public Material DefaultVolumetricMaterial;
+
     public Transform InstanceParent;
     public PressableButtonHoloLens2 ButtonTogglePlay;
     public PressableButtonHoloLens2 ButtonLayerSubmenu;
@@ -42,6 +57,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     // Drop here "Prefabs/ModelWithPlateRotationRig"
     public GameObject RotationBoxRigTemplate;
     public GameObject AddButtonsCollection;
+
+    /** Reference to the Color Map (Script) in the scene.
+     * The Colormap is normally attached to the same Gameobject as this script.*/
     public ColorMap ColorMap;
 
     private float SliderSpeedFactor = 5.0f;
@@ -168,6 +186,8 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         DataTurbulenceMaterial.DisableKeyword("CLIPPING_ON");
         DataDisplacementMaterial.DisableKeyword("CLIPPING_ON");
         DataDisplacementTransparentMaterial.DisableKeyword("CLIPPING_ON");
+        DataColorMaterial.DisableKeyword("CLIPPING_ON");
+        DataColorTransparentMaterial.DisableKeyword("CLIPPING_ON");
 
         LayerSubmenuState = false;
         AnimationSpeedSubmenu = false;
@@ -233,7 +253,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         }
     }
 
-     /* Handle a click on some button inside. Called by ButtonsClickReceiver. */
+    /** Handle a click on some button inside. Called by ButtonsClickReceiver. */
     public void Click(GameObject clickObject)
     {
         if (SharingSceneData.Singleton.isClient && !SharingSceneData.Singleton.isServer) 
@@ -371,10 +391,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         PlateRotation = !PlateRotation;
     }
 
-    /* Load new model or unload.
-     * newInstanceBundleName must match asset bundle name, returned by AssetBundleLoader.Name.
-     * It can also be null or empty to unload a model.
-     */
+    /**Load new model or unload. NewInstanceBundleName must match asset bundle name, returned by AssetBundleLoader.Name. It can also be null or empty to unload a model. */
     public void SetInstance(string newInstanceBundleName)
     {
         if (!string.IsNullOrEmpty(newInstanceBundleName))
@@ -463,12 +480,8 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         layersLoaded.Remove(layer);
     }
 
-    /* Unload currently loaded model.
-     * May be safely called even when instance is already unloaded.
-     * LoadInstance() calls this automatically at the beginning.
-     *
-     * After calling this, remember to call RefreshUserInterface at some point.
-     */
+    /** Unload currently loaded model. May be safely called even when instance is already unloaded. 
+    * LoadInstance() calls this automatically at the beginning. After calling this, remember to call RefreshUserInterface at some point. */
     private void UnloadInstance()
     {
         if (layersLoaded != null) {
@@ -579,7 +592,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         }
     }
 
-    /* Does this button toggles some layer (returns null if not), and which one. */
+    /** Does this button toggles some layer (returns null if not), and which one. */
     private ModelLayer ButtonOfLayer(GameObject buttonGameObject)
     {
         if (layersButtons != null) {
@@ -592,15 +605,12 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         return null;
     }
 
-    /* Load new model.
-     *
-     * newInstanceBundleName is a bundle name known to the ModelsCollection bundle.
-     *
-     * No layer is initially loaded -- you usually want to call
-     * LoadLayer immediately after this.
-     *
-     * After calling this, remember to call RefreshUserInterface at some point.
-     */
+    /*! Load new model.
+    
+    newInstanceBundleName is a bundle name known to the ModelsCollection bundle.
+    No layer is initially loaded -- you usually want to call
+    LoadLayer immediately after this.
+    After calling this, remember to call RefreshUserInterface at some point.*/
     private void LoadInstance(string newInstanceBundleName, bool newIsPreview)
     {
         if(instanceBundle != null)
@@ -705,7 +715,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         HoloUtilities.SetButtonStateText(layersButtons[layer], true);
     }
 
-    /* Instantiate new animated layer from currently loaded model.
+    /** Instantiate new animated layer from currently loaded model.
      * If the layer is already instantiated, does nothing
      * (for now it makes a warning, but we can disable the warning if it's useful).
      *
@@ -869,6 +879,19 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
                 return DataDisplacementMaterial;
             }
         } else
+        if (layer.RGB)
+        {
+
+            if (Transparent)
+            {
+                return DataColorTransparentMaterial;
+            }
+            else
+            {
+                return DataColorMaterial;
+            }
+        }
+        else
         if (Transparent)
         {
             return DefaultModelTransparentMaterial;

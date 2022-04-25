@@ -19,7 +19,7 @@ public class AssetBundleLoader
     private Bounds? bounds;
     public Texture2D Icon { get; private set; }
 
-    /* Uniquely identifies this bundle (across all running instances of the application). */
+    /** Uniquely identifies this bundle (across all running instances of the application). */
     public string Name { get; private set; }
 
     public Material VolumetricMaterial;
@@ -33,13 +33,13 @@ public class AssetBundleLoader
     
     public LoadState LoadState;
 
-    // All layers, available after LoadLayer
+    /** All layers, available after LoadLayer */
     public IEnumerable<ModelLayer> Layers
     {
         get { return new ReadOnlyCollection<ModelLayer>(layers); }
     }
 
-    /* Bounding box of all layers, available after LoadLayer.
+    /** Bounding box of all layers, available after LoadLayer.
      * May be null, if no visible layers are present.
      */
     public Bounds? Bounds { get { return bounds;  } }
@@ -83,8 +83,8 @@ public class AssetBundleLoader
         LoadState = LoadState.Full;
     }
 
-    // Enlarge bounds to contain newBounds.
-    // bounds may be null if empty.
+    /** Enlarge bounds to contain newBounds. 
+     * Bounds may be null if empty. */
     private void BoundsAdd(ref Bounds? bounds, Bounds newBounds)
     {
         if (bounds.HasValue) {
@@ -210,6 +210,7 @@ public class AssetBundleLoader
                 layer.Simulation = bundleObjectName.Contains("dataflow") || bundleObjectName.Contains("simulation");
                 layer.Turbulence = bundleObjectName.Contains("turbulence");
                 layer.Displacement = bundleObjectName.Contains("displacement");
+                layer.RGB = bundleObjectName.Contains("RGB");
                 if (layer.Simulation)
                 {
                     int simulationsCount = layers.Count(c => c.Simulation);
@@ -225,10 +226,15 @@ public class AssetBundleLoader
                     int displacementCount = layers.Count(c => c.Displacement);
                     layer.Caption = "Displacement " + (displacementCount + 1).ToString();
                 }
+                else if (layer.RGB)
+                {
+                    int rgbCount = layers.Count(c => c.RGB);
+                    layer.Caption = "RGB " + (rgbCount + 1).ToString();
+                }
                 layer.DataType = DataType.Mesh; // FIXME: If AB does not have ModeLayer - treat as simple mesh
                 Debug.LogWarning(layerDebugName + " does not contain ModelLayer component, guessing layer Caption (" + 
                     layer.Caption + "), simulation (" + 
-                    layer.Simulation.ToString() + "), turbulence (" + layer.Turbulence.ToString() + ") and displacement (" + layer.Displacement.ToString());
+                    layer.Simulation.ToString() + "), turbulence (" + layer.Turbulence.ToString() + "), displacement (" + layer.Displacement.ToString() + ") and rgb (" + layer.RGB.ToString() + ")");
             }
 
             layer.LayerIndex = layers.Count;
