@@ -43,6 +43,8 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public Transform InstanceParent;
     public PressableButtonHoloLens2 ButtonTogglePlay;
     public PressableButtonHoloLens2 ButtonLayerSubmenu;
+    public PressableButtonHoloLens2 ButtonScrollUp;
+    public PressableButtonHoloLens2 ButtonScrollDown;
     public PressableButtonHoloLens2 ButtonTransform;
     public PressableButtonHoloLens2 ButtonTranslate;
     public PressableButtonHoloLens2 ButtonRotate;
@@ -63,6 +65,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
     public ColorMap ColorMap;
 
     private float SliderSpeedFactor = 5.0f;
+
+    private int MaxButtonLayerNumber = 5;
+    private int ScrollCount = 0;
 
     public enum TransformationState
     {
@@ -218,7 +223,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         return AddButtonsCollection.transform.Find("Add" + i.ToString()).gameObject;
     }
 
-    /* Initialize "AddXxx" buttons captions and existence. */
+    /** Initialize "AddXxx" buttons captions and existence for asset bunbdles. */
     private void InitializeAddButtons()
     {
         if (ModelsCollection.Singleton == null)
@@ -271,6 +276,8 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             case "ConfirmPreview": ClickConfirmPreview(); break;
             case "CancelPreview": ClickCancelPreview(); break;
             case "ButtonLayers": ClickToggleLayersState(clickObject.GetComponent<PressableButtonHoloLens2>()); break;
+            case "ButtonScrollUp": ClickScrollUp();break;
+            case "ButtonScrollDown": ClickScrollDown();break;
             case "ButtonTransform": ClickTransform(); break;
             case "ButtonTranslate": ChangeTransformationState(TransformationState.Translate); break;
             case "ButtonRotate": ChangeTransformationState(TransformationState.Rotate); break;
@@ -280,7 +287,7 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             case "ButtonTransparency": ClickTransparency(); break;
             case "ButtonPlateRotation": ClickPlateRotation(); break;
 
-
+            /*Activate or deactivate layer*/
             default:
                 {
                     ModelLayer layer = ButtonOfLayer(clickObject);
@@ -359,6 +366,56 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         var layerState = LayerSubmenuState;
         CloseSubmenus();
         LayerSubmenuState = !layerState;
+    }
+    private void ClickScrollUp()
+    {
+        ScrollCount++;
+        ChangeLayerButtonActivation();
+        CheckScrollButtonsActivation();
+    }
+    private void ClickScrollDown()
+    {
+        ScrollCount--;
+        ChangeLayerButtonActivation();
+        CheckScrollButtonsActivation();
+    }
+    private void ChangeLayerButtonActivation()
+    {
+        int[] buttonindex = Enumerable.Range(0, layersButtons.Values.Count).ToArray();
+        foreach (Tuple<PressableButtonHoloLens2, int>  button in layersButtons.Values.Zip(buttonindex , Tuple.Create)) 
+        {
+
+            if (ScrollCount * MaxButtonLayerNumber <= button.Item2 && (ScrollCount + 1) * MaxButtonLayerNumber > button.Item2)
+            {
+                button.Item1.gameObject.SetActive(true);
+            }
+            else 
+            {
+                button.Item1.gameObject.SetActive(false);
+            }
+            
+        }
+    }
+
+    private void CheckScrollButtonsActivation() 
+    {
+        if ((ScrollCount+1) * MaxButtonLayerNumber >= layersButtons.Values.Count | layersButtons.Values.Count == 0)
+        {
+            ButtonScrollUp.gameObject.SetActive(false);
+        }
+        else
+        {
+            ButtonScrollUp. gameObject.SetActive(true);
+        }
+
+        if (ScrollCount == 0 | layersButtons.Values.Count == 0)
+        {
+            ButtonScrollDown.gameObject.SetActive(false);
+        }
+        else
+        {
+            ButtonScrollDown.gameObject.SetActive(true);
+        }
     }
     private void ClickTransform()
     {
@@ -676,6 +733,9 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
         // reset transparency to false
         Transparent = false;
 
+        //set ScrollCount to 0
+        ScrollCount = 0;
+
         // add buttons to toggle layers
         layersButtons = new Dictionary<ModelLayer, PressableButtonHoloLens2>();
         int buttonIndex = 0;
@@ -684,9 +744,13 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             // add button to scene
             GameObject buttonGameObject = Instantiate<GameObject>(ButtonLayerTemplate, LayerSubmenu.transform);
             buttonGameObject.transform.localPosition =
-                buttonGameObject.transform.localPosition + new Vector3(0f, 0f, buttonLayerHeight * buttonIndex);
+                buttonGameObject.transform.localPosition + new Vector3(0f, 0f, buttonLayerHeight *(buttonIndex%MaxButtonLayerNumber)) ;
             buttonIndex++;
-
+            //if buttonindex is bigger than MaxButtonLayerNumber => deactivate Button
+            if (buttonIndex > MaxButtonLayerNumber)
+            {
+                buttonGameObject.SetActive(false);
+            }
             // configure button text
             PressableButtonHoloLens2 button = buttonGameObject.GetComponent<PressableButtonHoloLens2>();
             if (button == null) {
@@ -695,11 +759,14 @@ public class ModelWithPlate : MonoBehaviour, IClickHandler
             }
             button.GetComponent<ButtonConfigHelper>().MainLabelText = layer.Caption;
             button.GetComponent<Interactable>().OnClick.AddListener(() => Click(buttonGameObject));
-
+            
             // update layersButtons dictionary
             layersButtons[layer] = button;
         }
         directionalIndicator.DirectionalTarget = instanceTransformation.transform;
+        
+        // check activation of ButtonScrollUp and ButtonScrollDown
+        CheckScrollButtonsActivation();
     }
 
     private void LoadInitialLayers()
